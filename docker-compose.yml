@@ -20,6 +20,8 @@ services:
 
     env_file:
       - .env
+    volumes:
+      - public_data:/var/www/html/public
     networks:
       - netsight
     secrets:
@@ -75,6 +77,7 @@ services:
       - "127.0.0.1:8080:80"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - public_data:/var/www/html/public:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
@@ -143,6 +146,7 @@ volumes:
   redisdata:
   caddy_data:
   caddy_config:
+  public_data:
 
 # =============================================================================
 # Networks
