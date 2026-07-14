@@ -200,7 +200,8 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="hop in tracerouteHops" :key="hop.address">
+              <tr v-for="(hop, index) in tracerouteHops" :key="hop.hop || index">
+                <td style="padding: 0.5rem 1rem; font-family: monospace;">{{ hop.hop || (index + 1) }}</td>
                 <td style="padding: 0.5rem 1rem; font-family: monospace;">{{ hop.address || '-' }}</td>
                 <td style="padding: 0.5rem 1rem; font-family: monospace;" :style="hop.loss > 0 ? 'color: #f87171;' : ''">{{ hop.loss || 0 }}%</td>
                 <td style="padding: 0.5rem 1rem;">{{ hop.sent || 0 }}</td>
