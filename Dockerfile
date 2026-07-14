@@ -19,21 +19,7 @@ RUN composer install \
     --no-interaction \
     --ignore-platform-reqs
 
-# ---------------------------------------------------------------------------
-# Stage 2: Node Build (Vite / Frontend Assets)
-# ---------------------------------------------------------------------------
-FROM node:20-alpine AS node-build
 
-WORKDIR /app
-
-COPY package.json package-lock.json ./
-
-RUN npm ci
-
-COPY resources/ resources/
-COPY vite.config.js ./
-
-RUN npm run build
 
 # ---------------------------------------------------------------------------
 # Stage 3: Final Production Image
@@ -75,8 +61,8 @@ WORKDIR /var/www/html
 # Copy Composer vendor directory from stage 1
 COPY --from=composer-deps /app/vendor ./vendor
 
-# Copy compiled frontend assets from stage 2
-COPY --from=node-build /app/public/build ./public/build
+# Copy compiled frontend assets from build context
+COPY public/build ./public/build
 
 # Copy entire application
 COPY . .
