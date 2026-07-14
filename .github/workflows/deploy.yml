@@ -13,30 +13,28 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Copy Files to VPS (SCP)
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
-          source: "app,artisan,bootstrap,composer.json,composer.lock,config,database,docker,docker-compose.yml,package.json,package-lock.json,public,resources,routes,vite.config.js,tsconfig.json,Dockerfile,Caddyfile,.env.example"
-          target: "/var/www/netsight"
-          rm: false # Jangan hapus file yang sudah ada (seperti .env)
-          tar_tmp_path: "/tmp"
-          debug: true
-
-      - name: Execute Deployment Commands on VPS (SSH)
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
-          script: |
+      - name: Deploy via Native SSH/SCP
+        run: |
+          # 1. Setup SSH Key
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # 2. Tar files locally (kecil dan cepat)
+          tar -zcf /tmp/netsight.tar.gz app artisan bootstrap composer.json composer.lock config database docker docker-compose.yml package.json package-lock.json public resources routes vite.config.js tsconfig.json Dockerfile Caddyfile .env.example
+          
+          # 3. Kirim tarball ke folder /tmp VPS
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -P 22 /tmp/netsight.tar.gz ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:/tmp/netsight.tar.gz
+          
+          # 4. SSH ke VPS, Ekstrak, dan Jalankan Docker
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -p 22 ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '
             cd /var/www/netsight
             
-            # 1. Siapkan file .env jika belum ada
+            # Ekstrak file tarball
+            tar -zxf /tmp/netsight.tar.gz -C /var/www/netsight
+            rm /tmp/netsight.tar.gz
+            
+            # Siapkan file .env jika belum ada
             if [ ! -f .env ]; then
               cp .env.example .env
               NEED_KEY_GEN=true
@@ -56,20 +54,21 @@ jobs:
               cp docker/secrets/app_key.example docker/secrets/app_key
             fi
             
-            # 2. Build & Jalankan Container
+            # Build & Jalankan Container
             docker compose up -d --build
             
-            # 3. Generate APP_KEY jika baru dibuat
+            # Generate APP_KEY jika baru dibuat
             if [ "$NEED_KEY_GEN" = true ]; then
               docker compose exec -T app php artisan key:generate
             fi
             
-            # 4. Jalankan Migrasi Database di dalam Container
+            # Jalankan Migrasi Database di dalam Container
             docker compose exec -T app php artisan migrate --force
             
-            # 5. Bersihkan Cache Laravel
+            # Bersihkan Cache Laravel
             docker compose exec -T app php artisan config:cache
             docker compose exec -T app php artisan route:cache
             docker compose exec -T app php artisan view:cache
             
             echo "Deployment Sukses! 🚀"
+          '
