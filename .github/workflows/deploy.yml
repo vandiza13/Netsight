@@ -21,7 +21,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           
           # 2. Tar files locally (kecil dan cepat)
-          tar -zcf /tmp/netsight.tar.gz app artisan bootstrap composer.json composer.lock config database docker docker-compose.yml package.json package-lock.json public resources routes vite.config.js tsconfig.json Dockerfile Caddyfile .env.example
+          tar -zcf /tmp/netsight.tar.gz app artisan bootstrap composer.json composer.lock config database docker docker-compose.yml package.json package-lock.json public resources routes storage vite.config.js Dockerfile Caddyfile .env.example phpunit.xml
           
           # 3. Kirim tarball ke folder /tmp VPS
           scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -P 22 /tmp/netsight.tar.gz ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:/tmp/netsight.tar.gz

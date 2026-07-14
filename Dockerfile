@@ -30,7 +30,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 COPY resources/ resources/
-COPY vite.config.ts tsconfig.json ./
+COPY vite.config.js ./
 
 RUN npm run build
 
