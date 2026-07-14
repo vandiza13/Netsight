@@ -20,20 +20,10 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          source: "./*"
+          source: "app,artisan,bootstrap,composer.json,composer.lock,config,database,docker,docker-compose.yml,package.json,package-lock.json,public,resources,routes,vite.config.js,tsconfig.json,Dockerfile,Caddyfile,.env.example"
           target: "/var/www/netsight"
           rm: false # Jangan hapus file yang sudah ada (seperti .env)
           tar_tmp_path: "/tmp"
-          exclude: |
-            .git
-            .github
-            node_modules
-            vendor
-            storage/logs/*
-            storage/framework/cache/*
-            storage/framework/sessions/*
-            storage/framework/views/*
-            public/build
 
       - name: Execute Deployment Commands on VPS (SSH)
         uses: appleboy/ssh-action@v1.0.3
