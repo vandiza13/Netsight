@@ -81,6 +81,9 @@ COPY --from=node-build /app/public/build ./public/build
 # Copy entire application
 COPY . .
 
+# Copy composer binary from composer image
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
 # Regenerate optimized autoloader with full application classes
 RUN composer dump-autoload --optimize --no-dev --classmap-authoritative
 

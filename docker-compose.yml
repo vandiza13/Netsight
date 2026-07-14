@@ -105,6 +105,28 @@ services:
       - redis_password
       - app_key
 
+  # ---------------------------------------------------------------------------
+  # Task Scheduler (Cronjob)
+  # ---------------------------------------------------------------------------
+  scheduler:
+    build: .
+    container_name: netsight-scheduler
+    restart: unless-stopped
+    command: sh -c "while true; do php artisan schedule:run --verbose --no-interaction & sleep 60; done"
+    depends_on:
+      - app
+      - db
+    env_file:
+      - .env
+    volumes:
+      - ./:/var/www/html          # Dev mount — remove in production
+    networks:
+      - netsight
+    secrets:
+      - db_password
+      - redis_password
+      - app_key
+
 # =============================================================================
 # Secrets
 # =============================================================================
