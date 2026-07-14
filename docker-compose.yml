@@ -56,7 +56,7 @@ services:
     image: redis:7-alpine
     container_name: netsight-redis
     restart: unless-stopped
-    command: redis-server --appendonly yes
+    command: sh -c 'redis-server --requirepass "$$(cat /run/secrets/redis_password)" --appendonly yes'
     ports:
       - "6379:6379"
     volumes:
