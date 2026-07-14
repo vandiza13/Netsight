@@ -398,5 +398,8 @@ watch(() => props.routerId, () => {
   .btn-refresh {
     width: 100%;
   }
+  .history-table {
+    min-width: 700px;
+  }
 }
 </style>

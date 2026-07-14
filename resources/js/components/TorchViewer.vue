@@ -1211,23 +1211,63 @@ async function runTraceroute() {
 
 @media (max-width: 768px) {
   .torch-viewer {
-    width: 95%;
-    height: 95vh;
-    border-radius: 12px;
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
   }
   .torch-viewer__header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
-    padding: 16px;
+    gap: 10px;
+    padding: 12px 16px;
+  }
+  .torch-viewer__title h3 {
+    font-size: 1rem;
   }
   .torch-viewer__actions {
     width: 100%;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .torch-viewer__actions .btn-close {
+    padding: 6px 10px;
+    font-size: 0.75rem;
   }
   .status-badge {
     padding: 4px 8px;
     font-size: 0.7rem;
+  }
+  .torch-viewer__body {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .torch-viewer__content {
+    flex: none;
+    border-right: none;
+    border-bottom: 1px solid var(--glass-border);
+    padding: 12px;
+    overflow: visible;
+  }
+  .torch-viewer__sidebar {
+    flex: none;
+    padding: 12px;
+  }
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .torch-table {
+    table-layout: auto;
+    min-width: 600px;
+  }
+  .torch-viewer__footer {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 16px;
+  }
+  .traffic-summary {
+    flex-wrap: wrap;
+    gap: 12px;
   }
 }
 </style>

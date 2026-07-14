@@ -476,6 +476,31 @@ function startTorch(username: string) {
   }
   .dashboard__stats {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .dashboard__panels {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .dashboard__panel {
+    min-height: auto;
+    padding: 16px;
+  }
+  .dashboard__heading {
+    font-size: 1.25rem;
+  }
+  .dashboard__welcome {
+    margin-bottom: 16px;
+  }
+  .dashboard__panel-header-tabs {
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .panel-tab-btn {
+    font-size: 0.85rem;
+    padding: 6px 8px;
+    white-space: nowrap;
   }
 }
 </style>

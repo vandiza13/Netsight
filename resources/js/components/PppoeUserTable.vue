@@ -373,5 +373,8 @@ function formatTime(dateString: string | null): string {
     width: 100%;
     justify-content: center;
   }
+  .user-table {
+    min-width: 600px;
+  }
 }
 </style>
