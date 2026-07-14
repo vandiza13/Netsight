@@ -96,6 +96,15 @@ export const useRouterStore = defineStore('routers', () => {
     }
   }
 
+  async function testConnection(id: number): Promise<any> {
+    try {
+      const { data } = await api.get(`/routers/${id}/health-check`)
+      return data
+    } catch (err: any) {
+      throw new Error(err.response?.data?.message || 'Failed to connect to router.')
+    }
+  }
+
   function selectRouter(id: number): void {
     selectedRouter.value = routers.value.find((r) => r.id === id) ?? null
     // Fetch users for the selected router
@@ -155,5 +164,6 @@ export const useRouterStore = defineStore('routers', () => {
       createRouter,
       updateRouter,
       deleteRouter,
+      testConnection,
     }
 })

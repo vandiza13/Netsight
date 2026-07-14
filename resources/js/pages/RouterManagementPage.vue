@@ -42,6 +42,10 @@
                     <span class="badge" :class="statusClass(router.status)">{{ router.status }}</span>
                   </td>
                   <td>
+                    <button class="btn btn-sm btn-icon" @click="testConnection(router)" :disabled="testingId === router.id" title="Test Connection">
+                      <span v-if="testingId === router.id">⏳</span>
+                      <span v-else>🔌</span>
+                    </button>
                     <button class="btn btn-sm btn-icon" @click="openEditModal(router)" title="Edit">✏️</button>
                     <button class="btn btn-sm btn-icon btn-danger" @click="confirmDelete(router.id)" title="Delete">🗑️</button>
                   </td>
@@ -124,6 +128,7 @@ const showModal = ref(false)
 const isEditing = ref(false)
 const submitting = ref(false)
 const formError = ref('')
+const testingId = ref<number | null>(null)
 let editingId: number | null = null
 
 const form = reactive({
@@ -208,6 +213,18 @@ async function confirmDelete(id: number) {
     } catch (err: any) {
       alert('Failed to delete router: ' + err.message)
     }
+  }
+}
+
+async function testConnection(router: MikroTikRouter) {
+  testingId.value = router.id
+  try {
+    const result = await routerStore.testConnection(router.id)
+    alert(`✅ Connection Successful!\nRouterOS Version: ${result.version || 'Unknown'}\nCPU Load: ${result.cpu_load}%\nUptime: ${result.uptime}`)
+  } catch (err: any) {
+    alert(`❌ Connection Failed:\n${err.message}`)
+  } finally {
+    testingId.value = null
   }
 }
 </script>
