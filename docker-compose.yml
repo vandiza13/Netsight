@@ -1,0 +1,133 @@
+# =============================================================================
+# NETSIGHT v2.1 - Docker Compose
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Application (PHP-FPM + Supervisord)
+  # ---------------------------------------------------------------------------
+  app:
+    build: .
+    container_name: netsight-app
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    depends_on:
+      db:
+        condition: service_started
+      redis:
+        condition: service_started
+    volumes:
+      - ./:/var/www/html          # Dev mount — remove in production
+    env_file:
+      - .env
+    networks:
+      - netsight
+    secrets:
+      - db_password
+      - redis_password
+      - app_key
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: netsight-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: netsight
+      POSTGRES_USER: netsight
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - netsight
+    secrets:
+      - db_password
+
+  # ---------------------------------------------------------------------------
+  # Redis Cache / Queue
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: netsight-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - netsight
+    secrets:
+      - redis_password
+
+  # ---------------------------------------------------------------------------
+  # Caddy Reverse Proxy / Web Server
+  # ---------------------------------------------------------------------------
+  caddy:
+    image: caddy:2-alpine
+    container_name: netsight-caddy
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+    networks:
+      - netsight
+
+  # ---------------------------------------------------------------------------
+  # Horizon Queue Worker
+  # ---------------------------------------------------------------------------
+  horizon:
+    build: .
+    container_name: netsight-horizon
+    restart: unless-stopped
+    command: php artisan horizon
+    depends_on:
+      - app
+      - redis
+    env_file:
+      - .env
+    volumes:
+      - ./:/var/www/html          # Dev mount — remove in production
+    networks:
+      - netsight
+    secrets:
+      - db_password
+      - redis_password
+      - app_key
+
+# =============================================================================
+# Secrets
+# =============================================================================
+secrets:
+  db_password:
+    file: ./docker/secrets/db_password
+  redis_password:
+    file: ./docker/secrets/redis_password
+  app_key:
+    file: ./docker/secrets/app_key
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  pgdata:
+  redisdata:
+  caddy_data:
+  caddy_config:
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  netsight:
+    driver: bridge

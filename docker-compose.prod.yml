@@ -1,0 +1,144 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      target: final
+    image: netsight-app:prod
+    restart: always
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+    env_file:
+      - .env.prod
+    volumes:
+      - ./storage/logs:/var/www/html/storage/logs
+      - ./storage/app/geoip:/var/www/html/storage/app/geoip:ro # Mount MMDB locally
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - netsight
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+
+  db:
+    image: postgres:18-alpine
+    restart: always
+    environment:
+      - POSTGRES_DB=netsight
+      - POSTGRES_USER=netsight
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db_password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - netsight
+    secrets:
+      - db_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U netsight"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8.6-alpine
+    restart: always
+    command: redis-server --requirepass-file /run/secrets/redis_password
+    volumes:
+      - redisdata:/data
+    networks:
+      - netsight
+    secrets:
+      - redis_password
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  horizon:
+    image: netsight-app:prod
+    restart: always
+    command: php artisan horizon
+    env_file:
+      - .env.prod
+    depends_on:
+      - app
+      - redis
+    networks:
+      - netsight
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+    networks:
+      - netsight
+
+  # Phase 6: Monitoring Stack
+  prometheus:
+    image: prom/prometheus:latest
+    restart: always
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - netsight
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD_FILE=/run/secrets/grafana_password
+    depends_on:
+      - prometheus
+    networks:
+      - netsight
+    secrets:
+      - grafana_password
+
+secrets:
+  db_password:
+    file: ./docker/secrets/db_password
+  redis_password:
+    file: ./docker/secrets/redis_password
+  app_key:
+    file: ./docker/secrets/app_key
+  grafana_password:
+    file: ./docker/secrets/grafana_password
+
+volumes:
+  pgdata:
+  redisdata:
+  caddy_data:
+  caddy_config:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  netsight:
+    driver: bridge

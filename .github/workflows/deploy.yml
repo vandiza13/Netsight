@@ -1,0 +1,67 @@
+name: Deploy Netsight to VPS
+
+on:
+  push:
+    branches:
+      - main # Jalankan deployment otomatis setiap kali ada push ke branch main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Copy Files to VPS (SCP)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "./*"
+          target: "/var/www/netsight"
+          rm: false # Jangan hapus file yang sudah ada (seperti .env)
+          tar_tmp_path: "/tmp"
+          exclude: |
+            .git
+            .github
+            node_modules
+            vendor
+            storage/logs/*
+            storage/framework/cache/*
+            storage/framework/sessions/*
+            storage/framework/views/*
+            public/build
+
+      - name: Execute Deployment Commands on VPS (SSH)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            cd /var/www/netsight
+            
+            # 1. Siapkan file .env jika belum ada
+            if [ ! -f .env ]; then
+              cp .env.example .env
+              # Generate key
+              docker run --rm -v $(pwd):/app -w /app php:8.3-cli php artisan key:generate
+              echo "PERINGATAN: File .env baru telah dibuat. Silakan konfigurasi credential database & MikroTik Anda di VPS!"
+            fi
+            
+            # 2. Build & Jalankan Container
+            docker compose up -d --build
+            
+            # 3. Jalankan Migrasi Database di dalam Container
+            docker compose exec -T app php artisan migrate --force
+            
+            # 4. Bersihkan Cache Laravel
+            docker compose exec -T app php artisan config:cache
+            docker compose exec -T app php artisan route:cache
+            docker compose exec -T app php artisan view:cache
+            
+            echo "Deployment Sukses! 🚀"

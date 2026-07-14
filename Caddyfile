@@ -1,0 +1,38 @@
+{
+    admin off
+}
+
+:80 {
+    # IP Whitelist - SECURITY.md Section 3.2
+    # Replace with actual NOC/VPN IPs
+    @blocked not remote_ip 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 127.0.0.1
+    respond @blocked 403
+
+    # Security Headers
+    header {
+        X-Frame-Options "DENY"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        -Server
+    }
+
+    # API routes to PHP-FPM
+    reverse_proxy app:9000 {
+        transport fastcgi {
+            root /var/www/html/public
+            split .php
+        }
+    }
+
+    # Static files
+    root * /var/www/html/public
+    file_server
+    encode gzip
+
+    log {
+        output file /var/log/caddy/access.log
+        format json
+    }
+}
