@@ -24,6 +24,7 @@ jobs:
           target: "/var/www/netsight"
           rm: false # Jangan hapus file yang sudah ada (seperti .env)
           tar_tmp_path: "/tmp"
+          debug: true
 
       - name: Execute Deployment Commands on VPS (SSH)
         uses: appleboy/ssh-action@v1.0.3
