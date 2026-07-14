@@ -38,7 +38,7 @@ RUN npm run build
 # ---------------------------------------------------------------------------
 # Stage 3: Final Production Image
 # ---------------------------------------------------------------------------
-FROM php:8.3-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 LABEL maintainer="NETSIGHT Team"
 LABEL version="2.1"
