@@ -18,18 +18,21 @@
         -Server
     }
 
-    # API routes to PHP-FPM
-    reverse_proxy app:9000 {
+    root * /var/www/html/public
+    encode gzip
+    file_server
+
+    # Handle Laravel routing
+    try_files {path} /index.php?{query}
+
+    # Pass PHP files to PHP-FPM
+    @php path *.php
+    reverse_proxy @php app:9000 {
         transport fastcgi {
             root /var/www/html/public
             split .php
         }
     }
-
-    # Static files
-    root * /var/www/html/public
-    file_server
-    encode gzip
 
     log {
         output file /var/log/caddy/access.log
