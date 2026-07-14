@@ -187,7 +187,7 @@
         </div>
         
         <div v-else style="overflow-x: auto;">
-          <table class="torch-table">
+          <table class="torch-table" style="table-layout: auto; white-space: nowrap;">
             <thead>
               <tr>
                 <th style="padding: 0.5rem 1rem;">Hop</th>
