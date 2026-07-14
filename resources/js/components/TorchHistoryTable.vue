@@ -381,8 +381,22 @@ watch(() => props.routerId, () => {
   color: var(--text-secondary);
 }
 
-.total-users {
+.total-items {
   color: var(--text-muted);
   font-size: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .history-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .search-box {
+    width: 100%;
+  }
+  .btn-refresh {
+    width: 100%;
+  }
 }
 </style>

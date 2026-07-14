@@ -472,7 +472,7 @@ function startTorch(username: string) {
 
 @media (max-width: 768px) {
   .dashboard__content {
-    padding: 20px 16px;
+    padding: 16px 12px;
   }
   .dashboard__stats {
     grid-template-columns: 1fr;

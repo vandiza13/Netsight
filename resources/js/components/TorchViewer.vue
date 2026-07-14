@@ -1207,4 +1207,26 @@ async function runTraceroute() {
   background: rgba(255, 255, 255, 0.05);
   border-left: 3px solid var(--text-muted);
 }
+
+@media (max-width: 768px) {
+  .torch-viewer {
+    width: 95%;
+    height: 95vh;
+    border-radius: 12px;
+  }
+  .torch-viewer__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+  }
+  .torch-viewer__actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .status-badge {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+  }
+}
 </style>

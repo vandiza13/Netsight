@@ -23,38 +23,40 @@
             <div v-if="loading" class="loading-state">Loading routers...</div>
             <div v-else-if="error" class="alert alert-error">{{ error }}</div>
             
-            <table v-else class="router-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>IP / Host</th>
-                  <th>API Port</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="router in routers" :key="router.id">
-                  <td>{{ router.name }}</td>
-                  <td><code>{{ router.host }}</code></td>
-                  <td>{{ router.api_port }}</td>
-                  <td>
-                    <span class="badge" :class="statusClass(router.status)">{{ router.status }}</span>
-                  </td>
-                  <td>
-                    <button class="btn btn-sm btn-icon" @click="testConnection(router)" :disabled="testingId === router.id" title="Test Connection">
-                      <span v-if="testingId === router.id">⏳</span>
-                      <span v-else>🔌</span>
-                    </button>
-                    <button class="btn btn-sm btn-icon" @click="openEditModal(router)" title="Edit">✏️</button>
-                    <button class="btn btn-sm btn-icon btn-danger" @click="confirmDelete(router.id)" title="Delete">🗑️</button>
-                  </td>
-                </tr>
-                <tr v-if="routers.length === 0">
-                  <td colspan="5" class="text-center">No routers registered yet.</td>
-                </tr>
-              </tbody>
-            </table>
+            <div v-else class="table-responsive">
+              <table class="router-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>IP / Host</th>
+                    <th>API Port</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="router in routers" :key="router.id">
+                    <td>{{ router.name }}</td>
+                    <td><code>{{ router.host }}</code></td>
+                    <td>{{ router.api_port }}</td>
+                    <td>
+                      <span class="badge" :class="statusClass(router.status)">{{ router.status }}</span>
+                    </td>
+                    <td>
+                      <button class="btn btn-sm btn-icon" @click="testConnection(router)" :disabled="testingId === router.id" title="Test Connection">
+                        <span v-if="testingId === router.id">⏳</span>
+                        <span v-else>🔌</span>
+                      </button>
+                      <button class="btn btn-sm btn-icon" @click="openEditModal(router)" title="Edit">✏️</button>
+                      <button class="btn btn-sm btn-icon btn-danger" @click="confirmDelete(router.id)" title="Delete">🗑️</button>
+                    </td>
+                  </tr>
+                  <tr v-if="routers.length === 0">
+                    <td colspan="5" class="text-center">No routers registered yet.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
       </main>
@@ -341,6 +343,12 @@ async function testConnection(router: MikroTikRouter) {
   width: 100%;
   max-width: 500px;
   padding: 24px;
+}
+@media (max-width: 640px) {
+  .modal-content {
+    margin: 16px;
+    padding: 20px;
+  }
 }
 .modal-title {
   font-size: 1.2rem;

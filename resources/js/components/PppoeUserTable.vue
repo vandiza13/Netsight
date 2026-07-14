@@ -359,4 +359,19 @@ function formatTime(dateString: string | null): string {
   color: var(--text-muted);
   font-size: 0.75rem;
 }
+
+@media (max-width: 640px) {
+  .user-table-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .search-box {
+    width: 100%;
+  }
+  .btn-sync {
+    width: 100%;
+    justify-content: center;
+  }
+}
 </style>
