@@ -17,8 +17,7 @@ services:
         condition: service_started
       redis:
         condition: service_started
-    volumes:
-      - ./:/var/www/html          # Dev mount — remove in production
+
     env_file:
       - .env
     networks:
@@ -96,8 +95,7 @@ services:
       - redis
     env_file:
       - .env
-    volumes:
-      - ./:/var/www/html          # Dev mount — remove in production
+
     networks:
       - netsight
     secrets:
@@ -118,8 +116,7 @@ services:
       - db
     env_file:
       - .env
-    volumes:
-      - ./:/var/www/html          # Dev mount — remove in production
+
     networks:
       - netsight
     secrets:
