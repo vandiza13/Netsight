@@ -48,18 +48,35 @@ jobs:
             # 1. Siapkan file .env jika belum ada
             if [ ! -f .env ]; then
               cp .env.example .env
-              # Generate key
-              docker run --rm -v $(pwd):/app -w /app php:8.3-cli php artisan key:generate
-              echo "PERINGATAN: File .env baru telah dibuat. Silakan konfigurasi credential database & MikroTik Anda di VPS!"
+              NEED_KEY_GEN=true
+            else
+              NEED_KEY_GEN=false
+            fi
+            
+            # Siapkan file docker secrets jika belum ada
+            mkdir -p docker/secrets
+            if [ ! -f docker/secrets/db_password ]; then
+              cp docker/secrets/db_password.example docker/secrets/db_password
+            fi
+            if [ ! -f docker/secrets/redis_password ]; then
+              cp docker/secrets/redis_password.example docker/secrets/redis_password
+            fi
+            if [ ! -f docker/secrets/app_key ]; then
+              cp docker/secrets/app_key.example docker/secrets/app_key
             fi
             
             # 2. Build & Jalankan Container
             docker compose up -d --build
             
-            # 3. Jalankan Migrasi Database di dalam Container
+            # 3. Generate APP_KEY jika baru dibuat
+            if [ "$NEED_KEY_GEN" = true ]; then
+              docker compose exec -T app php artisan key:generate
+            fi
+            
+            # 4. Jalankan Migrasi Database di dalam Container
             docker compose exec -T app php artisan migrate --force
             
-            # 4. Bersihkan Cache Laravel
+            # 5. Bersihkan Cache Laravel
             docker compose exec -T app php artisan config:cache
             docker compose exec -T app php artisan route:cache
             docker compose exec -T app php artisan view:cache
