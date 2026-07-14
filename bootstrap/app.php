@@ -1,5 +1,24 @@
 <?php
 
+// Load Docker Secrets into environment if they exist
+$secrets = [
+    'db_password' => 'DB_PASSWORD',
+    'redis_password' => 'REDIS_PASSWORD',
+    'app_key' => 'APP_KEY',
+];
+
+foreach ($secrets as $fileName => $envKey) {
+    $secretPath = "/run/secrets/{$fileName}";
+    if (file_exists($secretPath)) {
+        $value = trim(file_get_contents($secretPath));
+        if ($value !== '') {
+            $_ENV[$envKey] = $value;
+            $_SERVER[$envKey] = $value;
+            putenv("{$envKey}={$value}");
+        }
+    }
+}
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
