@@ -112,6 +112,10 @@ export const useAuthStore = defineStore('auth', () => {
       _pendingEmail.value = null
       _pendingPassword.value = null
       _challengeToken.value = null
+      
+      // Ensure we purge any lingering demo state if logging in as real admin
+      demoSetupData.value = null
+      localStorage.removeItem('netsight_demo_schema')
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Invalid TOTP code. Try again.'
       throw err

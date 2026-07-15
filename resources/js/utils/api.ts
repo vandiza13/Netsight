@@ -35,6 +35,7 @@ api.interceptors.response.use(
       // Token expired or invalid — purge and redirect
       localStorage.removeItem('netsight_token')
       localStorage.removeItem('netsight_user')
+      localStorage.removeItem('netsight_demo_schema')
 
       if (window.location.pathname !== '/login') {
         window.location.href = '/login'
