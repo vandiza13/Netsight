@@ -15,7 +15,7 @@ class SetPostgresSchema
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $schema = $request->header('X-Demo-Schema');
+        $schema = $request->header('X-Demo-Schema') ?: $request->query('schema');
 
         if ($schema && preg_match('/^demo_[a-zA-Z0-9_]+$/', $schema)) {
             \Illuminate\Support\Facades\DB::statement("SET search_path TO {$schema}, public");

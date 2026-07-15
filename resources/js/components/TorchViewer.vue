@@ -536,7 +536,12 @@ onBeforeUnmount(() => {
 // Methods
 function startStream(tag: string) {
   const token = localStorage.getItem('netsight_token')
-  const url = `/api/torch/${tag}/stream?token=${token}`
+  let url = `/api/torch/${tag}/stream?token=${token}`
+  
+  const schema = localStorage.getItem('netsight_demo_schema')
+  if (schema) {
+    url += `&schema=${schema}`
+  }
   
   eventSource = new EventSource(url)
   
