@@ -65,7 +65,8 @@ jobs:
             fi
             
             # Build & Jalankan Container
-            docker compose up -d --build
+            docker compose build --build-arg GITHUB_TOKEN=${{ secrets.NETSIGHT_CORE_TOKEN }}
+            docker compose up -d
             
             # Generate APP_KEY jika baru dibuat
             if [ "$NEED_KEY_GEN" = true ]; then

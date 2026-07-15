@@ -7,8 +7,8 @@
     "license": "MIT",
     "repositories": [
         {
-            "type": "path",
-            "url": "packages/vandiza/netsight-core"
+            "type": "vcs",
+            "url": "https://github.com/vandiza13/Netsight-core.git"
         }
     ],
     "require": {
