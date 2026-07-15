@@ -103,11 +103,14 @@ class WarmDemoSandboxes extends Command
         $profiles = ['10M', '20M', '50M', '100M'];
         $users = [];
         for ($i = 1; $i <= 45; $i++) {
+            $prof = $profiles[array_rand($profiles)];
+            $limit = (int)str_replace('M', '', $prof);
+            
             $users[] = [
                 'router_id' => $router->id,
                 'username' => 'user' . str_pad($i, 3, '0', STR_PAD_LEFT) . '@demo.net',
-                'profile' => $profiles[array_rand($profiles)],
-                'package_limit_mbps' => rand(10, 100),
+                'profile' => $prof,
+                'package_limit_mbps' => $limit,
                 'is_active_last_check' => (rand(1, 10) > 2), // 80% active
                 'synced_at' => now()->subMinutes(rand(1, 10)),
             ];
@@ -117,8 +120,8 @@ class WarmDemoSandboxes extends Command
         // 6b. Seed Dummy Torch Sessions History
         $sessions = [];
         for ($i = 1; $i <= 5; $i++) {
-            $avgTx = rand(1000000, 20000000);
-            $avgRx = rand(2000000, 40000000);
+            $avgTx = rand(5000000, 20000000); // 5 - 20 Mbps download (TX)
+            $avgRx = rand(1000000, 4000000);  // 1 - 4 Mbps upload (RX)
             
             $sessions[] = [
                 'router_id' => $router->id,

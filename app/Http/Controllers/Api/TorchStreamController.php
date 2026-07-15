@@ -351,8 +351,8 @@ class TorchStreamController extends Controller
                 $demoData = [];
                 foreach ($activeApps as $app) {
                     $demoData[] = [
-                        'tx' => rand(500000, 3000000), // 0.5 - 3 Mbps per app
-                        'rx' => rand(1000000, 8000000), // 1 - 8 Mbps per app
+                        'tx' => rand(1000000, 8000000), // 1 - 8 Mbps per app (Download to customer)
+                        'rx' => rand(500000, 3000000), // 0.5 - 3 Mbps per app (Upload from customer)
                         'ip-protocol' => $app['proto'],
                         'dst-port' => "{$app['port']} ({$app['svc']})",
                         'dst-address' => $app['ip'],
