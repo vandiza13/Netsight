@@ -40,6 +40,10 @@ class StaffController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        if ($request->header('X-Demo-Schema')) {
+            return response()->json(['message' => 'Penambahan staf dinonaktifkan di mode demo.'], 403);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'email' => 'required|email|max:100|unique:staff_noc,email',
@@ -67,6 +71,10 @@ class StaffController extends Controller
      */
     public function update(Request $request, $id): JsonResponse
     {
+        if ($request->header('X-Demo-Schema')) {
+            return response()->json(['message' => 'Pengubahan staf dinonaktifkan di mode demo.'], 403);
+        }
+
         $staff = StaffNOC::findOrFail($id);
 
         $validated = $request->validate([
@@ -103,6 +111,10 @@ class StaffController extends Controller
      */
     public function destroy(Request $request, $id): JsonResponse
     {
+        if ($request->header('X-Demo-Schema')) {
+            return response()->json(['message' => 'Penghapusan staf dinonaktifkan di mode demo.'], 403);
+        }
+
         $staff = StaffNOC::findOrFail($id);
 
         if ($staff->id === $request->user()->id) {
@@ -121,8 +133,12 @@ class StaffController extends Controller
     /**
      * POST /api/staff/{id}/reset-totp — Reset/Hapus kunci TOTP staf.
      */
-    public function resetTotp($id): JsonResponse
+    public function resetTotp(Request $request, $id): JsonResponse
     {
+        if ($request->header('X-Demo-Schema')) {
+            return response()->json(['message' => 'Reset TOTP dinonaktifkan di mode demo.'], 403);
+        }
+
         $staff = StaffNOC::findOrFail($id);
         
         $staff->totp_secret_encrypted = null;
