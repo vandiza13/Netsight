@@ -310,31 +310,66 @@ class TorchStreamController extends Controller
             while (true) {
                 if (connection_aborted()) break;
 
-                // Simulate data every 3 seconds
-                $tx = rand(1000000, 5000000); // 1-5 Mbps
-                $rx = rand(2000000, 10000000); // 2-10 Mbps
-
-                $demoData = [
+                // Pool of varied dummy applications
+                $appPool = [
                     [
-                        'tx' => $tx,
-                        'rx' => $rx,
-                        'ip-protocol' => 'tcp',
-                        'dst-port' => '443 (https)',
-                        'dst-address' => '142.250.196.14:443',
-                        'port' => '443',
-                        'protocol' => 'tcp',
-                        '_enriched' => [
-                            'port_category' => 'Web',
-                            'port_service' => 'HTTPS',
-                            'geo_country' => 'US',
-                            'geo_city' => 'Mountain View',
-                            'asn_org' => 'Google LLC',
-                            'app_name' => 'YouTube',
-                            'app_icon' => 'youtube.svg',
-                            'app_category' => 'Streaming',
-                        ]
+                        'ip' => '142.250.196.14:443', 'port' => '443', 'proto' => 'tcp',
+                        'port_cat' => 'Web', 'svc' => 'HTTPS', 'country' => 'US', 'city' => 'Mountain View',
+                        'org' => 'Google LLC', 'app' => 'YouTube', 'icon' => 'youtube.svg', 'cat' => 'Streaming'
+                    ],
+                    [
+                        'ip' => '162.159.130.23:443', 'port' => '443', 'proto' => 'tcp',
+                        'port_cat' => 'Web', 'svc' => 'HTTPS', 'country' => 'US', 'city' => 'San Francisco',
+                        'org' => 'Cloudflare, Inc.', 'app' => 'TikTok', 'icon' => 'tiktok.svg', 'cat' => 'Social Media'
+                    ],
+                    [
+                        'ip' => '157.240.22.35:443', 'port' => '443', 'proto' => 'tcp',
+                        'port_cat' => 'Web', 'svc' => 'HTTPS', 'country' => 'US', 'city' => 'Menlo Park',
+                        'org' => 'Meta Platforms', 'app' => 'Instagram', 'icon' => 'instagram.svg', 'cat' => 'Social Media'
+                    ],
+                    [
+                        'ip' => '45.57.90.1:443', 'port' => '443', 'proto' => 'tcp',
+                        'port_cat' => 'Web', 'svc' => 'HTTPS', 'country' => 'US', 'city' => 'Los Gatos',
+                        'org' => 'Netflix', 'app' => 'Netflix', 'icon' => 'netflix.svg', 'cat' => 'Streaming'
+                    ],
+                    [
+                        'ip' => '162.254.196.50:27015', 'port' => '27015', 'proto' => 'udp',
+                        'port_cat' => 'Gaming', 'svc' => 'Steam', 'country' => 'US', 'city' => 'Bellevue',
+                        'org' => 'Valve Corporation', 'app' => 'Steam', 'icon' => 'steam.svg', 'cat' => 'Gaming'
+                    ],
+                    [
+                        'ip' => '170.114.14.3:8801', 'port' => '8801', 'proto' => 'udp',
+                        'port_cat' => 'Video', 'svc' => 'Zoom', 'country' => 'US', 'city' => 'San Jose',
+                        'org' => 'Zoom Video Comm.', 'app' => 'Zoom', 'icon' => 'zoom.svg', 'cat' => 'Communication'
                     ]
                 ];
+
+                // Randomly pick 2 to 4 apps active for this 3-second window
+                shuffle($appPool);
+                $activeApps = array_slice($appPool, 0, rand(2, 4));
+
+                $demoData = [];
+                foreach ($activeApps as $app) {
+                    $demoData[] = [
+                        'tx' => rand(500000, 3000000), // 0.5 - 3 Mbps per app
+                        'rx' => rand(1000000, 8000000), // 1 - 8 Mbps per app
+                        'ip-protocol' => $app['proto'],
+                        'dst-port' => "{$app['port']} ({$app['svc']})",
+                        'dst-address' => $app['ip'],
+                        'port' => $app['port'],
+                        'protocol' => $app['proto'],
+                        '_enriched' => [
+                            'port_category' => $app['port_cat'],
+                            'port_service' => $app['svc'],
+                            'geo_country' => $app['country'],
+                            'geo_city' => $app['city'],
+                            'asn_org' => $app['org'],
+                            'app_name' => $app['app'],
+                            'app_icon' => $app['icon'],
+                            'app_category' => $app['cat'],
+                        ]
+                    ];
+                }
 
                 echo "data: " . json_encode(['type' => 'traffic', 'data' => $demoData]) . "\n\n";
 
