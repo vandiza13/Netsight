@@ -398,6 +398,9 @@ onMounted(() => {
   display: none;
 }
 
+</style>
+
+<style>
 @media print {
   @page {
     size: A4;
@@ -417,8 +420,12 @@ onMounted(() => {
     height: auto !important;
     background: transparent !important;
     backdrop-filter: none !important;
-    visibility: visible;
+    visibility: visible !important;
     display: block !important;
+  }
+  
+  .modal-overlay * {
+    visibility: visible;
   }
   
   /* Hide the UI card entirely */
@@ -428,8 +435,8 @@ onMounted(() => {
   
   /* Show the dedicated print report */
   .print-only-report {
-    display: block;
-    visibility: visible;
+    display: block !important;
+    visibility: visible !important;
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
@@ -439,7 +446,7 @@ onMounted(() => {
   }
   
   .print-only-report * {
-    visibility: visible;
+    visibility: visible !important;
   }
   
   .print-header {
@@ -566,9 +573,10 @@ onMounted(() => {
     margin-top: 10px;
     font-style: italic;
     color: #999;
-  }
 }
+</style>
 
+<style scoped>
 .status-badge {
   display: inline-block;
   align-self: flex-start;
