@@ -1,5 +1,5 @@
 # =============================================================================
-# NETSIGHT v2.1 - Docker Compose
+# NETSIGHT v2.1 - Docker Compose (Optimized for Milestone 1 Testing)
 # =============================================================================
 
 services:
@@ -17,7 +17,6 @@ services:
         condition: service_started
       redis:
         condition: service_started
-
     env_file:
       - .env
     volumes:
@@ -29,6 +28,11 @@ services:
       - db_password
       - redis_password
       - app_key
+    # 🔒 Batasi RAM Biar Gak Rakus
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
   # ---------------------------------------------------------------------------
   # PostgreSQL Database
@@ -47,6 +51,11 @@ services:
       - netsight
     secrets:
       - db_password
+    # 🔒 Batasi RAM Shared Buffers Postgres Docker
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
   # ---------------------------------------------------------------------------
   # Redis Cache / Queue
@@ -62,6 +71,11 @@ services:
       - netsight
     secrets:
       - redis_password
+    # 🔒 Batasi RAM Redis (Cache ringan)
+    deploy:
+      resources:
+        limits:
+          memory: 128M
 
   # ---------------------------------------------------------------------------
   # Caddy Reverse Proxy / Web Server
@@ -81,6 +95,11 @@ services:
       - app
     networks:
       - netsight
+    # 🔒 Caddy bawaan sangat ringan, batasi kecil saja
+    deploy:
+      resources:
+        limits:
+          memory: 128M
 
   # ---------------------------------------------------------------------------
   # Horizon Queue Worker
@@ -95,13 +114,17 @@ services:
       - redis
     env_file:
       - .env
-
     networks:
       - netsight
     secrets:
       - db_password
       - redis_password
       - app_key
+    # 🔒 Batasi RAM Worker Antrean Laravel
+    deploy:
+      resources:
+        limits:
+          memory: 512M
 
   # ---------------------------------------------------------------------------
   # Task Scheduler (Cronjob)
@@ -116,13 +139,17 @@ services:
       - db
     env_file:
       - .env
-
     networks:
       - netsight
     secrets:
       - db_password
       - redis_password
       - app_key
+    # 🔒 Scheduler hanya CLI Loop, batasi secukupnya
+    deploy:
+      resources:
+        limits:
+          memory: 256M
 
 # =============================================================================
 # Secrets
