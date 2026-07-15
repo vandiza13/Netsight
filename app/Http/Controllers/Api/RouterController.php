@@ -79,6 +79,13 @@ class RouterController extends Controller
      */
     public function forceSync(Request $request, int $id): JsonResponse
     {
+        if ($request->header('X-Demo-Schema')) {
+            return response()->json([
+                'message' => 'Sync manual selesai secara instan (Mode Simulasi Demo).',
+                'router' => 'Demo Router',
+            ]);
+        }
+
         $router = Router::findOrFail($id);
 
         // Rate limit: 1x per 5 menit per router
@@ -122,8 +129,20 @@ class RouterController extends Controller
      *
      * @role TIER_2+
      */
-    public function healthCheck(int $id): JsonResponse
+    public function healthCheck(Request $request, int $id): JsonResponse
     {
+        if ($request->header('X-Demo-Schema')) {
+            return response()->json([
+                'status' => 'OK',
+                'cpu_load' => rand(3, 12),
+                'free_memory' => 842000000,
+                'total_memory' => 1024000000,
+                'uptime' => '10d 5h 30m',
+                'version' => '7.12 (Demo)',
+                'thresholds' => ['warning' => 80, 'critical' => 95],
+            ]);
+        }
+
         $router = Router::findOrFail($id);
 
         try {
@@ -175,16 +194,10 @@ class RouterController extends Controller
         ]);
 
         $demoSchema = $request->header('X-Demo-Schema');
-        if ($demoSchema && preg_match('/^demo_[a-zA-Z0-9_]+$/', $demoSchema)) {
-            $isProductionHost = \Illuminate\Support\Facades\DB::table('public.routers')
-                ->where('host', $validated['host'])
-                ->exists();
-
-            if ($isProductionHost || in_array($validated['host'], ['101.255.105.34', '127.0.0.1', 'localhost'])) {
-                return response()->json([
-                    'message' => 'IP/Host router ini dilindungi dan tidak dapat digunakan di akun demo.',
-                ], 403);
-            }
+        if ($demoSchema) {
+            return response()->json([
+                'message' => 'Penambahan router dinonaktifkan di mode demo. Silakan gunakan Dummy Router yang sudah tersedia.',
+            ], 403);
         }
 
         $router = new Router();
@@ -212,6 +225,12 @@ class RouterController extends Controller
      */
     public function update(Request $request, int $id): JsonResponse
     {
+        if ($request->header('X-Demo-Schema')) {
+            return response()->json([
+                'message' => 'Pengubahan router dinonaktifkan di mode demo.',
+            ], 403);
+        }
+
         $router = Router::findOrFail($id);
 
         $validated = $request->validate([
@@ -224,19 +243,6 @@ class RouterController extends Controller
         ]);
 
         if (isset($validated['host'])) {
-            $demoSchema = $request->header('X-Demo-Schema');
-            if ($demoSchema && preg_match('/^demo_[a-zA-Z0-9_]+$/', $demoSchema)) {
-                $isProductionHost = \Illuminate\Support\Facades\DB::table('public.routers')
-                    ->where('host', $validated['host'])
-                    ->exists();
-
-                if ($isProductionHost || in_array($validated['host'], ['101.255.105.34', '127.0.0.1', 'localhost'])) {
-                    return response()->json([
-                        'message' => 'IP/Host router ini dilindungi dan tidak dapat digunakan di akun demo.',
-                    ], 403);
-                }
-            }
-        }
 
         if (isset($validated['name'])) $router->name = $validated['name'];
         if (isset($validated['host'])) $router->host = $validated['host'];
@@ -261,8 +267,14 @@ class RouterController extends Controller
      *
      * @role ADMIN
      */
-    public function destroy(int $id): JsonResponse
+    public function destroy(Request $request, int $id): JsonResponse
     {
+        if ($request->header('X-Demo-Schema')) {
+            return response()->json([
+                'message' => 'Penghapusan router dinonaktifkan di mode demo.',
+            ], 403);
+        }
+
         $router = Router::findOrFail($id);
         
         // Ensure cascading deletion or handle relationships if necessary

@@ -38,6 +38,20 @@ class TorchController extends Controller
         $router = Router::findOrFail($request->router_id);
         $username = $request->username;
 
+        if ($request->header('X-Demo-Schema')) {
+            $tag = 'demo_torch_' . \Illuminate\Support\Str::random(5);
+            return response()->json([
+                'session_tag' => $tag,
+                'interface' => '<pppoe-' . $username . '>',
+                'queue' => [
+                    'name' => '<pppoe-' . $username . '>',
+                    'target' => '10.120.3.33/32',
+                    'max-limit' => '10M/50M'
+                ],
+                'warnings' => null
+            ]);
+        }
+
         // 1. Pre-flight CPU Check
         $cpuCheck = $this->guardrailService->preFlight($router);
         if (!$cpuCheck['allowed']) {
@@ -134,6 +148,10 @@ class TorchController extends Controller
      */
     public function heartbeat(string $tag): JsonResponse
     {
+        if (str_starts_with($tag, 'demo_torch_')) {
+            return response()->json(['status' => 'OK']);
+        }
+
         $session = TorchSession::where('tag', $tag)->firstOrFail();
 
         if ($session->status !== 'RUNNING') {
@@ -154,6 +172,12 @@ class TorchController extends Controller
      */
     public function cancel(Request $request, string $tag): JsonResponse
     {
+        if (str_starts_with($tag, 'demo_torch_')) {
+            return response()->json([
+                'message' => 'Torch session cancelled (Demo).',
+            ]);
+        }
+
         $session = TorchSession::where('tag', $tag)->firstOrFail();
 
         if ($session->status !== 'RUNNING') {
@@ -270,6 +294,14 @@ class TorchController extends Controller
      */
     public function ping(string $tag): JsonResponse
     {
+        if (str_starts_with($tag, 'demo_torch_')) {
+            return response()->json(['data' => [
+                ['status' => 'OK', 'size' => 56, 'ttl' => 62, 'time' => rand(15, 30) . 'ms', 'sent' => 3, 'received' => 3, 'packet-loss' => '0%'],
+                ['status' => 'OK', 'size' => 56, 'ttl' => 62, 'time' => rand(15, 30) . 'ms', 'sent' => 3, 'received' => 3, 'packet-loss' => '0%'],
+                ['status' => 'OK', 'size' => 56, 'ttl' => 62, 'time' => rand(15, 30) . 'ms', 'sent' => 3, 'received' => 3, 'packet-loss' => '0%']
+            ]]);
+        }
+
         $session = TorchSession::where('tag', $tag)->with('router')->firstOrFail();
 
         // Cari IP aktif user
@@ -294,6 +326,13 @@ class TorchController extends Controller
      */
     public function logs(string $tag)
     {
+        if (str_starts_with($tag, 'demo_torch_')) {
+            return response()->json(['data' => [
+                ['time' => date('H:i:s'), 'topics' => 'info,account', 'message' => 'Demo User logged in'],
+                ['time' => date('H:i:s', time() - 3600), 'topics' => 'info,pppoe', 'message' => '<pppoe-demo> connected'],
+            ]]);
+        }
+
         $session = TorchSession::where('tag', $tag)->firstOrFail();
         $router = Router::findOrFail($session->router_id);
 
@@ -306,6 +345,14 @@ class TorchController extends Controller
      */
     public function traceroute(string $tag)
     {
+        if (str_starts_with($tag, 'demo_torch_')) {
+            return response()->json(['data' => [
+                ['address' => '10.120.3.33', 'loss' => 0, 'sent' => 3, 'last' => rand(10, 20), 'avg' => 15, 'status' => 'OK'],
+                ['address' => '192.168.1.1', 'loss' => 0, 'sent' => 3, 'last' => rand(20, 30), 'avg' => 25, 'status' => 'OK'],
+                ['address' => '8.8.8.8', 'loss' => 0, 'sent' => 3, 'last' => rand(30, 50), 'avg' => 40, 'status' => 'OK'],
+            ]]);
+        }
+
         $session = TorchSession::where('tag', $tag)->first();
         
         if (!$session) {

@@ -31,7 +31,8 @@ Route::prefix('auth')->group(function () {
         ->middleware('auth:sanctum');
 });
 
-Route::post('/demo/start', [\App\Http\Controllers\Api\DemoController::class, 'start']);
+Route::post('/demo/start', [\App\Http\Controllers\Api\DemoController::class, 'start'])
+    ->middleware('throttle:2,1440');
 
 // ============================================================
 // AUTHENTICATED ROUTES

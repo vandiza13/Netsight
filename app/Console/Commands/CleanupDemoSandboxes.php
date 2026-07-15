@@ -39,5 +39,9 @@ class CleanupDemoSandboxes extends Command
         }
 
         $this->info('Cleanup completed.');
+        
+        $this->info('Triggering sandbox warm-up process...');
+        \Illuminate\Support\Facades\Artisan::call('app:warm-demo-sandboxes');
+        $this->info('Warm-up completed.');
     }
 }

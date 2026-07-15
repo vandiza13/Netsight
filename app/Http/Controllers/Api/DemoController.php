@@ -15,55 +15,48 @@ class DemoController extends Controller
 {
     public function start(Request $request)
     {
-        // 1. Generate unique schema name
-        $schema = 'demo_' . strtolower(Str::random(8));
+        // 1. Ambil schema yang idle
+        $sandbox = DB::table('public.demo_sandboxes')
+            ->where('status', 'idle')
+            ->orderBy('id', 'asc')
+            ->first();
+            
+        if (!$sandbox) {
+            // Jika pool kosong, fallback error.
+            return response()->json(['message' => 'Server demo sedang menyiapkan sesi baru. Silakan coba lagi dalam beberapa detik.'], 503);
+        }
 
-        // 2. Create Schema on current connection
-        DB::statement("CREATE SCHEMA {$schema}");
+        $schema = $sandbox->schema_name;
 
-        // 3. Reconnect with new search path to run migrations
+        // 2. Tandai schema menjadi active
+        DB::table('public.demo_sandboxes')
+            ->where('id', $sandbox->id)
+            ->update([
+                'status' => 'active',
+                'expires_at' => now()->addHours(24),
+                'updated_at' => now(),
+            ]);
+            
+        // 3. Ambil TOTP Secret dari dalam schema tersebut
         config(['database.connections.pgsql.search_path' => $schema]);
         DB::purge('pgsql');
+        
+        $admin = StaffNoc::where('email', 'demo@netsight.id')->first();
+        $totpSecret = $admin->totp_secret;
+        
+        config(['database.connections.pgsql.search_path' => 'public']);
+        DB::purge('pgsql');
 
-        // 4. Run migrations on the new schema
-        Artisan::call('migrate', [
-            '--force' => true,
-        ]);
-
-        // 5. Create default admin user in this schema
+        // 4. Generate QR Code
         $google2fa = new Google2FA();
-        $totpSecret = $google2fa->generateSecretKey();
-
-        $admin = new StaffNoc([
-            'name' => 'Demo Admin',
-            'email' => 'demo@netsight.id',
-            'password_hash' => Hash::make('password123'),
-            'role' => 'ADMIN',
-            'is_active' => true,
-        ]);
-        $admin->totp_secret = $totpSecret;
-        $admin->save();
-
-        // 6. Generate QR code URL (using a free QR code generator API for the frontend to display)
         $qrCodeUrl = $google2fa->getQRCodeUrl(
             'Netsight Demo',
             $admin->email,
             $totpSecret
         );
-        // PragmaRX returns a otpauth:// URL, we can format it for the frontend
-        // If we want a direct image URL, we can use google charts or similar, but the frontend usually handles it.
-        // Actually, our frontend expects totp_qr_url to be the otpauth:// URI and uses qrcode.vue to render it.
-
-        // 7. Track the schema in public database
-        DB::table('public.demo_sandboxes')->insert([
-            'schema_name' => $schema,
-            'expires_at' => now()->addHours(24),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
 
         return response()->json([
-            'message' => 'Sandbox created successfully.',
+            'message' => 'Sandbox berhasil diklaim.',
             'schema' => $schema,
             'admin' => [
                 'email' => $admin->email,

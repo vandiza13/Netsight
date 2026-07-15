@@ -28,6 +28,10 @@ class TorchStreamController extends Controller
      */
     public function stream(string $tag)
     {
+        if (str_starts_with($tag, 'demo_torch_')) {
+            return $this->demoStream($tag);
+        }
+
         $session = TorchSession::where('tag', $tag)->firstOrFail();
 
         if ($session->status !== 'RUNNING') {
@@ -285,6 +289,65 @@ class TorchStreamController extends Controller
                 ]);
 
                 $this->guardrailService->releaseHeartbeat($tag);
+            }
+        }, 200, $headers);
+    }
+
+    private function demoStream(string $tag)
+    {
+        set_time_limit(0);
+        while (ob_get_level()) ob_end_clean();
+
+        $headers = [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'Connection' => 'keep-alive',
+            'X-Accel-Buffering' => 'no',
+        ];
+
+        return response()->stream(function () {
+            $loopCounter = 0;
+            while (true) {
+                if (connection_aborted()) break;
+
+                // Simulate data every 3 seconds
+                $tx = rand(1000000, 5000000); // 1-5 Mbps
+                $rx = rand(2000000, 10000000); // 2-10 Mbps
+
+                $demoData = [
+                    [
+                        'tx' => $tx,
+                        'rx' => $rx,
+                        'ip-protocol' => 'tcp',
+                        'dst-port' => '443 (https)',
+                        'dst-address' => '142.250.196.14:443',
+                        'port' => '443',
+                        'protocol' => 'tcp',
+                        '_enriched' => [
+                            'port_category' => 'Web',
+                            'port_service' => 'HTTPS',
+                            'geo_country' => 'US',
+                            'geo_city' => 'Mountain View',
+                            'asn_org' => 'Google LLC',
+                            'app_name' => 'YouTube',
+                            'app_icon' => 'youtube.svg',
+                            'app_category' => 'Streaming',
+                        ]
+                    ]
+                ];
+
+                echo "data: " . json_encode(['type' => 'traffic', 'data' => $demoData]) . "\n\n";
+
+                if ($loopCounter % 2 === 0) {
+                    $pingRes = [
+                        ['status' => 'OK', 'size' => 56, 'ttl' => 62, 'time' => rand(15, 30) . 'ms', 'sent' => 3, 'received' => 3, 'packet-loss' => '0%']
+                    ];
+                    echo "data: " . json_encode(['type' => 'ping', 'data' => $pingRes]) . "\n\n";
+                }
+
+                flush();
+                sleep(3);
+                $loopCounter++;
             }
         }, 200, $headers);
     }
