@@ -42,7 +42,7 @@ class TorchController extends Controller
             $tag = 'demo_torch_' . \Illuminate\Support\Str::random(5);
             
             // Get user's package_limit_mbps from DB
-            $user = \App\Models\PppoeUser::where('router_id', $router->id)
+            $user = \App\Models\PppoeUserCache::where('router_id', $router->id)
                                         ->where('username', $username)
                                         ->first();
             
