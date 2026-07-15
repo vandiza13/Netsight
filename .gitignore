@@ -1,3 +1,14 @@
+# AI Agent Instructions & Contexts
+AGENT.md
+DR.md
+PRD.md
+SRD.md
+
+# Package Security
+/packages
+/vendor
+/node_modules
+
 *.log
 .DS_Store
 .env

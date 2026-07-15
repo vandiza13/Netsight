@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "190fcffb04ef1c7dfd1cae4394ba6245",
+    "content-hash": "3c350ed4c8bef37e9afad5852ebdd929",
     "packages": [
         {
             "name": "brick/math",
@@ -7254,6 +7254,38 @@
             "time": "2025-12-02T11:56:42+00:00"
         },
         {
+            "name": "vandiza/netsight-core",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "packages/vandiza/netsight-core",
+                "reference": "3b8105c14724f6bd0281552fa7a8c0bf603b6353"
+            },
+            "require": {
+                "evilfreelancer/routeros-api-php": "^1.7",
+                "geoip2/geoip2": "^3.3",
+                "php": "^8.2",
+                "predis/predis": "^3.5"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Vandiza\\NetsightCore\\Providers\\NetsightCoreServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Vandiza\\NetsightCore\\": "src/"
+                }
+            },
+            "description": "Core business logic for Netsight",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
             "name": "vlucas/phpdotenv",
             "version": "v5.6.4",
             "source": {
@@ -10722,7 +10754,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "vandiza/netsight-core": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
