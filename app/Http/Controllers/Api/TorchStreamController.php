@@ -315,32 +315,32 @@ class TorchStreamController extends Controller
                     [
                         'ip' => '142.250.196.14:443', 'port' => '443', 'proto' => 'tcp',
                         'port_cat' => 'Web', 'svc' => 'HTTPS', 'country' => 'US', 'city' => 'Mountain View',
-                        'org' => 'Google LLC', 'app' => 'YouTube', 'icon' => 'youtube.svg', 'cat' => 'Streaming'
+                        'org' => 'Google LLC', 'app' => 'YouTube', 'icon' => '📺', 'cat' => 'Streaming'
                     ],
                     [
                         'ip' => '162.159.130.23:443', 'port' => '443', 'proto' => 'tcp',
                         'port_cat' => 'Web', 'svc' => 'HTTPS', 'country' => 'US', 'city' => 'San Francisco',
-                        'org' => 'Cloudflare, Inc.', 'app' => 'TikTok', 'icon' => 'tiktok.svg', 'cat' => 'Social Media'
+                        'org' => 'Cloudflare, Inc.', 'app' => 'TikTok', 'icon' => '📱', 'cat' => 'Social Media'
                     ],
                     [
                         'ip' => '157.240.22.35:443', 'port' => '443', 'proto' => 'tcp',
                         'port_cat' => 'Web', 'svc' => 'HTTPS', 'country' => 'US', 'city' => 'Menlo Park',
-                        'org' => 'Meta Platforms', 'app' => 'Instagram', 'icon' => 'instagram.svg', 'cat' => 'Social Media'
+                        'org' => 'Meta Platforms', 'app' => 'Instagram', 'icon' => '📷', 'cat' => 'Social Media'
                     ],
                     [
                         'ip' => '45.57.90.1:443', 'port' => '443', 'proto' => 'tcp',
                         'port_cat' => 'Web', 'svc' => 'HTTPS', 'country' => 'US', 'city' => 'Los Gatos',
-                        'org' => 'Netflix', 'app' => 'Netflix', 'icon' => 'netflix.svg', 'cat' => 'Streaming'
+                        'org' => 'Netflix', 'app' => 'Netflix', 'icon' => '🎬', 'cat' => 'Streaming'
                     ],
                     [
                         'ip' => '162.254.196.50:27015', 'port' => '27015', 'proto' => 'udp',
                         'port_cat' => 'Gaming', 'svc' => 'Steam', 'country' => 'US', 'city' => 'Bellevue',
-                        'org' => 'Valve Corporation', 'app' => 'Steam', 'icon' => 'steam.svg', 'cat' => 'Gaming'
+                        'org' => 'Valve Corporation', 'app' => 'Steam', 'icon' => '🎮', 'cat' => 'Gaming'
                     ],
                     [
                         'ip' => '170.114.14.3:8801', 'port' => '8801', 'proto' => 'udp',
                         'port_cat' => 'Video', 'svc' => 'Zoom', 'country' => 'US', 'city' => 'San Jose',
-                        'org' => 'Zoom Video Comm.', 'app' => 'Zoom', 'icon' => 'zoom.svg', 'cat' => 'Communication'
+                        'org' => 'Zoom Video Comm.', 'app' => 'Zoom', 'icon' => '🎥', 'cat' => 'Communication'
                     ]
                 ];
 

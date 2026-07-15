@@ -40,13 +40,25 @@ class TorchController extends Controller
 
         if ($request->header('X-Demo-Schema')) {
             $tag = 'demo_torch_' . \Illuminate\Support\Str::random(5);
+            
+            // Get user's package_limit_mbps from DB
+            $user = \App\Models\PppoeUser::where('router_id', $router->id)
+                                        ->where('username', $username)
+                                        ->first();
+            
+            $limitMbps = $user && $user->package_limit_mbps ? $user->package_limit_mbps : 50;
+            $downloadBps = $limitMbps * 1000000; // Mbps to bps
+            $uploadBps = (int)($downloadBps / 3); // Mock upload as 1/3 of download
+            
             return response()->json([
                 'session_tag' => $tag,
                 'interface' => '<pppoe-' . $username . '>',
                 'queue' => [
                     'name' => '<pppoe-' . $username . '>',
-                    'target' => '10.120.3.33/32',
-                    'max-limit' => '10M/50M'
+                    'tx_limit' => $uploadBps,
+                    'rx_limit' => $downloadBps,
+                    'burst_limit' => null,
+                    'dynamic' => true
                 ],
                 'warnings' => null
             ]);
