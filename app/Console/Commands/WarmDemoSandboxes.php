@@ -132,14 +132,14 @@ class WarmDemoSandboxes extends Command
                 'started_at' => now()->subHours(rand(1, 48)),
                 'ended_at' => now()->subHours(rand(1, 48))->addMinutes(2),
                 'diagnostic_conclusion' => 'Koneksi normal. Latensi dan bandwidth terpantau stabil.',
-                'peak_tx_bps' => $avgTx * 1.5,
-                'peak_rx_bps' => $avgRx * 1.5,
+                'peak_tx_bps' => (int)($avgTx * 1.5),
+                'peak_rx_bps' => (int)($avgRx * 1.5),
                 'avg_tx_bps' => $avgTx,
                 'avg_rx_bps' => $avgRx,
                 'app_distribution' => json_encode([
-                    ['name' => 'YouTube', 'bytes' => $avgRx * 0.6, 'percentage' => 60],
-                    ['name' => 'TikTok', 'bytes' => $avgRx * 0.3, 'percentage' => 30],
-                    ['name' => 'Unknown', 'bytes' => $avgRx * 0.1, 'percentage' => 10],
+                    ['name' => 'YouTube', 'bytes' => (int)($avgRx * 0.6), 'percentage' => 60],
+                    ['name' => 'TikTok', 'bytes' => (int)($avgRx * 0.3), 'percentage' => 30],
+                    ['name' => 'Unknown', 'bytes' => (int)($avgRx * 0.1), 'percentage' => 10],
                 ])
             ];
         }
