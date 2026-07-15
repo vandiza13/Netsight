@@ -192,6 +192,8 @@ watch(() => props.routerId, () => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
+  width: 100%;
 }
 
 .history-filters {
@@ -254,10 +256,12 @@ watch(() => props.routerId, () => {
   border: 1px solid var(--glass-border);
   border-radius: 12px;
   backdrop-filter: blur(16px);
+  width: 100%;
 }
 
 .history-table {
   width: 100%;
+  min-width: 600px;
   border-collapse: collapse;
   text-align: left;
   font-size: 0.85rem;
@@ -295,7 +299,7 @@ watch(() => props.routerId, () => {
 .rx-rate { color: var(--accent-cyan); }
 
 .col-conclusion {
-  max-width: 250px;
+  max-width: 180px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
