@@ -95,7 +95,55 @@ class WarmDemoSandboxes extends Command
         $router->credential = 'demo';
         $router->sync_offset_minutes = 0;
         $router->status = 'HEALTHY';
+        $router->routeros_version = '7.12.1';
+        $router->last_synced_at = now()->subMinutes(2);
         $router->save();
+
+        // 6a. Seed Dummy PPPoE Users
+        $profiles = ['10M', '20M', '50M', '100M'];
+        $users = [];
+        for ($i = 1; $i <= 45; $i++) {
+            $users[] = [
+                'router_id' => $router->id,
+                'username' => 'user' . str_pad($i, 3, '0', STR_PAD_LEFT) . '@demo.net',
+                'profile' => $profiles[array_rand($profiles)],
+                'package_limit_mbps' => rand(10, 100),
+                'is_active_last_check' => (rand(1, 10) > 2), // 80% active
+                'synced_at' => now()->subMinutes(rand(1, 10)),
+            ];
+        }
+        DB::table('pppoe_users_cache')->insert($users);
+
+        // 6b. Seed Dummy Torch Sessions History
+        $sessions = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $avgTx = rand(1000000, 20000000);
+            $avgRx = rand(2000000, 40000000);
+            
+            $sessions[] = [
+                'router_id' => $router->id,
+                'username' => 'user' . str_pad(rand(1, 45), 3, '0', STR_PAD_LEFT) . '@demo.net',
+                'session_id_snapshot' => '819200' . rand(10, 99),
+                'dynamic_interface' => '<pppoe-user>',
+                'initiated_by' => $admin->id,
+                'tag' => 'demo_torch_' . \Illuminate\Support\Str::random(5),
+                'status' => 'COMPLETED',
+                'auto_cleanup' => true,
+                'started_at' => now()->subHours(rand(1, 48)),
+                'ended_at' => now()->subHours(rand(1, 48))->addMinutes(2),
+                'diagnostic_conclusion' => 'Koneksi normal. Latensi dan bandwidth terpantau stabil.',
+                'peak_tx_bps' => $avgTx * 1.5,
+                'peak_rx_bps' => $avgRx * 1.5,
+                'avg_tx_bps' => $avgTx,
+                'avg_rx_bps' => $avgRx,
+                'app_distribution' => json_encode([
+                    ['name' => 'YouTube', 'bytes' => $avgRx * 0.6, 'percentage' => 60],
+                    ['name' => 'TikTok', 'bytes' => $avgRx * 0.3, 'percentage' => 30],
+                    ['name' => 'Unknown', 'bytes' => $avgRx * 0.1, 'percentage' => 10],
+                ])
+            ];
+        }
+        DB::table('torch_sessions')->insert($sessions);
 
         // 7. Track the schema in public database as 'idle'
         // Reset search path back to public first just to be safe
