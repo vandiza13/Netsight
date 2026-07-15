@@ -32,12 +32,13 @@ api.interceptors.response.use(
     const status = error.response?.status
 
     if (status === 401) {
-      // Token expired or invalid — purge and redirect
+      // Token expired or invalid
       localStorage.removeItem('netsight_token')
       localStorage.removeItem('netsight_user')
-      localStorage.removeItem('netsight_demo_schema')
 
+      // Jika kita BUKAN berada di halaman login, baru bersihkan schema demo dan redirect
       if (window.location.pathname !== '/login') {
+        localStorage.removeItem('netsight_demo_schema')
         window.location.href = '/login'
       }
     }

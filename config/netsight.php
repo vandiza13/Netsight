@@ -99,7 +99,7 @@ return [
         'password_min_length' => (int) env('NETSIGHT_AUTH_PASSWORD_MIN_LENGTH', 12),
 
         // TOTP window (jumlah period yang diterima)
-        'totp_window' => (int) env('NETSIGHT_AUTH_TOTP_WINDOW', 1),
+        'totp_window' => (int) env('NETSIGHT_AUTH_TOTP_WINDOW', 2),
     ],
 
     /*
