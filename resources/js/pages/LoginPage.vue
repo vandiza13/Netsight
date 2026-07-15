@@ -364,9 +364,9 @@ function triggerShake() {
 .login-bg__orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.12;
-  animation: orbFloat 20s ease-in-out infinite;
+  filter: blur(120px);
+  opacity: 0.04;
+  animation: orbFloat 30s ease-in-out infinite;
 }
 
 .login-bg__orb--1 {
@@ -395,9 +395,9 @@ function triggerShake() {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  animation-duration: 25s;
+  animation-duration: 40s;
   animation-delay: -10s;
-  opacity: 0.06;
+  opacity: 0.02;
 }
 
 @keyframes orbFloat {
@@ -624,6 +624,8 @@ function triggerShake() {
   position: relative;
   overflow: hidden;
   margin-top: 4px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 16px rgba(6, 182, 212, 0.15);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
 .login-btn::before {
@@ -637,7 +639,7 @@ function triggerShake() {
 
 .login-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 8px 24px rgba(6, 182, 212, 0.25);
 }
 .login-btn:hover:not(:disabled)::before {
   opacity: 1;
