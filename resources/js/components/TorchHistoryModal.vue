@@ -104,6 +104,70 @@
         </div>
       </div>
     </div>
+
+    <!-- Dedicated Print Layout -->
+    <div class="print-only-report" v-if="sessionData">
+      <div class="print-header">
+        <div class="print-logo">Netsight</div>
+        <div class="print-title">Official Diagnostic Report</div>
+      </div>
+      
+      <div class="print-info-grid">
+        <div class="info-box">
+          <strong>Customer Username:</strong> {{ sessionData.username }}
+        </div>
+        <div class="info-box">
+          <strong>Date & Time:</strong> {{ formatFullDate(sessionData.started_at) }}
+        </div>
+        <div class="info-box">
+          <strong>Router:</strong> {{ sessionData.router?.name || '-' }}
+        </div>
+        <div class="info-box">
+          <strong>Inspected By:</strong> {{ sessionData.initiator?.name || 'System' }}
+        </div>
+      </div>
+
+      <div class="print-section print-conclusion">
+        <h4>Diagnostic Conclusion</h4>
+        <p>{{ sessionData.diagnostic_conclusion || 'No conclusion recorded.' }}</p>
+      </div>
+
+      <div class="print-section">
+        <h4>Traffic Performance</h4>
+        <div class="print-peaks-grid">
+          <div class="peak-item"><span>Peak Download:</span> <strong>{{ formatTraffic(sessionData.peak_tx_bps) }}</strong></div>
+          <div class="peak-item"><span>Peak Upload:</span> <strong>{{ formatTraffic(sessionData.peak_rx_bps) }}</strong></div>
+          <div class="peak-item"><span>Avg Download:</span> <strong>{{ formatTraffic(sessionData.avg_tx_bps) }}</strong></div>
+          <div class="peak-item"><span>Avg Upload:</span> <strong>{{ formatTraffic(sessionData.avg_rx_bps) }}</strong></div>
+        </div>
+      </div>
+
+      <div class="print-section">
+        <h4>Application Distribution</h4>
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th>Application / Protocol</th>
+              <th>Bandwidth Usage</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="app in parsedDistribution" :key="app.name">
+              <td>{{ app.name }}</td>
+              <td>{{ app.percentage }}%</td>
+            </tr>
+            <tr v-if="parsedDistribution.length === 0">
+              <td colspan="2">No app data recorded.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="print-footer">
+        <p><strong>Disclaimer:</strong> Laporan ini dihasilkan secara otomatis oleh sistem diagnostik Netsight. Ditujukan murni sebagai informasi teknis mengenai kondisi jaringan pelanggan pada saat inspeksi dilakukan.</p>
+        <p class="print-timestamp">Generated on: {{ new Date().toLocaleString() }}</p>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -330,28 +394,178 @@ onMounted(() => {
   font-weight: 500;
 }
 
+.print-only-report {
+  display: none;
+}
+
 @media print {
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+  
   body * {
     visibility: hidden;
   }
-  .modal-overlay, .modal-overlay * {
+  
+  /* Reset modal overlay for printing */
+  .modal-overlay {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    visibility: visible;
+    display: block !important;
+  }
+  
+  /* Hide the UI card entirely */
+  .modal-card {
+    display: none !important;
+  }
+  
+  /* Show the dedicated print report */
+  .print-only-report {
+    display: block;
+    visibility: visible;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    color: #000;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: #fff;
+  }
+  
+  .print-only-report * {
     visibility: visible;
   }
-  .modal-overlay {
-    position: absolute;
-    left: 0;
-    top: 0;
+  
+  .print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid #111;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+  }
+  
+  .print-logo {
+    font-size: 28px;
+    font-weight: 800;
+    color: #111;
+    letter-spacing: -1px;
+  }
+  
+  .print-title {
+    font-size: 16px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+  
+  .print-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  
+  .info-box {
+    border: 1px solid #ddd;
+    padding: 12px 15px;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #fafafa;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .info-box strong {
+    display: block;
+    font-size: 11px;
+    color: #777;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  
+  .print-section {
+    margin-bottom: 25px;
+    page-break-inside: avoid;
+  }
+  
+  .print-section h4 {
+    margin: 0 0 12px 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+    font-size: 16px;
+    color: #222;
+  }
+  
+  .print-conclusion {
+    background: #f0fdf4 !important; /* light green tint */
+    border-left: 4px solid #16a34a !important;
+    padding: 15px 20px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .print-conclusion p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  
+  .print-peaks-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 30px;
+  }
+  
+  .peak-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed #ccc;
+    font-size: 14px;
+  }
+  
+  .print-table {
     width: 100%;
-    background: transparent !important;
+    border-collapse: collapse;
+    margin-top: 10px;
   }
-  .glass-card {
-    border: none !important;
-    box-shadow: none !important;
-    background: #fff !important;
-    color: #000 !important;
+  
+  .print-table th, .print-table td {
+    border: 1px solid #ddd;
+    padding: 10px 15px;
+    text-align: left;
+    font-size: 13px;
   }
-  .print-hidden {
-    display: none !important;
+  
+  .print-table th {
+    background: #f8f9fa !important;
+    font-weight: 600;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .print-footer {
+    margin-top: 50px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+    font-size: 11px;
+    color: #666;
+    line-height: 1.4;
+  }
+  
+  .print-timestamp {
+    text-align: right;
+    margin-top: 10px;
+    font-style: italic;
+    color: #999;
   }
 }
 
