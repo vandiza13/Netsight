@@ -242,7 +242,6 @@ class RouterController extends Controller
             'sync_offset_minutes' => 'nullable|integer|min:1',
         ]);
 
-        if (isset($validated['host'])) {
 
         if (isset($validated['name'])) $router->name = $validated['name'];
         if (isset($validated['host'])) $router->host = $validated['host'];
