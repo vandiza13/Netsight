@@ -203,6 +203,14 @@
         <div class="demo-qr-container">
           <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(auth.demoSetupData.totp_qr_url)}`" alt="TOTP QR Code" class="demo-qr" />
         </div>
+        <div class="demo-totp-manual">
+          <p class="text-sm text-muted mt-2 mb-1">Mobile Users? Copy manual setup key:</p>
+          <code class="manual-key" @click="copyToClipboard(auth.demoSetupData.totp_secret)" title="Click to copy">
+            {{ auth.demoSetupData.totp_secret }}
+            <span v-if="copySuccess" class="copy-success">✓ Copied</span>
+            <span v-else class="copy-hint">📋</span>
+          </code>
+        </div>
         <div class="demo-credentials">
           <p><strong>Email:</strong> {{ auth.demoSetupData.email }}</p>
           <p><strong>Password:</strong> {{ auth.demoSetupData.password }}</p>
@@ -234,6 +242,21 @@ const showPassword = ref(false)
 const emailFocused = ref(false)
 const passwordFocused = ref(false)
 const shakeCard = ref(false)
+const copySuccess = ref(false)
+
+function copyToClipboard(text: string) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      copySuccess.value = true
+      setTimeout(() => { copySuccess.value = false }, 2000)
+    }).catch(() => {
+      alert('Failed to copy: ' + text)
+    })
+  } else {
+    // Fallback if clipboard API not available
+    alert('Setup Key: ' + text)
+  }
+}
 
 async function handleStartDemo() {
   try {
@@ -610,6 +633,51 @@ function triggerShake() {
 }
 
 /* ── Submit Button ─────────────────────────────────────────────── */
+.demo-qr {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+.demo-totp-manual {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.manual-key {
+  display: inline-block;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  color: #38bdf8;
+  font-family: monospace;
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.manual-key:hover {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.6);
+}
+
+.copy-success {
+  color: #10b981;
+  font-size: 0.8rem;
+  margin-left: 8px;
+  letter-spacing: normal;
+}
+
+.copy-hint {
+  font-size: 0.9rem;
+  margin-left: 8px;
+  opacity: 0.7;
+}
+
 .login-btn {
   width: 100%;
   height: 48px;
