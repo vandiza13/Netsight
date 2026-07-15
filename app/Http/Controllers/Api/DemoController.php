@@ -10,11 +10,21 @@ use Illuminate\Support\Str;
 use App\Models\StaffNoc;
 use Illuminate\Support\Facades\Hash;
 use PragmaRX\Google2FA\Google2FA;
+use Illuminate\Support\Facades\RateLimiter;
 
 class DemoController extends Controller
 {
     public function start(Request $request)
     {
+        $throttleKey = 'demo-start:' . $request->ip();
+        
+        // Batasi 5x per hari
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            return response()->json(['message' => 'Peringatan limit habis silahkan coba 24 jam kedepan'], 429);
+        }
+        
+        RateLimiter::hit($throttleKey, 86400); // Kunci selama 24 jam
+
         // 1. Ambil schema yang idle
         $sandbox = DB::table('public.demo_sandboxes')
             ->where('status', 'idle')

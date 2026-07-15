@@ -32,7 +32,7 @@ class WarmDemoSandboxes extends Command
      */
     public function handle()
     {
-        $targetPoolSize = 3;
+        $targetPoolSize = 20;
         
         $idleCount = DB::table('public.demo_sandboxes')
             ->where('status', 'idle')
