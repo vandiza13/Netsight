@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  app:
+    image: netsight-app:latest
+    container_name: netsight_tenant_${TENANT_NAME}
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./storage:/var/www/html/storage
+    networks:
+      netsight_shared_net:
+        ipv4_address: ${TENANT_IP}
+    deploy:
+      resources:
+        limits:
+          memory: 160M
+        reservations:
+          memory: 64M
+
+networks:
+  netsight_shared_net:
+    external: true

@@ -1,14 +1,25 @@
-name: Deploy Netsight to VPS
+name: Deploy Netsight
 
 on:
   push:
     branches:
-      - main # Jalankan deployment otomatis setiap kali ada push ke branch main
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target Environment to Deploy'
+        required: true
+        default: 'demo'
+        type: choice
+        options:
+          - demo
+          - production
 
 jobs:
-  deploy:
+  build:
+    name: Build Application
     runs-on: ubuntu-latest
-
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -18,68 +29,110 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Build Frontend Assets
+      - name: Install Dependencies & Build
         run: |
           npm ci
           npm run build
 
-      - name: Deploy via Native SSH/SCP
-        run: |
-          # 1. Setup SSH Key
-          mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          
-          # 2. Tar files locally (kecil dan cepat)
-          tar -zcf /tmp/netsight.tar.gz app artisan bootstrap composer.json composer.lock config database docker docker-compose.yml package.json package-lock.json public resources routes storage vite.config.js Dockerfile Caddyfile .env.example phpunit.xml
-          
-          # 3. Kirim tarball ke folder /tmp VPS
-          scp -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -P 22 /tmp/netsight.tar.gz ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }}:/tmp/netsight.tar.gz
-          
-          # 4. SSH ke VPS, Ekstrak, dan Jalankan Docker
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -p 22 ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} '
-            cd /var/www/netsight
+      - name: Compress Source Code
+        run: tar -czf netsight.tar.gz --exclude=.git --exclude=node_modules .
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: netsight-build
+          path: netsight.tar.gz
+
+  deploy-demo:
+    name: Deploy to VPS A (Demo)
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'demo')
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: netsight-build
+
+      - name: Deploy to VPS A
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            mkdir -p /var/www/netsight-demo
             
-            # Ekstrak file tarball
-            tar -zxf /tmp/netsight.tar.gz -C /var/www/netsight
-            rm /tmp/netsight.tar.gz
+      - name: Copy Tarball to VPS A
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "netsight.tar.gz"
+          target: "/var/www/netsight-demo"
+
+      - name: Extract & Start VPS A Services
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /var/www/netsight-demo
+            tar -xzf netsight.tar.gz
+            rm netsight.tar.gz
+            docker compose up -d --build
+            docker compose exec -T app php artisan db:seed --class=DemoDataSeeder --force
+
+  deploy-production:
+    name: Deploy to VPS B (Production)
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: netsight-build
+
+      - name: Deploy to VPS B Master Folder
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST_PROD }}
+          username: ${{ secrets.VPS_USERNAME_PROD }}
+          key: ${{ secrets.VPS_SSH_KEY_PROD }}
+          script: |
+            mkdir -p /var/www/netsight-saas/master
             
-            # Siapkan file .env jika belum ada
-            if [ ! -f .env ]; then
-              cp .env.example .env
-              NEED_KEY_GEN=true
-            else
-              NEED_KEY_GEN=false
-            fi
+      - name: Copy Tarball to VPS B
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST_PROD }}
+          username: ${{ secrets.VPS_USERNAME_PROD }}
+          key: ${{ secrets.VPS_SSH_KEY_PROD }}
+          source: "netsight.tar.gz"
+          target: "/var/www/netsight-saas/master"
+
+      - name: Extract & Rolling Update Tenants
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST_PROD }}
+          username: ${{ secrets.VPS_USERNAME_PROD }}
+          key: ${{ secrets.VPS_SSH_KEY_PROD }}
+          script: |
+            cd /var/www/netsight-saas/master
+            tar -xzf netsight.tar.gz
+            rm netsight.tar.gz
             
-            # Siapkan file docker secrets jika belum ada
-            mkdir -p docker/secrets
-            if [ ! -f docker/secrets/db_password ]; then
-              cp docker/secrets/db_password.example docker/secrets/db_password
-            fi
-            if [ ! -f docker/secrets/redis_password ]; then
-              cp docker/secrets/redis_password.example docker/secrets/redis_password
-            fi
-            if [ ! -f docker/secrets/app_key ]; then
-              cp docker/secrets/app_key.example docker/secrets/app_key
-            fi
+            # Build new master image
+            docker build -t netsight-app:latest .
             
-            # Build & Jalankan Container
-            docker compose build --build-arg GITHUB_TOKEN=${{ secrets.NETSIGHT_CORE_TOKEN }}
-            docker compose up -d
-            
-            # Generate APP_KEY jika baru dibuat
-            if [ "$NEED_KEY_GEN" = true ]; then
-              docker compose exec -T app php artisan key:generate
-            fi
-            
-            # Jalankan Migrasi Database di dalam Container
-            docker compose exec -T app php artisan migrate --force
-            
-            # Bersihkan Cache Laravel
-            docker compose exec -T app php artisan config:cache
-            docker compose exec -T app php artisan route:cache
-            docker compose exec -T app php artisan view:cache
-            
-            echo "Deployment Sukses! 🚀"
-          '
+            # Looping to update all tenants
+            for tenant_dir in /var/www/netsight-saas/tenants/*; do
+              if [ -d "$tenant_dir" ] && [ -f "$tenant_dir/docker-compose.yml" ]; then
+                echo "Updating tenant in $tenant_dir"
+                cd "$tenant_dir"
+                docker compose up -d --force-recreate
+              fi
+            done
