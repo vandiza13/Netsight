@@ -63,8 +63,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            sudo mkdir -p /var/www/netsight-demo
-            sudo chown -R $USER:$USER /var/www/netsight-demo
+            sudo chown -R $USER:$USER /var/www/netsight
             
       - name: Copy Tarball to VPS A
         uses: appleboy/scp-action@v0.1.7
@@ -73,7 +72,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           source: "netsight.tar.gz"
-          target: "/var/www/netsight-demo"
+          target: "/var/www/netsight"
 
       - name: Extract & Start VPS A Services
         uses: appleboy/ssh-action@v1.0.3
@@ -82,7 +81,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd /var/www/netsight-demo
+            cd /var/www/netsight
             tar -xzf netsight.tar.gz
             rm netsight.tar.gz
             sudo docker compose up -d --build
