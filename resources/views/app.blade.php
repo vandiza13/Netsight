@@ -8,6 +8,12 @@
     <meta name="color-scheme" content="dark">
     <title>Netsight by Vandiza Tech</title>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <script>
+        window.APP_CONFIG = {
+            env: '{{ config('app.env') }}',
+            showDemoButton: {{ env('SHOW_DEMO_BUTTON', false) ? 'true' : 'false' }}
+        };
+    </script>
     @vite(['resources/js/app.ts', 'resources/js/assets/main.css'])
 </head>
 <body>

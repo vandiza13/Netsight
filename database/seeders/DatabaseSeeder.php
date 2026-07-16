@@ -15,8 +15,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
-            StaffNocSeeder::class,
-        ]);
+        // Add production-ready structural seeders here if needed
+        // (e.g., Roles, Permissions, System Settings).
+        // Demo data has been moved to DemoDataSeeder.php
     }
 }

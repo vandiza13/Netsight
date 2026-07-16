@@ -185,7 +185,7 @@
       </Transition>
 
       <!-- Demo Section -->
-      <div v-if="!auth.totpRequired && !auth.demoSetupData" class="demo-section">
+      <div v-if="!auth.totpRequired && !auth.demoSetupData && (window.APP_CONFIG?.env === 'local' || window.APP_CONFIG?.showDemoButton)" class="demo-section">
         <div class="demo-divider"><span>OR</span></div>
         <button type="button" class="demo-btn" @click="handleStartDemo" :disabled="auth.demoStarting">
           <span v-if="!auth.demoStarting">🚀 Try Demo Sandbox</span>

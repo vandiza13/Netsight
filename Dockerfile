@@ -70,6 +70,9 @@ COPY public/build ./public/build
 # Copy entire application
 COPY . .
 
+# Ensure local .env is never included in the production image
+RUN rm -f .env
+
 # Copy composer binary from composer image
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -81,7 +84,7 @@ COPY docker/supervisord.conf /etc/supervisord.conf
 
 # Set proper permissions
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+    && chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 9000
 

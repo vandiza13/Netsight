@@ -7,7 +7,7 @@ use App\Models\Router;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class StaffNocSeeder extends Seeder
+class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
