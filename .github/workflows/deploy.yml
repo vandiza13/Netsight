@@ -89,6 +89,7 @@ jobs:
             rm netsight.tar.gz
             export GITHUB_TOKEN=$GITHUB_TOKEN
             docker compose up -d --build
+            docker compose exec -T app php artisan migrate --force
             docker compose exec -T app php artisan db:seed --class=DemoDataSeeder --force
 
   deploy-production:
