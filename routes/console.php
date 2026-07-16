@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Schedule;
 // ==========================================
 // Berjalan setiap menit, mendistribusikan beban query ke Mikrotik.
 Schedule::command('app:cleanup-demo-sandboxes')->hourly();
+Schedule::command('app:warm-demo-sandboxes')->everyMinute()->withoutOverlapping();
 
 Schedule::call(function () {
     $currentMinute = now()->minute;
