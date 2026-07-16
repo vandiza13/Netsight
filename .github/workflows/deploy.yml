@@ -141,11 +141,17 @@ jobs:
             # Build new master image
             docker build --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t netsight-app:latest .
             
-            # Looping to update all tenants
             for tenant_dir in /var/www/netsight-saas/tenants/*; do
               if [ -d "$tenant_dir" ] && [ -f "$tenant_dir/docker-compose.yml" ]; then
                 echo "Updating tenant in $tenant_dir"
                 cd "$tenant_dir"
                 docker compose up -d --force-recreate
+                echo "Waiting for database to be ready..."
+                until docker compose exec -T db pg_isready -U netsight; do sleep 2; done || true
+                docker compose exec -T app php artisan migrate --force
+                docker compose exec -T app php artisan config:cache
+                docker compose exec -T app php artisan route:cache
+                docker compose exec -T app php artisan view:cache
+                docker compose exec -T app chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
               fi
             done
