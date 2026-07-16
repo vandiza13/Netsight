@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3c350ed4c8bef37e9afad5852ebdd929",
+    "content-hash": "f164600cd97891c55c4193faceae6534",
     "packages": [
         {
             "name": "brick/math",
@@ -7256,10 +7256,16 @@
         {
             "name": "vandiza/netsight-core",
             "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:vandiza13/Netsight-core.git",
+                "reference": "ab407a1f53ce676b021b7737e2c13724cc2d2f64"
+            },
             "dist": {
-                "type": "path",
-                "url": "packages/vandiza/netsight-core",
-                "reference": "3b8105c14724f6bd0281552fa7a8c0bf603b6353"
+                "type": "zip",
+                "url": "https://api.github.com/repos/vandiza13/Netsight-core/zipball/ab407a1f53ce676b021b7737e2c13724cc2d2f64",
+                "reference": "ab407a1f53ce676b021b7737e2c13724cc2d2f64",
+                "shasum": ""
             },
             "require": {
                 "evilfreelancer/routeros-api-php": "^1.7",
@@ -7267,6 +7273,7 @@
                 "php": "^8.2",
                 "predis/predis": "^3.5"
             },
+            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
@@ -7281,9 +7288,7 @@
                 }
             },
             "description": "Core business logic for Netsight",
-            "transport-options": {
-                "relative": true
-            }
+            "time": "2026-07-16T00:42:39+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
