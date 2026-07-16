@@ -76,14 +76,18 @@ jobs:
 
       - name: Extract & Start VPS A Services
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          envs: GITHUB_TOKEN
           script: |
             cd /var/www/netsight
             tar -xzf netsight.tar.gz
             rm netsight.tar.gz
+            export GITHUB_TOKEN=$GITHUB_TOKEN
             docker compose up -d --build
             docker compose exec -T app php artisan db:seed --class=DemoDataSeeder --force
 
@@ -118,17 +122,20 @@ jobs:
 
       - name: Extract & Rolling Update Tenants
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.VPS_HOST_PROD }}
           username: ${{ secrets.VPS_USERNAME_PROD }}
           key: ${{ secrets.VPS_SSH_KEY_PROD }}
+          envs: GITHUB_TOKEN
           script: |
             cd /var/www/netsight-saas/master
             tar -xzf netsight.tar.gz
             rm netsight.tar.gz
             
             # Build new master image
-            docker build -t netsight-app:latest .
+            docker build --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t netsight-app:latest .
             
             # Looping to update all tenants
             for tenant_dir in /var/www/netsight-saas/tenants/*; do

@@ -7258,7 +7258,7 @@
             "version": "dev-main",
             "source": {
                 "type": "git",
-                "url": "git@github.com:vandiza13/Netsight-core.git",
+                "url": "https://github.com/vandiza13/Netsight-core.git",
                 "reference": "ab407a1f53ce676b021b7737e2c13724cc2d2f64"
             },
             "dist": {
