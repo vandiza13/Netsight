@@ -22,6 +22,8 @@ services:
         condition: service_started
     env_file:
       - .env
+    environment:
+      - LICENSE_KEY=demo_license_bypass_123
     volumes:
       - ./public:/var/www/html/public
       - geoip_data:/var/www/html/storage/app/geoip
