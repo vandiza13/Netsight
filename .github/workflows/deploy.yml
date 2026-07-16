@@ -146,6 +146,8 @@ jobs:
               if [ -d "$tenant_dir" ] && [ -f "$tenant_dir/docker-compose.yml" ]; then
                 echo "Updating tenant in $tenant_dir"
                 cd "$tenant_dir"
+                mkdir -p "$tenant_dir/public"
+                cp -r /var/www/netsight-saas/master/public/* "$tenant_dir/public/"
                 docker compose up -d --force-recreate
                 echo "Waiting for database to be ready..."
                 for i in {1..10}; do docker compose exec -T db pg_isready -U netsight 2>/dev/null && break || sleep 2; done
