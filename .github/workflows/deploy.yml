@@ -63,7 +63,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            sudo chown -R $USER:$USER /var/www/netsight
+            # Directory should already be owned by the SSH user
             
       - name: Copy Tarball to VPS A
         uses: appleboy/scp-action@v0.1.7
@@ -84,8 +84,8 @@ jobs:
             cd /var/www/netsight
             tar -xzf netsight.tar.gz
             rm netsight.tar.gz
-            sudo docker compose up -d --build
-            sudo docker compose exec -T app php artisan db:seed --class=DemoDataSeeder --force
+            docker compose up -d --build
+            docker compose exec -T app php artisan db:seed --class=DemoDataSeeder --force
 
   deploy-production:
     name: Deploy to VPS B (Production)
@@ -105,8 +105,7 @@ jobs:
           username: ${{ secrets.VPS_USERNAME_PROD }}
           key: ${{ secrets.VPS_SSH_KEY_PROD }}
           script: |
-            sudo mkdir -p /var/www/netsight-saas/master
-            sudo chown -R $USER:$USER /var/www/netsight-saas/master
+            mkdir -p /var/www/netsight-saas/master
             
       - name: Copy Tarball to VPS B
         uses: appleboy/scp-action@v0.1.7
@@ -129,13 +128,13 @@ jobs:
             rm netsight.tar.gz
             
             # Build new master image
-            sudo docker build -t netsight-app:latest .
+            docker build -t netsight-app:latest .
             
             # Looping to update all tenants
             for tenant_dir in /var/www/netsight-saas/tenants/*; do
               if [ -d "$tenant_dir" ] && [ -f "$tenant_dir/docker-compose.yml" ]; then
                 echo "Updating tenant in $tenant_dir"
                 cd "$tenant_dir"
-                sudo docker compose up -d --force-recreate
+                docker compose up -d --force-recreate
               fi
             done
