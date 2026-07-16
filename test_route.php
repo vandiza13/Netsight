@@ -1,0 +1,1 @@
+<?php require 'vendor/autoload.php'; \ = require_once 'bootstrap/app.php'; \ = \->make(Illuminate\Contracts\Http\Kernel::class); \ = Illuminate\Http\Request::create('/'); \ = \->handle(\); echo 'STATUS: ' . \->getStatusCode();
