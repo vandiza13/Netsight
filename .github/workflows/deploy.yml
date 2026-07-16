@@ -77,7 +77,7 @@ jobs:
       - name: Extract & Start VPS A Services
         uses: appleboy/ssh-action@v1.0.3
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.NETSIGHT_DISTRIBUTION_KEY || secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
@@ -123,7 +123,7 @@ jobs:
       - name: Extract & Rolling Update Tenants
         uses: appleboy/ssh-action@v1.0.3
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.NETSIGHT_DISTRIBUTION_KEY || secrets.GITHUB_TOKEN }}
         with:
           host: ${{ secrets.VPS_HOST_PROD }}
           username: ${{ secrets.VPS_USERNAME_PROD }}
