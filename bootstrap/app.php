@@ -30,6 +30,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Trust all proxies (needed for Nginx SSL termination)
+        $middleware->trustProxies(at: '*');
+
         // Register middleware aliases for RBAC and Audit
         $middleware->alias([
             'rbac' => \Vandiza\NetsightCore\Http\Middleware\RbacMiddleware::class,
