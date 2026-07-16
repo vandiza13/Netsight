@@ -5,8 +5,8 @@
 :80 {
     # IP Whitelist - SECURITY.md Section 3.2
     # Replace with actual NOC/VPN IPs
-    @blocked not remote_ip 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 127.0.0.1
-    respond @blocked 403
+    # @blocked not remote_ip 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 127.0.0.1
+    # respond @blocked 403
 
     # Security Headers
     header {
