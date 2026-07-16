@@ -12,7 +12,7 @@ WORKDIR /app
 COPY composer.json composer.lock ./
 
 ARG GITHUB_TOKEN
-RUN composer config github-oauth.github.com $GITHUB_TOKEN
+RUN if [ -n "$GITHUB_TOKEN" ]; then composer config github-oauth.github.com $GITHUB_TOKEN; fi
 
 RUN composer install \
     --no-dev \
