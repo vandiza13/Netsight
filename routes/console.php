@@ -1,8 +1,8 @@
 <?php
 
-use App\Jobs\SyncRouterUsersJob;
-use App\Jobs\WatchdogOrphanedSessionJob;
-use App\Models\Router;
+use Vandiza\NetsightCore\Jobs\SyncRouterUsersJob;
+use Vandiza\NetsightCore\Jobs\WatchdogOrphanedSessionJob;
+use Vandiza\NetsightCore\Models\Router;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
 
@@ -13,12 +13,17 @@ use Illuminate\Support\Facades\Schedule;
 */
 
 // ==========================================
-// 1. Staggered Background Sync
+// 1. Demo Sandbox Commands (Non-Production Only)
+// ==========================================
+if (app()->environment('local', 'demo')) {
+    Schedule::command('app:cleanup-demo-sandboxes')->hourly();
+    Schedule::command('app:warm-demo-sandboxes')->everyMinute()->withoutOverlapping();
+}
+
+// ==========================================
+// 2. Staggered Background Sync
 // ==========================================
 // Berjalan setiap menit, mendistribusikan beban query ke Mikrotik.
-Schedule::command('app:cleanup-demo-sandboxes')->hourly();
-Schedule::command('app:warm-demo-sandboxes')->everyMinute()->withoutOverlapping();
-
 Schedule::call(function () {
     $currentMinute = now()->minute;
 
@@ -33,21 +38,18 @@ Schedule::call(function () {
     Log::debug("Dispatching sync jobs for {$routers->count()} routers at minute {$currentMinute}");
 
     foreach ($routers as $router) {
-        // Dispatch job ke queue 'default' (ditangani oleh Horizon)
         dispatch(new SyncRouterUsersJob($router));
     }
 })->everyMinute()->name('staggered-sync')->withoutOverlapping();
 
 
 // ==========================================
-// 2. Torch Orphaned Session Watchdog
+// 3. Torch Orphaned Session Watchdog
 // ==========================================
-// Laravel scheduler berjalan paling cepat 1 menit sekali.
-// Karena kita butuh interval 15 detik, kita akan dispatch multiple job.
 Schedule::call(function () {
     $interval = config('netsight.torch.watchdog_interval_seconds', 15);
     $runs = max(1, floor(60 / $interval));
-    
+
     for ($i = 0; $i < $runs; $i++) {
         dispatch(new WatchdogOrphanedSessionJob())
             ->delay(now()->addSeconds($i * $interval));
