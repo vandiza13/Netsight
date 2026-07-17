@@ -146,8 +146,8 @@ jobs:
             tar -xzf netsight.tar.gz
             rm netsight.tar.gz
             
-            # Build new master image
-            docker build --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t netsight-app:latest .
+            # Build new master image (tag as latest and prod to match tenant configurations)
+            docker build --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t netsight-app:latest -t netsight-app:prod .
             
             for tenant_dir in /var/www/netsight-saas/tenants/*; do
               if [ -d "$tenant_dir" ] && [ -f "$tenant_dir/docker-compose.yml" ]; then
