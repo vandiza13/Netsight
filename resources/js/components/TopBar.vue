@@ -23,35 +23,53 @@
 
       <div class="topbar__divider" />
 
-      <!-- User block -->
-      <div class="topbar__user">
-        <div class="topbar__avatar">
-          {{ userInitial }}
+      <!-- User block with dropdown -->
+      <div class="topbar__user-container" @click="dropdownOpen = !dropdownOpen" ref="dropdownRef">
+        <div class="topbar__user">
+          <div class="topbar__avatar">
+            {{ userInitial }}
+          </div>
+          <div class="topbar__user-info">
+            <span class="topbar__user-name">{{ auth.user?.name || 'Operator' }}</span>
+            <span
+              class="topbar__role-badge"
+              :style="{ background: auth.roleBadge.color + '22', color: auth.roleBadge.color }"
+            >
+              {{ auth.roleBadge.label }}
+            </span>
+          </div>
+          <svg class="topbar__dropdown-icon" :class="{'topbar__dropdown-icon--open': dropdownOpen}" width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
         </div>
-        <div class="topbar__user-info">
-          <span class="topbar__user-name">{{ auth.user?.name || 'Operator' }}</span>
-          <span
-            class="topbar__role-badge"
-            :style="{ background: auth.roleBadge.color + '22', color: auth.roleBadge.color }"
-          >
-            {{ auth.roleBadge.label }}
-          </span>
-        </div>
-      </div>
 
-      <button class="topbar__logout" @click="handleLogout" title="Logout">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
+        <!-- Dropdown Menu -->
+        <Transition name="fade-slide">
+          <div v-if="dropdownOpen" class="topbar__dropdown-menu glass-card">
+            <router-link to="/profile" class="dropdown-item" @click="dropdownOpen = false">
+              <span class="dropdown-item-icon">👤</span>
+              My Profile
+            </router-link>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item dropdown-item--danger" @click="handleLogout">
+              <span class="dropdown-item-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              Logout
+            </button>
+          </div>
+        </Transition>
+      </div>
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
 
@@ -61,6 +79,24 @@ defineEmits<{
 
 const auth = useAuthStore()
 const router = useRouter()
+
+const dropdownOpen = ref(false)
+const dropdownRef = ref<HTMLElement | null>(null)
+
+// Close dropdown when clicking outside
+function handleClickOutside(event: MouseEvent) {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
+    dropdownOpen.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 
 const userInitial = computed(() =>
   auth.user?.name?.charAt(0).toUpperCase() || 'N'
@@ -173,10 +209,29 @@ function handleLogout() {
 }
 
 /* User */
+.topbar__user-container {
+  position: relative;
+}
+
 .topbar__user {
   display: flex;
   align-items: center;
   gap: 10px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s;
+}
+.topbar__user:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.topbar__dropdown-icon {
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+.topbar__dropdown-icon--open {
+  transform: rotate(180deg);
 }
 
 .topbar__avatar {
@@ -219,19 +274,69 @@ function handleLogout() {
   width: fit-content;
 }
 
-.topbar__logout {
+.topbar__dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 180px;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 200;
+}
+
+.dropdown-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
+  gap: 10px;
+  padding: 8px 12px;
   border-radius: var(--radius-sm);
-  color: var(--text-muted);
-  transition: all var(--transition-fast);
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
 }
-.topbar__logout:hover {
-  color: var(--accent-red);
+.dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.dropdown-item-icon {
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+}
+.dropdown-item--danger:hover {
   background: var(--accent-red-dim);
+  color: var(--accent-red);
+}
+.dropdown-item--danger:hover .dropdown-item-icon {
+  color: var(--accent-red);
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--glass-border);
+  margin: 4px 0;
+}
+
+/* Animations */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.2s ease;
+}
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 
 /* Responsive: hide text on small screens */

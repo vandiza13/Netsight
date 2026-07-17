@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\StaffNoc;
-use App\Models\Router;
+use Vandiza\NetsightCore\Models\StaffNoc;
+use Vandiza\NetsightCore\Models\Router;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -13,25 +13,27 @@ class DemoDataSeeder extends Seeder
     {
         // 1. Create ADMIN User
         StaffNoc::updateOrCreate(
-            ['email' => 'admin@netsight.local'],
+            ['email' => 'admin@netsight.xyz'],
             [
                 'name' => 'NOC Admin',
-                'password_hash' => Hash::make('password123'),
-                'totp_secret' => 'JBSWY3DPEHPK3PXP', // Known TOTP base32 key for testing
+                'password_hash' => Hash::make('admin'),
+                'totp_secret' => null,
                 'role' => 'ADMIN',
                 'is_active' => true,
+                'must_change_password' => true,
             ]
         );
 
         // 2. Create TIER_2 User
         StaffNoc::updateOrCreate(
-            ['email' => 'noc@netsight.local'],
+            ['email' => 'noc@netsight.xyz'],
             [
                 'name' => 'NOC Engineer L2',
-                'password_hash' => Hash::make('password123'),
-                'totp_secret' => 'JBSWY3DPEHPK3PXP',
+                'password_hash' => Hash::make('noc'),
+                'totp_secret' => null,
                 'role' => 'TIER_2',
                 'is_active' => true,
+                'must_change_password' => true,
             ]
         );
 

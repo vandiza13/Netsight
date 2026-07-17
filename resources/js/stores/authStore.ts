@@ -6,6 +6,8 @@ export interface AuthUser {
   name: string
   email: string
   role: 'ADMIN' | 'TIER_2' | 'TIER_1'
+  must_change_password?: boolean
+  mfa_enabled?: boolean
 }
 
 export const useAuthStore = defineStore('auth', () => {
@@ -57,8 +59,13 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
     error.value = null
 
+    // Ensure we are querying the public schema for non-demo users
+    if (email !== 'demo@netsight.id') {
+      localStorage.removeItem('netsight_demo_schema')
+    }
+
     try {
-      const { data } = await api.post<{ totp_required: boolean; challenge_token?: string }>('/auth/login', {
+      const { data } = await api.post<{ totp_required: boolean; challenge_token?: string; token?: string; user?: AuthUser }>('/auth/login', {
         email,
         password,
       })
@@ -68,6 +75,15 @@ export const useAuthStore = defineStore('auth', () => {
         _pendingEmail.value = email
         _pendingPassword.value = password
         _challengeToken.value = data.challenge_token
+      } else if (!data.totp_required && data.token && data.user) {
+        // MFA Bypassed - Login directly
+        token.value = data.token
+        user.value = data.user
+        localStorage.setItem('netsight_token', data.token)
+        localStorage.setItem('netsight_user', JSON.stringify(data.user))
+        
+        totpRequired.value = false
+        _challengeToken.value = null
       }
     } catch (err: any) {
       error.value =
@@ -123,6 +139,19 @@ export const useAuthStore = defineStore('auth', () => {
       throw err
     } finally {
       loading.value = false
+    }
+  }
+
+  /** Fetch latest user data from /auth/me */
+  async function fetchUser(): Promise<void> {
+    if (!token.value) return
+    try {
+      const { data } = await api.get<{ user: AuthUser }>('/auth/me')
+      user.value = data.user
+      localStorage.setItem('netsight_user', JSON.stringify(data.user))
+    } catch (err) {
+      // If unauthorized, logout
+      logout()
     }
   }
 
@@ -184,6 +213,7 @@ export const useAuthStore = defineStore('auth', () => {
     verifyTotp,
     logout,
     clearError,
-    startDemo
+    startDemo,
+    fetchUser
   }
 })

@@ -298,6 +298,8 @@ async function handleLogin() {
       nextTick(() => {
         setTimeout(() => totpRefs[0]?.focus(), 350)
       })
+    } else if (auth.isAuthenticated) {
+      router.push('/dashboard')
     }
   } catch {
     triggerShake()

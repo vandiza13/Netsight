@@ -2,6 +2,7 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
 import LoginPage from '../pages/LoginPage.vue'
 import DashboardPage from '../pages/DashboardPage.vue'
+import OnboardingPage from '../pages/OnboardingPage.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -16,6 +17,12 @@ const routes: RouteRecordRaw[] = [
     name: 'Login',
     component: LoginPage,
     meta: { requiresAuth: false, transition: 'fade' },
+  },
+  {
+    path: '/onboarding',
+    name: 'Onboarding',
+    component: OnboardingPage,
+    meta: { requiresAuth: true, transition: 'fade' },
   },
   {
     path: '/dashboard',
@@ -41,6 +48,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/StaffManagementPage.vue'),
     meta: { requiresAuth: true, requiresAdmin: true, transition: 'slide' },
   },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('../pages/ProfilePage.vue'),
+    meta: { requiresAuth: true, transition: 'slide' },
+  },
 ]
 
 const router = createRouter({
@@ -57,6 +70,16 @@ router.beforeEach((to, _from, next) => {
     return next({ name: 'Login', query: { redirect: to.fullPath } })
   }
 
+  // Enforce onboarding if password must be changed
+  if (auth.isAuthenticated && auth.user?.must_change_password && to.path !== '/onboarding') {
+    return next('/onboarding')
+  }
+
+  // Prevent accessing onboarding if not required
+  if (to.path === '/onboarding' && auth.isAuthenticated && !auth.user?.must_change_password) {
+    return next('/dashboard')
+  }
+
   // Admin route check
   if (to.meta.requiresAdmin && !auth.isAdmin) {
     return next({ name: 'Dashboard' })
@@ -64,6 +87,9 @@ router.beforeEach((to, _from, next) => {
 
   // Already authenticated — don't show login page
   if (to.name === 'Login' && auth.isAuthenticated) {
+    if (auth.user?.must_change_password) {
+      return next('/onboarding')
+    }
     return next({ name: 'Dashboard' })
   }
 
