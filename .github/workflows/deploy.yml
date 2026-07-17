@@ -155,8 +155,8 @@ jobs:
               if [ -d "$tenant_dir" ] && [ -f "$tenant_dir/docker-compose.yml" ]; then
                 echo "Updating tenant in $tenant_dir"
                 cd "$tenant_dir"
-                chmod -R u+w "$tenant_dir/public" 2>/dev/null || true
-                rm -rf "$tenant_dir/public"
+                # Force delete public folder using docker to bypass any host permission/ownership issues
+                docker run --rm -v "$tenant_dir:/mnt" alpine rm -rf /mnt/public
                 cp -r /var/www/netsight-saas/master/public "$tenant_dir/"
                 chmod -R 755 "$tenant_dir/public"
                 docker compose up -d --force-recreate
