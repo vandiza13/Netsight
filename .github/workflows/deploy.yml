@@ -155,6 +155,7 @@ jobs:
               if [ -d "$tenant_dir" ] && [ -f "$tenant_dir/docker-compose.yml" ]; then
                 echo "Updating tenant in $tenant_dir"
                 cd "$tenant_dir"
+                chmod -R u+w "$tenant_dir/public" 2>/dev/null || true
                 rm -rf "$tenant_dir/public"
                 cp -r /var/www/netsight-saas/master/public "$tenant_dir/"
                 chmod -R 755 "$tenant_dir/public"
