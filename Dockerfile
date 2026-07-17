@@ -10,6 +10,7 @@ FROM composer:2 AS composer-deps
 WORKDIR /app
 
 COPY composer.json composer.lock ./
+COPY packages/ ./packages/
 
 ARG GITHUB_TOKEN
 RUN if [ -n "$GITHUB_TOKEN" ]; then composer config github-oauth.github.com $GITHUB_TOKEN; fi
