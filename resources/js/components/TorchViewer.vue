@@ -5,6 +5,9 @@
         <div class="torch-viewer__title">
           <span class="icon-pulse">🔦</span>
           <h3>Live Inspection: <span>{{ username }}</span></h3>
+          <span v-if="vendorName" class="badge-vendor font-mono" :title="`MAC: ${callerId || '-'}`">
+            📱 Modem: {{ vendorName }}
+          </span>
           <div class="status-badge" :class="statusClass">
             <span class="status-dot"></span>
             {{ statusText }}
@@ -21,6 +24,10 @@
             <button class="btn-action btn-action--emerald" @click="handlePingOnt" :disabled="status !== 'ACTIVE' || isPingingOnt" title="Tes Ping dari Router ke Modem/ONT pelanggan">
               <span v-if="isPingingOnt" class="icon spin">🔄</span>
               <span v-else>🏓 Ping ONT</span>
+            </button>
+            <button class="btn-action btn-action--amber" @click="handleFetchUserLogs" :disabled="status !== 'ACTIVE' || isLoadingUserLogs" title="Lihat log riwayat sesi & penyebab putus koneksi">
+              <span v-if="isLoadingUserLogs" class="icon spin">🔄</span>
+              <span v-else>📜 Log Sesi</span>
             </button>
             <button class="btn-action btn-action--rose" @click="handleKickSession" :disabled="status !== 'ACTIVE' || isKicking" title="Putus sesi PPPoE paksa untuk Dial-Up ulang">
               <span v-if="isKicking" class="icon spin">🔄</span>
@@ -257,6 +264,40 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Logs Modal -->
+    <div v-if="showUserLogsModal" class="torch-viewer-overlay" style="z-index: 1000; display: flex; align-items: center; justify-content: center;">
+      <div class="glass-card" style="padding: 1.5rem; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.1); max-width: 44rem; width: 100%; background: #0f172a; max-height: 80vh; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h3 style="font-size: 1.125rem; font-weight: 600; color: #e5e7eb; margin: 0; display: flex; align-items: center; gap: 8px;">
+            📜 Riwayat Log Sesi: <span style="color: #38bdf8;">{{ username }}</span>
+          </h3>
+          <button @click="showUserLogsModal = false" style="background: none; border: none; color: #9ca3af; font-size: 1.5rem; cursor: pointer;">&times;</button>
+        </div>
+        
+        <div v-if="isLoadingUserLogs" style="text-align: center; padding: 2rem; color: #9ca3af;">
+          <div class="icon spin" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: inline-block;">🔄</div>
+          <div style="margin-top: 8px;">Membaca log kejadian pengguna dari router...</div>
+        </div>
+        
+        <div v-else-if="userLogsList.length === 0" style="text-align: center; padding: 2rem; color: #9ca3af;">
+          Tidak ada catatan log kejadian khusus untuk pengguna ini.
+        </div>
+        
+        <div v-else style="overflow-y: auto; flex: 1;">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div v-for="(log, idx) in userLogsList" :key="idx" style="padding: 10px 14px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-size: 0.82rem; font-weight: 600; color: #f1f5f9;">{{ log.category }}</span>
+                <span style="font-size: 0.75rem; font-family: monospace; color: #94a3b8;">{{ log.time }}</span>
+              </div>
+              <div style="font-size: 0.78rem; color: #cbd5e1; font-family: monospace; margin-bottom: 2px;">{{ log.message }}</div>
+              <div style="font-size: 0.75rem; color: #38bdf8; font-style: italic;">💡 {{ log.detail }}</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -556,6 +597,12 @@ onMounted(async () => {
     if (data.queue) {
       queueInfo.value = data.queue
     }
+    if (data.vendor_name) {
+      vendorName.value = data.vendor_name
+    }
+    if (data.caller_id) {
+      callerId.value = data.caller_id
+    }
     
     if (data.warnings) {
       console.warn(data.warnings)
@@ -767,11 +814,35 @@ async function runTraceroute() {
   }
 }
 
-// ── On-Demand Quick Actions ────────────────────────────────────────
+// ── On-Demand Quick Actions & Vendor Info ──────────────────────────
+const vendorName = ref<string | null>(null)
+const callerId = ref<string | null>(null)
 const isKicking = ref(false)
 const isPingingOnt = ref(false)
 const ontPingResult = ref<any>(null)
 const ontPingError = ref<string | null>(null)
+
+const showUserLogsModal = ref(false)
+const userLogsList = ref<any[]>([])
+const isLoadingUserLogs = ref(false)
+
+async function handleFetchUserLogs() {
+  if (!sessionTag.value) return
+  isLoadingUserLogs.value = true
+  showUserLogsModal.value = true
+  userLogsList.value = []
+  
+  try {
+    const { data } = await api.get(`/torch/${sessionTag.value}/user-logs`)
+    if (data && data.data) {
+      userLogsList.value = data.data
+    }
+  } catch (e: any) {
+    console.error('Failed to fetch user logs', e)
+  } finally {
+    isLoadingUserLogs.value = false
+  }
+}
 
 async function handleKickSession() {
   if (!sessionTag.value) return
@@ -950,6 +1021,30 @@ async function handlePingOnt() {
   color: #ffffff;
   box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
   transform: translateY(-1px);
+}
+
+.btn-action--amber {
+  background: rgba(120, 53, 15, 0.6);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fde68a;
+}
+.btn-action--amber:hover:not(:disabled) {
+  background: rgba(217, 119, 6, 0.8);
+  border-color: #fbbf24;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+  transform: translateY(-1px);
+}
+
+.badge-vendor {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .btn-action--rose {
