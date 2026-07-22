@@ -179,8 +179,8 @@
         <div class="stat-group">
           <div class="stat"><span class="k">Active Conn</span><span class="v">{{ activeConnectionsCount }}</span></div>
           <div class="stat"><span class="k">Dest IPs</span><span class="v">{{ uniqueDestinationsCount }}</span></div>
-          <div class="stat"><span class="k">Total TX</span><span class="v" style="color:var(--tx)">{{ formatTraffic(totalTx) }}</span></div>
-          <div class="stat"><span class="k">Total RX</span><span class="v" style="color:var(--rx)">{{ formatTraffic(totalRx) }}</span></div>
+          <div class="stat"><span class="k">Total TX</span><span class="v num-tx">{{ formatTraffic(totalTx) }}</span></div>
+          <div class="stat"><span class="k">Total RX</span><span class="v num-rx">{{ formatTraffic(totalRx) }}</span></div>
         </div>
         <div class="session-id">Session ID: {{ sessionTag || 'Initialising...' }}</div>
       </div>
@@ -1232,13 +1232,13 @@ tbody tr:last-child td { border-bottom: none; }
 .num-tx {
   font-family: var(--mono);
   font-weight: 700;
-  color: #f5a623;
+  color: #f5a623 !important;
 }
 
 .num-rx {
   font-family: var(--mono);
   font-weight: 700;
-  color: #22d3ee;
+  color: #22d3ee !important;
 }
 
 /* ===== FOOTER ===== */
