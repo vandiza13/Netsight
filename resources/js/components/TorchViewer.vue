@@ -1,227 +1,189 @@
 <template>
   <div class="torch-viewer-overlay">
-    <div class="torch-viewer glass-card">
-      <div class="torch-viewer__header">
-        <div class="torch-viewer__title">
-          <span class="icon-pulse">🔦</span>
-          <div class="title-meta">
-            <div class="title-main">
-              <h3>Live Inspection: <span>{{ username }}</span></h3>
-              <div class="status-badge" :class="statusClass">
-                <span class="status-dot"></span>
-                {{ statusText }}
-              </div>
-            </div>
-            <div class="title-sub" v-if="vendorName">
-              <span class="badge-vendor font-mono" :title="`MAC: ${callerId || '-'}`">
-                📱 {{ vendorName }}
-              </span>
-            </div>
+    <div class="shell">
+
+      <!-- HEADER -->
+      <div class="header">
+        <div class="header-left">
+          <span style="color:var(--text-dimmer); font-size: 1.2rem;">🔍</span>
+          <div class="header-title-block">
+            <div class="title">Live Inspection: <span class="muted">{{ username }}</span></div>
+            <div class="device-chip">📶 {{ vendorName || 'Router Pelanggan' }}</div>
           </div>
+          <span class="live-badge"><i class="live-dot"></i>{{ statusText }}</span>
         </div>
-
-        <div class="torch-viewer__actions">
-          <!-- Diagnostic Tools Group -->
-          <div class="torch-toolbar">
-            <button class="btn-action btn-action--blue" @click="runTraceroute" :disabled="status !== 'ACTIVE' || isTracerouting" title="Jalankan Traceroute ke pelanggan">
-              <span v-if="isTracerouting" class="icon spin">🔄</span>
-              <span v-else>📍 Trace</span>
-            </button>
-            <button class="btn-action btn-action--emerald" @click="handlePingOnt" :disabled="status !== 'ACTIVE' || isPingingOnt" title="Tes Ping dari Router ke Modem/ONT pelanggan">
-              <span v-if="isPingingOnt" class="icon spin">🔄</span>
-              <span v-else>🏓 Ping</span>
-            </button>
-            <button class="btn-action btn-action--amber" @click="handleFetchUserLogs" :disabled="status !== 'ACTIVE' || isLoadingUserLogs" title="Lihat log riwayat sesi & penyebab putus koneksi">
-              <span v-if="isLoadingUserLogs" class="icon spin">🔄</span>
-              <span v-else>📜 Logs</span>
-            </button>
-            <button class="btn-action btn-action--rose" @click="handleKickSession" :disabled="status !== 'ACTIVE' || isKicking" title="Putus sesi PPPoE paksa untuk Dial-Up ulang">
-              <span v-if="isKicking" class="icon spin">🔄</span>
-              <span v-else>⚡ Kick</span>
-            </button>
-          </div>
-
-          <!-- Mode Switcher -->
-          <button class="btn-action btn-action--default" @click="winboxMode = !winboxMode" :title="winboxMode ? 'Beralih ke Tampilan Modern' : 'Beralih ke Tampilan Winbox'">
-            <span>{{ winboxMode ? '⚡ Modern' : '🖥️ Winbox' }}</span>
-          </button>
-
-          <!-- Stop Inspection -->
-          <button class="btn-action btn-action--stop" @click="stopTorch" :disabled="status === 'STOPPING'" title="Hentikan Inspeksi">
-            <span>✖ Stop</span>
-          </button>
+        <div class="actions">
+          <button class="btn blue" @click="runTraceroute" :disabled="status !== 'ACTIVE' || isTracerouting">📍 Trace</button>
+          <button class="btn green" @click="handlePingOnt" :disabled="status !== 'ACTIVE' || isPingingOnt">📶 Ping</button>
+          <button class="btn amber" @click="handleFetchUserLogs" :disabled="status !== 'ACTIVE' || isLoadingUserLogs">📄 Logs</button>
+          <button class="btn red" @click="handleKickSession" :disabled="status !== 'ACTIVE' || isKicking">⚡ Kick</button>
+          <button class="btn" @click="winboxMode = !winboxMode">🖥 {{ winboxMode ? 'Modern' : 'Winbox' }}</button>
+          <button class="btn danger-solid" @click="stopTorch" :disabled="status === 'STOPPING'">✕ Stop</button>
         </div>
       </div>
 
-      <div class="torch-viewer__body">
-        <div class="torch-viewer__content">
-          <div v-if="error" class="alert alert-error">
+      <!-- BODY -->
+      <div class="body-grid">
+
+        <!-- MAIN COLUMN -->
+        <div class="main-col">
+
+          <div class="section-label">
+            Real-Time Throughput (TX/RX)
+            <span class="legend">
+              <span><i style="background:var(--tx)"></i>TX (Download)</span>
+              <span><i style="background:var(--rx)"></i>RX (Upload)</span>
+            </span>
+          </div>
+
+          <div v-if="error" class="alert alert-error mb-4">
             {{ error }}
           </div>
-          
-          <!-- Live Line Chart for real-time visualization (except in Winbox mode) -->
-          <LiveTrafficChart :samples="liveSamples" v-if="!winboxMode" />
-          
-          <div class="table-container" ref="tableContainer" :class="{ 'winbox-mode': winboxMode }">
-            <table class="torch-table">
+
+          <!-- Live Line Chart -->
+          <div class="chart-card mb-4" v-if="!winboxMode">
+            <LiveTrafficChart :samples="liveSamples" />
+          </div>
+
+          <div class="section-label" style="margin-top:22px;">Active Connections</div>
+
+          <div class="table-scroll" ref="tableContainer" :class="{ 'winbox-mode': winboxMode }">
+            <table>
               <thead>
                 <tr>
-                  <th class="col-src">Src Address</th>
-                  <th class="col-dst">Destination</th>
-                  <th class="col-app">App / Service</th>
-                  <th class="col-proto">Protocol</th>
-                  <th class="col-tx">TX (Download)</th>
-                  <th class="col-rx">RX (Upload)</th>
+                  <th>Src Addr</th>
+                  <th>Destination</th>
+                  <th>App / Service</th>
+                  <th>Proto</th>
+                  <th>TX (Download)</th>
+                  <th>RX (Upload)</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-if="packets.length === 0 && status === 'CONNECTING'">
-                  <td colspan="6" class="empty-state">
+                  <td colspan="6" class="empty-state" style="text-align: center; color: var(--text-dim); padding: 2rem;">
                     Connecting to router...
                   </td>
                 </tr>
                 <tr v-else-if="packets.length === 0">
-                  <td colspan="6" class="empty-state">
+                  <td colspan="6" class="empty-state" style="text-align: center; color: var(--text-dim); padding: 2rem;">
                     Waiting for traffic...
                   </td>
                 </tr>
                 <tr v-for="(packet, idx) in displayedPackets" :key="idx" class="fade-in-row">
-                  <td class="cell-src font-mono">{{ packet['src-address'] || '-' }}</td>
-                  <td class="cell-dst">
-                    <span class="dst-ip font-mono">{{ packet['dst-address'] || '-' }}</span>
-                    <div class="dst-meta" v-if="packet._enriched?.geo_country">
-                      <span class="badge-geo">{{ packet._enriched.geo_country }}<template v-if="packet._enriched.geo_city !== '-'"> ({{ packet._enriched.geo_city }})</template></span>
-                    </div>
-                    <div class="dst-org" v-if="packet._enriched?.asn_org && packet._enriched.asn_org !== 'Unknown'">
+                  <td>
+                    <span v-if="!packet['src-address'] || packet['src-address'] === '-'" class="ip-empty"><span class="dot"></span>NAT · unresolved</span>
+                    <span v-else class="font-mono">{{ packet['src-address'] }}</span>
+                  </td>
+                  <td>
+                    <div class="dest-ip">{{ packet['dst-address'] || '-' }}</div>
+                    <span class="dest-loc" v-if="packet._enriched?.geo_country">
+                      {{ packet._enriched.geo_country }}<template v-if="packet._enriched.geo_city !== '-'"> ({{ packet._enriched.geo_city }})</template>
+                    </span>
+                    <div class="dest-sub" v-if="packet._enriched?.asn_org && packet._enriched.asn_org !== 'Unknown'">
                       {{ packet._enriched.asn_org }}
                     </div>
                   </td>
-                  <td class="cell-app">
-                    <span v-if="packet._enriched?.app_name" class="badge-app" :class="getAppClass(packet._enriched.app_category)">
-                      <span class="app-icon">{{ packet._enriched.app_icon }}</span> {{ packet._enriched.app_name }}
+                  <td>
+                    <span v-if="packet._enriched?.app_name" class="app-chip" :class="getAppClass(packet._enriched.app_category)">
+                      <span>{{ packet._enriched.app_icon }}</span> {{ packet._enriched.app_name }}
                     </span>
-                    <span v-else-if="packet._enriched?.port_service" class="badge-service" :class="getAppClass(packet._enriched.port_category)">
+                    <span v-else-if="packet._enriched?.port_service" class="app-chip" :class="getAppClass(packet._enriched.port_category)">
                       {{ packet._enriched.port_service }}
                     </span>
-                    <span class="port-info">Port: {{ packet.port || '-' }}</span>
+                    <div class="app-sub">Port: {{ packet.port || '-' }}</div>
                   </td>
-                  <td class="cell-proto font-mono">{{ packet.protocol || '-' }}</td>
-                  <td class="cell-traffic tx-rate font-mono">{{ formatTraffic(packet.tx) }}</td>
-                  <td class="cell-traffic rx-rate font-mono">{{ formatTraffic(packet.rx) }}</td>
+                  <td><span class="proto">{{ packet.protocol || '-' }}</span></td>
+                  <td class="num-tx">{{ formatTraffic(packet.tx) }}</td>
+                  <td class="num-rx">{{ formatTraffic(packet.rx) }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <div class="torch-viewer__sidebar">
-          <div class="diagnostic-assistant mb-4">
-            <h4>Diagnostic Assistant</h4>
-            <div class="diagnostic-card" :class="diagnosticResult.class">
-              <span class="diagnostic-icon">{{ diagnosticResult.icon }}</span>
-              <p>{{ diagnosticResult.message }}</p>
-            </div>
-            <div v-if="pingStats" class="ping-stats mt-2">
-              <span class="text-xs text-muted">Latest Ping: </span>
-              <span class="font-mono text-sm" :style="{ color: pingColor(pingStats.latestTime) }">
-                {{ pingStats.latestTime }}
-              </span>
-              <div class="ping-details mt-1 text-xs">
-                <div>Loss: <span :class="pingStats.loss > 0 ? 'text-red-500' : 'text-green-500'">{{ pingStats.loss }}%</span></div>
-                <div>Avg: <span>{{ pingStats.avg }}ms</span> | Jitter: <span>{{ pingStats.jitter }}ms</span></div>
-              </div>
-            </div>
+        <!-- SIDE COLUMN -->
+        <div class="side-col">
 
-            <!-- ONT Ping Test Result -->
-            <div v-if="ontPingResult" class="ont-ping-card mt-3">
-              <div class="ont-ping-card__header">
-                <span class="ont-ping-icon">🏓</span>
-                <span class="ont-ping-title">Router ➔ ONT Ping</span>
-                <span class="badge-ip font-mono">{{ ontPingResult.ip }}</span>
-              </div>
-              <div class="ont-ping-card__grid">
-                <div class="ont-metric">
-                  <span class="ont-label">Loss:</span>
-                  <span class="ont-value" :class="ontPingResult.packet_loss === '0%' ? 'text-green-400' : 'text-red-400'">{{ ontPingResult.packet_loss }}</span>
-                </div>
-                <div class="ont-metric" v-if="ontPingResult.avg_rtt">
-                  <span class="ont-label">Avg RTT:</span>
-                  <span class="ont-value font-mono text-cyan-400">{{ ontPingResult.avg_rtt }}</span>
-                </div>
-                <div class="ont-metric" v-if="ontPingResult.min_rtt">
-                  <span class="ont-label">Min/Max:</span>
-                  <span class="ont-value font-mono text-muted">{{ ontPingResult.min_rtt }} / {{ ontPingResult.max_rtt }}</span>
-                </div>
-              </div>
-            </div>
-            <div v-if="ontPingError" class="alert alert-error mt-2 text-xs" style="padding: 6px 10px;">
-              {{ ontPingError }}
-            </div>
-          </div>
-          
-          <div class="queue-status-panel" style="margin-bottom: 1rem;" v-if="queueInfo">
-            <h4>Queue Status</h4>
-            <div class="queue-card" style="margin-top: 0.5rem; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid" :style="isQueueFull ? 'border-color: #ef4444; background-color: rgba(127, 29, 29, 0.2)' : 'border-color: #374151; background-color: rgba(31, 41, 55, 0.4)'">
-              <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.25rem;">
-                <span style="color: #9ca3af;">Target Limit (DL/UL):</span>
-                <span style="font-family: monospace; font-weight: 600;">{{ formatTraffic(queueInfo.rx_limit) }} / {{ formatTraffic(queueInfo.tx_limit) }}</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.5rem;">
-                <span style="color: #9ca3af;">Actual Usage (DL/UL):</span>
-                <span style="font-family: monospace; color: #22d3ee;">{{ formatTraffic(totalTx) }} / {{ formatTraffic(totalRx) }}</span>
-              </div>
-              <div style="height: 0.5rem; width: 100%; background-color: #374151; border-radius: 9999px; overflow: hidden; display: flex;">
-                <div style="height: 100%; background-color: #06b6d4;" :style="{ width: rxUsagePercent + '%' }"></div>
-              </div>
-              <div v-if="isQueueFull" style="font-size: 0.75rem; color: #f87171; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.25rem;">
-                <span>⚠️</span> Pelanggan mencapai batas kecepatan (Limit).
-              </div>
+          <div>
+            <div class="section-label">Diagnostic Assistant</div>
+            <div class="diag-alert" :style="diagnosticResult.class === 'alert-warning' ? 'background: linear-gradient(135deg, rgba(239,68,68,.14), rgba(239,68,68,.05)); border-color: rgba(239,68,68,.35);' : 'background: linear-gradient(135deg, rgba(34,197,94,.14), rgba(34,197,94,.05)); border-color: rgba(34,197,94,.35);'">
+              <span class="pulse-dot" :style="diagnosticResult.class === 'alert-warning' ? 'background: var(--red);' : 'background: var(--green);'"></span>
+              <p :style="diagnosticResult.class === 'alert-warning' ? 'color: #fecaca;' : 'color: #bbf7d0;'">
+                {{ diagnosticResult.message }}
+              </p>
             </div>
           </div>
 
-          <h4 class="mt-4">Traffic Distribution</h4>
-          <div class="chart-container">
-            <div v-if="categoryStats.length === 0" class="text-muted text-sm text-center mt-8">
-              No data yet...
+          <div class="panel">
+            <div class="metric-row">
+              <span class="k">Latest Ping</span>
+              <span class="v" v-if="pingStats" :style="{ color: pingColor(pingStats.latestTime) }">{{ pingStats.latestTime }}</span>
+              <span class="v text-muted" v-else>-</span>
             </div>
-            <div v-for="stat in categoryStats" :key="stat.name" class="chart-bar-wrap">
-              <div class="chart-label">
-                <span>{{ stat.icon }} {{ stat.name }} <span class="text-xs text-muted ml-1">({{ stat.connections }} conn)</span></span>
-                <span class="tx-rate">{{ formatTraffic(stat.tx) }}</span>
+            <div class="metric-row">
+              <span class="k">Loss</span>
+              <span class="v" v-if="pingStats" :class="pingStats.loss > 0 ? 'text-red-500' : 'green'">{{ pingStats.loss }}%</span>
+              <span class="v text-muted" v-else>-</span>
+            </div>
+            <div class="metric-row">
+              <span class="k">Avg / Jitter</span>
+              <span class="v" v-if="pingStats">{{ pingStats.avg }}ms / {{ pingStats.jitter }}ms</span>
+              <span class="v text-muted" v-else>- / -</span>
+            </div>
+          </div>
+
+          <!-- ONT Ping Test Result -->
+          <div v-if="ontPingResult" class="panel" style="border-color: rgba(74, 222, 128, 0.4);">
+            <div style="font-weight: 700; color: #4ade80; font-size: 11px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">🏓 ONT Ping Test ({{ ontPingResult.ip }}):</div>
+            <div class="metric-row"><span class="k">Loss</span><span class="v" :class="ontPingResult.packet_loss === '0%' ? 'green' : 'text-red-500'">{{ ontPingResult.packet_loss }}</span></div>
+            <div class="metric-row" v-if="ontPingResult.avg_rtt"><span class="k">Min/Avg/Max</span><span class="v" style="color: #7dd3fc;">{{ ontPingResult.min_rtt }} / {{ ontPingResult.avg_rtt }} / {{ ontPingResult.max_rtt }}</span></div>
+          </div>
+          <div v-if="ontPingError" class="alert alert-error text-xs" style="padding: 8px 10px;">
+            {{ ontPingError }}
+          </div>
+
+          <div v-if="queueInfo">
+            <div class="section-label">Queue Status</div>
+            <div class="panel">
+              <div class="queue-line"><span>Target Limit (DL/UL)</span><b>{{ formatTraffic(queueInfo.rx_limit) }} / {{ formatTraffic(queueInfo.tx_limit) }}</b></div>
+              <div class="queue-line"><span>Actual Usage (DL/UL)</span><b style="color:var(--rx)">{{ formatTraffic(totalTx) }} / {{ formatTraffic(totalRx) }}</b></div>
+              <div class="progress-track">
+                <div class="progress-fill" :style="{ width: rxUsagePercent + '%' }"></div>
               </div>
-              <div class="chart-bar-bg">
-                <div class="chart-bar-fill" :class="getAppClass(stat.category)" :style="{ width: stat.percentage + '%' }"></div>
+              <span class="progress-pct">{{ rxUsagePercent }}% of allocated limit</span>
+            </div>
+          </div>
+
+          <div>
+            <div class="section-label">Traffic Distribution</div>
+            <div class="panel">
+              <div v-if="categoryStats.length === 0" class="text-muted text-xs text-center py-4">
+                No data yet...
+              </div>
+              <div v-else class="donut-legend">
+                <div v-for="stat in categoryStats" :key="stat.name" class="row">
+                  <span>{{ stat.icon }} {{ stat.name }}</span>
+                  <span class="pct">{{ stat.percentage }}%</span>
+                </div>
               </div>
             </div>
           </div>
-          
-          <MikrotikLogViewer :logs="systemLogs" v-if="sessionTag" />
+
         </div>
       </div>
-      
-      <div class="torch-viewer__footer">
-        <div class="traffic-summary">
-          <div class="summary-item">
-            <span class="label">Active Conn:</span>
-            <span class="value">{{ activeConnectionsCount }}</span>
-          </div>
-          <div class="summary-item">
-            <span class="label">Dest IPs:</span>
-            <span class="value">{{ uniqueDestinationsCount }}</span>
-          </div>
-          <div class="summary-item ml-4">
-            <span class="label">Total TX:</span>
-            <span class="value tx-rate">{{ formatTraffic(totalTx) }}</span>
-          </div>
-          <div class="summary-item">
-            <span class="label">Total RX:</span>
-            <span class="value rx-rate">{{ formatTraffic(totalRx) }}</span>
-          </div>
+
+      <!-- FOOTER -->
+      <div class="footer">
+        <div class="stat-group">
+          <div class="stat"><span class="k">Active Conn</span><span class="v">{{ activeConnectionsCount }}</span></div>
+          <div class="stat"><span class="k">Dest IPs</span><span class="v">{{ uniqueDestinationsCount }}</span></div>
+          <div class="stat"><span class="k">Total TX</span><span class="v" style="color:var(--tx)">{{ formatTraffic(totalTx) }}</span></div>
+          <div class="stat"><span class="k">Total RX</span><span class="v" style="color:var(--rx)">{{ formatTraffic(totalRx) }}</span></div>
         </div>
-        <div class="session-info text-muted">
-          Session ID: {{ sessionTag || 'Initializing...' }}
-        </div>
+        <div class="session-id">Session ID: {{ sessionTag || 'Initialising...' }}</div>
       </div>
+
     </div>
     
     <!-- Traceroute Modal -->
@@ -889,32 +851,508 @@ async function handlePingOnt() {
 </script>
 
 <style scoped>
+:root {
+  --bg: #0a0e14;
+  --panel: #10161f;
+  --panel-2: #0d1219;
+  --border: #1e2733;
+  --border-soft: #161d27;
+  --text: #e8ecf1;
+  --text-dim: #8b96a5;
+  --text-dimmer: #5c6774;
+  --tx: #f5a623;       /* orange - download */
+  --rx: #22d3ee;       /* cyan - upload */
+  --red: #ef4444;
+  --green: #22c55e;
+  --amber: #f59e0b;
+}
+
 .torch-viewer-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(10, 14, 26, 0.85);
-  backdrop-filter: blur(8px);
+  background: rgba(10, 14, 20, 0.9);
+  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   animation: fadeIn 0.3s ease;
+  padding: 24px;
 }
 
-.torch-viewer {
-  width: 90%;
-  max-width: 1200px;
-  height: 85vh;
+.shell {
+  max-width: 1180px;
+  width: 100%;
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
-  background: var(--bg-card);
-  border: 1px solid var(--glass-border);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  border-radius: 16px;
+  background: #10161f;
+  border: 1px solid #1e2733;
+  border-radius: 14px;
   overflow: hidden;
+  box-shadow: 0 20px 60px -20px rgba(0,0,0,.6);
+}
+
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-bottom: 1px solid #1e2733;
+  background: linear-gradient(180deg, rgba(255,255,255,.015), transparent);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: .2px;
+  color: #e8ecf1;
+}
+
+.title .muted {
+  color: #8b96a5;
+  font-weight: 500;
+}
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(34,197,94,.12);
+  border: 1px solid rgba(34,197,94,.35);
+  color: #22c55e;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 0 rgba(34,197,94,.6);
+  animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(34,197,94,.55); }
+  70% { box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
+
+.device-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: #8b96a5;
+  background: #0d1219;
+  border: 1px solid #161d27;
+  padding: 2px 8px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 13px;
+  border-radius: 8px;
+  border: 1px solid #1e2733;
+  background: #0d1219;
+  color: #8b96a5;
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: #2a3644;
+  color: #e8ecf1;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn.blue { color: #7dd3fc; border-color: rgba(125,211,252,.25); }
+.btn.green { color: #4ade80; border-color: rgba(74,222,128,.25); }
+.btn.amber { color: #f59e0b; border-color: rgba(245,158,11,.25); }
+.btn.red { color: #fca5a5; border-color: rgba(248,113,113,.3); }
+.btn.danger-solid {
+  background: rgba(239,68,68,.12);
+  color: #fca5a5;
+  border-color: rgba(239,68,68,.4);
+}
+.btn.danger-solid:hover:not(:disabled) {
+  background: rgba(239,68,68,.2);
+}
+
+/* ===== BODY GRID ===== */
+.body-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.main-col {
+  padding: 20px 24px;
+  border-right: 1px solid #1e2733;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.side-col {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  background: #0d1219;
+  overflow-y: auto;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #8b96a5;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.legend {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8b96a5;
+}
+
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* ===== CHART ===== */
+.chart-card {
+  background: #0d1219;
+  border: 1px solid #161d27;
+  border-radius: 10px;
+  padding: 16px 16px 8px;
+}
+
+/* ===== TABLE ===== */
+.table-scroll {
+  border: 1px solid #161d27;
+  border-radius: 10px;
+  overflow-x: auto;
+  overflow-y: auto;
+  flex: 1;
+  background: #0d1219;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead th {
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  color: #8b96a5;
+  text-transform: uppercase;
+  background: #131a24;
+  padding: 10px 14px;
+  border-bottom: 1px solid #1e2733;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #161d27;
+  vertical-align: middle;
+}
+
+tbody tr { transition: background .12s ease; }
+tbody tr:nth-child(even) { background: rgba(255,255,255,.012); }
+tbody tr:hover { background: rgba(255,255,255,.035); }
+tbody tr:last-child td { border-bottom: none; }
+
+.ip-empty {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #5c6774;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.ip-empty .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #5c6774;
+}
+
+.dest-ip {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: #e8ecf1;
+}
+
+.dest-loc {
+  display: inline-block;
+  font-size: 10px;
+  color: #8b96a5;
+  background: #10161f;
+  border: 1px solid #161d27;
+  padding: 1px 6px;
+  border-radius: 5px;
+  margin-top: 3px;
+}
+
+.dest-sub {
+  font-size: 11px;
+  color: #5c6774;
+  margin-top: 2px;
+}
+
+.app-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #1a2230;
+  border: 1px solid #1e2733;
+  padding: 4px 9px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.app-sub {
+  font-size: 10.5px;
+  color: #5c6774;
+  margin-top: 3px;
+}
+
+.proto {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: #8b96a5;
+  background: rgba(255,255,255,.04);
+  padding: 2px 7px;
+  border-radius: 5px;
+}
+
+.num-tx {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: #f5a623;
+}
+
+.num-rx {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: #22d3ee;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  border-top: 1px solid #1e2733;
+  background: #0d1219;
+}
+
+.stat-group {
+  display: flex;
+  gap: 28px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat .k {
+  font-size: 10px;
+  letter-spacing: .6px;
+  color: #8b96a5;
+  text-transform: uppercase;
+}
+
+.stat .v {
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: #e8ecf1;
+}
+
+.session-id {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: #5c6774;
+}
+
+/* ===== SIDE PANELS ===== */
+.panel {
+  background: #0d1219;
+  border: 1px solid #161d27;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.diag-alert {
+  display: flex;
+  gap: 10px;
+  border-radius: 9px;
+  padding: 12px;
+}
+
+.diag-alert .pulse-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-top: 3px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 0 rgba(239,68,68,.6);
+  animation: pulse-red 1.6s infinite;
+}
+
+@keyframes pulse-red {
+  0% { box-shadow: 0 0 0 0 rgba(239,68,68,.5); }
+  70% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+
+.diag-alert p {
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 8px 0;
+  border-bottom: 1px solid #161d27;
+  font-size: 12.5px;
+}
+
+.metric-row:last-child { border-bottom: none; }
+.metric-row .k { color: #8b96a5; }
+.metric-row .v { font-family: var(--mono); font-weight: 700; color: #e8ecf1; }
+.metric-row .v.green { color: #22c55e; }
+
+.queue-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #8b96a5;
+  margin-bottom: 6px;
+}
+
+.queue-line b {
+  color: #e8ecf1;
+  font-family: var(--mono);
+}
+
+.progress-track {
+  width: 100%;
+  height: 9px;
+  border-radius: 5px;
+  background: #1a2230;
+  overflow: hidden;
+  position: relative;
+  margin-top: 4px;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(90deg, #22d3ee, #f59e0b);
+  position: relative;
+}
+
+.progress-pct {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: #f59e0b;
+  margin-top: 5px;
+  display: block;
+}
+
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.donut-legend .row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #e8ecf1;
+}
+
+.donut-legend .pct {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-weight: 700;
+  color: #8b96a5;
 }
 
 .torch-viewer__header {
