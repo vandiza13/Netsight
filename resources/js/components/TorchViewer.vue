@@ -108,9 +108,9 @@
 
           <div>
             <div class="section-label">Diagnostic Assistant</div>
-            <div class="diag-alert" :style="diagnosticResult.class === 'alert-warning' ? 'background: linear-gradient(135deg, rgba(239,68,68,.14), rgba(239,68,68,.05)); border-color: rgba(239,68,68,.35);' : 'background: linear-gradient(135deg, rgba(34,197,94,.14), rgba(34,197,94,.05)); border-color: rgba(34,197,94,.35);'">
-              <span class="pulse-dot" :style="diagnosticResult.class === 'alert-warning' ? 'background: var(--red);' : 'background: var(--green);'"></span>
-              <p :style="diagnosticResult.class === 'alert-warning' ? 'color: #fecaca;' : 'color: #bbf7d0;'">
+            <div class="diag-alert" :style="{ background: diagnosticResult.bgGradient, borderColor: diagnosticResult.borderColor }">
+              <span class="pulse-dot" :style="{ background: diagnosticResult.pulseColor }"></span>
+              <p :style="{ color: diagnosticResult.textColor }">
                 {{ diagnosticResult.message }}
               </p>
             </div>
