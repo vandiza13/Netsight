@@ -120,7 +120,7 @@
                 />
               </div>
 
-              <div v-show="activeTab === 'interfaces'">
+              <div v-if="activeTab === 'interfaces'">
                 <RouterInterfaceViewer 
                   :router-id="selectedRouter.id"
                 />

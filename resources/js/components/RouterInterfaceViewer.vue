@@ -6,9 +6,20 @@
         <h4 class="title">🔌 Hardware Interfaces & Port Status</h4>
         <span class="subtitle">Real-time port link speed & traffic monitoring</span>
       </div>
-      <button class="btn-refresh" @click="fetchInterfaces" :disabled="loading" title="Refresh interfaces">
-        <span :class="{'spinning': loading}">🔄</span>
-      </button>
+      <div class="header-right">
+        <button 
+          class="btn-toggle-live" 
+          :class="isLivePaused ? 'btn-live--paused' : 'btn-live--active'"
+          @click="toggleLive" 
+          :title="isLivePaused ? 'Resume Live Monitoring' : 'Pause Live Monitoring'"
+        >
+          <span class="live-dot" :class="{'live-dot--pulse': !isLivePaused}"></span>
+          {{ isLivePaused ? 'PAUSED' : 'LIVE (3s)' }}
+        </button>
+        <button class="btn-refresh" @click="fetchInterfaces" :disabled="loading" title="Refresh interfaces">
+          <span :class="{'spinning': loading}">🔄</span>
+        </button>
+      </div>
     </div>
 
     <!-- Visual Switch Port Bar -->
@@ -143,17 +154,32 @@ async function fetchInterfaces() {
   }
 }
 
+const isLivePaused = ref(false)
+
+function toggleLive() {
+  isLivePaused.value = !isLivePaused.value
+  if (!isLivePaused.value && selectedInterface.value) {
+    fetchTraffic()
+  }
+}
+
 function selectInterface(iface: RouterInterface) {
   selectedInterface.value = iface
-  fetchTraffic()
+  if (!isLivePaused.value) {
+    fetchTraffic()
+  }
   
-  // Reset and restart 1.5-second live polling interval
+  // Reset and restart 3-second live polling interval
   if (trafficInterval) clearInterval(trafficInterval)
-  trafficInterval = setInterval(fetchTraffic, 1500)
+  trafficInterval = setInterval(() => {
+    if (!isLivePaused.value && !document.hidden) {
+      fetchTraffic()
+    }
+  }, 3000)
 }
 
 async function fetchTraffic() {
-  if (!selectedInterface.value) return
+  if (!selectedInterface.value || isLivePaused.value || document.hidden) return
   try {
     const name = encodeURIComponent(selectedInterface.value.name)
     const { data } = await api.get(`/routers/${props.routerId}/interfaces/${name}/traffic`)
@@ -216,6 +242,48 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-toggle-live {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.btn-live--active {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.btn-live--paused {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.live-dot--pulse {
+  animation: pulse 1.5s infinite;
 }
 
 .header-left .title {
