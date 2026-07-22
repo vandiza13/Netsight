@@ -5,9 +5,11 @@
         <h4 class="router-card__title">{{ router.name }}</h4>
         <span class="router-card__host">{{ router.host }}:{{ router.api_port }}</span>
       </div>
-      <div class="router-card__status" :class="`status--${router.status.toLowerCase()}`">
-        <span class="status-dot"></span>
-        {{ router.status }}
+      <div class="router-card__status-group">
+        <div class="router-card__status" :class="`status--${router.status.toLowerCase()}`">
+          <span class="status-dot"></span>
+          {{ router.status }}
+        </div>
       </div>
     </div>
     <div class="router-card__footer">
@@ -35,6 +37,7 @@ const props = defineProps<{
 
 defineEmits<{
   (e: 'select'): void
+  (e: 'open-interfaces'): void
 }>()
 
 function timeAgo(dateString: string | null): string {

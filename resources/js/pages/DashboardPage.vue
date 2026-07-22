@@ -89,6 +89,13 @@
               </button>
               <button 
                 class="panel-tab-btn" 
+                :class="{ 'panel-tab-btn--active': activeTab === 'interfaces' }"
+                @click="activeTab = 'interfaces'"
+              >
+                🔌 Interfaces
+              </button>
+              <button 
+                class="panel-tab-btn" 
                 :class="{ 'panel-tab-btn--active': activeTab === 'history' }"
                 @click="activeTab = 'history'"
               >
@@ -110,6 +117,12 @@
                   @page-change="handlePageChange"
                   @force-sync="triggerForceSync"
                   @inspect="startTorch"
+                />
+              </div>
+
+              <div v-show="activeTab === 'interfaces'">
+                <RouterInterfaceViewer 
+                  :router-id="selectedRouter.id"
                 />
               </div>
 
@@ -164,12 +177,13 @@ import PppoeUserTable from '../components/PppoeUserTable.vue'
 import TorchViewer from '../components/TorchViewer.vue'
 import TorchHistoryTable from '../components/TorchHistoryTable.vue'
 import TorchHistoryModal from '../components/TorchHistoryModal.vue'
+import RouterInterfaceViewer from '../components/RouterInterfaceViewer.vue'
 
 const auth = useAuthStore()
 const routerStore = useRouterStore()
 const sidebarOpen = ref(false)
 const activeTorchUser = ref<string | null>(null)
-const activeTab = ref<'users' | 'history'>('users')
+const activeTab = ref<'users' | 'interfaces' | 'history'>('users')
 const selectedReportId = ref<number | null>(null)
 
 const { 
