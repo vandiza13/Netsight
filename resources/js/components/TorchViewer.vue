@@ -5,29 +5,37 @@
         <div class="torch-viewer__title">
           <span class="icon-pulse">🔦</span>
           <h3>Live Inspection: <span>{{ username }}</span></h3>
-        </div>
-        <div class="torch-viewer__actions">
           <div class="status-badge" :class="statusClass">
             <span class="status-dot"></span>
             {{ statusText }}
           </div>
-          <button class="btn-close" @click="winboxMode = !winboxMode" style="margin-right: 8px;">
-            {{ winboxMode ? 'Modern UI' : 'Winbox UI' }}
+        </div>
+
+        <div class="torch-viewer__actions">
+          <!-- Diagnostic Tools Group -->
+          <div class="torch-toolbar">
+            <button class="btn-action btn-action--blue" @click="runTraceroute" :disabled="status !== 'ACTIVE' || isTracerouting" title="Jalankan Traceroute ke pelanggan">
+              <span v-if="isTracerouting" class="icon spin">🔄</span>
+              <span v-else>📍 Traceroute</span>
+            </button>
+            <button class="btn-action btn-action--emerald" @click="handlePingOnt" :disabled="status !== 'ACTIVE' || isPingingOnt" title="Tes Ping dari Router ke Modem/ONT pelanggan">
+              <span v-if="isPingingOnt" class="icon spin">🔄</span>
+              <span v-else>🏓 Ping ONT</span>
+            </button>
+            <button class="btn-action btn-action--rose" @click="handleKickSession" :disabled="status !== 'ACTIVE' || isKicking" title="Putus sesi PPPoE paksa untuk Dial-Up ulang">
+              <span v-if="isKicking" class="icon spin">🔄</span>
+              <span v-else>⚡ Kick Session</span>
+            </button>
+          </div>
+
+          <!-- Mode Switcher -->
+          <button class="btn-action btn-action--default" @click="winboxMode = !winboxMode" :title="winboxMode ? 'Beralih ke Tampilan Modern' : 'Beralih ke Tampilan Winbox'">
+            <span>{{ winboxMode ? '⚡ Modern UI' : '🖥️ Winbox UI' }}</span>
           </button>
-          <button class="btn-close" @click="runTraceroute" :disabled="status !== 'ACTIVE' || isTracerouting" style="margin-right: 8px; background: rgba(59, 130, 246, 0.2); border-color: #3b82f6; color: #60a5fa;">
-            <span v-if="isTracerouting" class="icon spin">🔄</span>
-            <span v-else>📍 Traceroute</span>
-          </button>
-          <button class="btn-close" @click="handlePingOnt" :disabled="status !== 'ACTIVE' || isPingingOnt" style="margin-right: 8px; background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #34d399;">
-            <span v-if="isPingingOnt" class="icon spin">🔄</span>
-            <span v-else>🏓 Ping ONT</span>
-          </button>
-          <button class="btn-close" @click="handleKickSession" :disabled="status !== 'ACTIVE' || isKicking" style="margin-right: 8px; background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #f87171;">
-            <span v-if="isKicking" class="icon spin">🔄</span>
-            <span v-else>⚡ Kick (Re-Dial)</span>
-          </button>
-          <button class="btn-close" @click="stopTorch" :disabled="status === 'STOPPING'">
-            Stop Inspection
+
+          <!-- Stop Inspection -->
+          <button class="btn-action btn-action--stop" @click="stopTorch" :disabled="status === 'STOPPING'">
+            <span>Stop Inspection</span>
           </button>
         </div>
       </div>
@@ -112,11 +120,25 @@
             </div>
 
             <!-- ONT Ping Test Result -->
-            <div v-if="ontPingResult" class="ping-stats mt-2" style="border-color: #10b981; background: rgba(16, 185, 129, 0.05);">
-              <div style="font-weight: 600; color: #34d399; font-size: 0.8rem; margin-bottom: 4px;">🏓 Router-to-ONT Ping ({{ ontPingResult.ip }}):</div>
-              <div class="ping-details text-xs">
-                <div>Packet Loss: <span :class="ontPingResult.packet_loss === '0%' ? 'text-green-500' : 'text-red-500'">{{ ontPingResult.packet_loss }}</span></div>
-                <div v-if="ontPingResult.avg_rtt">Min/Avg/Max RTT: <span class="font-mono" style="color: #60a5fa;">{{ ontPingResult.min_rtt }} / {{ ontPingResult.avg_rtt }} / {{ ontPingResult.max_rtt }}</span></div>
+            <div v-if="ontPingResult" class="ont-ping-card mt-3">
+              <div class="ont-ping-card__header">
+                <span class="ont-ping-icon">🏓</span>
+                <span class="ont-ping-title">Router ➔ ONT Ping</span>
+                <span class="badge-ip font-mono">{{ ontPingResult.ip }}</span>
+              </div>
+              <div class="ont-ping-card__grid">
+                <div class="ont-metric">
+                  <span class="ont-label">Loss:</span>
+                  <span class="ont-value" :class="ontPingResult.packet_loss === '0%' ? 'text-green-400' : 'text-red-400'">{{ ontPingResult.packet_loss }}</span>
+                </div>
+                <div class="ont-metric" v-if="ontPingResult.avg_rtt">
+                  <span class="ont-label">Avg RTT:</span>
+                  <span class="ont-value font-mono text-cyan-400">{{ ontPingResult.avg_rtt }}</span>
+                </div>
+                <div class="ont-metric" v-if="ontPingResult.min_rtt">
+                  <span class="ont-label">Min/Max:</span>
+                  <span class="ont-value font-mono text-muted">{{ ontPingResult.min_rtt }} / {{ ontPingResult.max_rtt }}</span>
+                </div>
               </div>
             </div>
             <div v-if="ontPingError" class="alert alert-error mt-2 text-xs" style="padding: 6px 10px;">
@@ -139,7 +161,7 @@
                 <div style="height: 100%; background-color: #06b6d4;" :style="{ width: rxUsagePercent + '%' }"></div>
               </div>
               <div v-if="isQueueFull" style="font-size: 0.75rem; color: #f87171; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.25rem;">
-                <span>⚠️</span> Pelanggan mencapai batas kecepatan (Limit/FUP).
+                <span>⚠️</span> Pelanggan mencapai batas kecepatan (Limit).
               </div>
             </div>
           </div>
