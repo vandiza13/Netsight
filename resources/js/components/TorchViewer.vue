@@ -18,6 +18,14 @@
             <span v-if="isTracerouting" class="icon spin">🔄</span>
             <span v-else>📍 Traceroute</span>
           </button>
+          <button class="btn-close" @click="handlePingOnt" :disabled="status !== 'ACTIVE' || isPingingOnt" style="margin-right: 8px; background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #34d399;">
+            <span v-if="isPingingOnt" class="icon spin">🔄</span>
+            <span v-else>🏓 Ping ONT</span>
+          </button>
+          <button class="btn-close" @click="handleKickSession" :disabled="status !== 'ACTIVE' || isKicking" style="margin-right: 8px; background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #f87171;">
+            <span v-if="isKicking" class="icon spin">🔄</span>
+            <span v-else>⚡ Kick (Re-Dial)</span>
+          </button>
           <button class="btn-close" @click="stopTorch" :disabled="status === 'STOPPING'">
             Stop Inspection
           </button>
@@ -101,6 +109,18 @@
                 <div>Loss: <span :class="pingStats.loss > 0 ? 'text-red-500' : 'text-green-500'">{{ pingStats.loss }}%</span></div>
                 <div>Avg: <span>{{ pingStats.avg }}ms</span> | Jitter: <span>{{ pingStats.jitter }}ms</span></div>
               </div>
+            </div>
+
+            <!-- ONT Ping Test Result -->
+            <div v-if="ontPingResult" class="ping-stats mt-2" style="border-color: #10b981; background: rgba(16, 185, 129, 0.05);">
+              <div style="font-weight: 600; color: #34d399; font-size: 0.8rem; margin-bottom: 4px;">🏓 Router-to-ONT Ping ({{ ontPingResult.ip }}):</div>
+              <div class="ping-details text-xs">
+                <div>Packet Loss: <span :class="ontPingResult.packet_loss === '0%' ? 'text-green-500' : 'text-red-500'">{{ ontPingResult.packet_loss }}</span></div>
+                <div v-if="ontPingResult.avg_rtt">Min/Avg/Max RTT: <span class="font-mono" style="color: #60a5fa;">{{ ontPingResult.min_rtt }} / {{ ontPingResult.avg_rtt }} / {{ ontPingResult.max_rtt }}</span></div>
+              </div>
+            </div>
+            <div v-if="ontPingError" class="alert alert-error mt-2 text-xs" style="padding: 6px 10px;">
+              {{ ontPingError }}
             </div>
           </div>
           
@@ -722,6 +742,49 @@ async function runTraceroute() {
     tracerouteError.value = e.response?.data?.message || 'Gagal mendapatkan data traceroute.'
   } finally {
     isTracerouting.value = false
+  }
+}
+
+// ── On-Demand Quick Actions ────────────────────────────────────────
+const isKicking = ref(false)
+const isPingingOnt = ref(false)
+const ontPingResult = ref<any>(null)
+const ontPingError = ref<string | null>(null)
+
+async function handleKickSession() {
+  if (!sessionTag.value) return
+  if (!confirm(`Apakah Anda yakin ingin memutus (kick) sesi PPPoE aktif untuk "${props.username}"?\n\nModem pelanggan akan otomatis melakukan Dial-Up ulang.`)) {
+    return
+  }
+
+  isKicking.value = true
+  try {
+    const { data } = await api.post(`/torch/${sessionTag.value}/kick`)
+    alert(data.message || 'Sesi berhasil diputus/re-dial.')
+  } catch (e: any) {
+    alert(e.response?.data?.message || 'Gagal memutus sesi PPPoE.')
+  } finally {
+    isKicking.value = false
+  }
+}
+
+async function handlePingOnt() {
+  if (!sessionTag.value) return
+  isPingingOnt.value = true
+  ontPingError.value = null
+  ontPingResult.value = null
+  
+  try {
+    const { data } = await api.post(`/torch/${sessionTag.value}/ping-ont`)
+    if (data && data.data) {
+      ontPingResult.value = data.data
+    } else {
+      ontPingError.value = 'Tidak ada respons dari tes ping ONT.'
+    }
+  } catch (e: any) {
+    ontPingError.value = e.response?.data?.message || 'Gagal menjalankan ping ke ONT.'
+  } finally {
+    isPingingOnt.value = false
   }
 }
 </script>
