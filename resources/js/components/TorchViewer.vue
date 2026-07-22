@@ -86,7 +86,8 @@
                   </td>
                   <td>
                     <span v-if="packet._enriched?.app_name" class="app-chip" :class="getAppClass(packet._enriched.app_category)">
-                      <span>{{ packet._enriched.app_icon }}</span> {{ packet._enriched.app_name }}
+                      <span v-html="getAppLogoHtml(packet._enriched.app_name, packet._enriched.app_icon)"></span>
+                      <span>{{ packet._enriched.app_name }}</span>
                     </span>
                     <span v-else-if="packet._enriched?.port_service" class="app-chip" :class="getAppClass(packet._enriched.port_category)">
                       {{ packet._enriched.port_service }}
@@ -151,7 +152,7 @@
               <div class="progress-track">
                 <div class="progress-fill" :style="{ width: rxUsagePercent + '%' }"></div>
               </div>
-              <span class="progress-pct">{{ rxUsagePercent }}% of allocated limit</span>
+              <span class="progress-pct">{{ Math.round(rxUsagePercent) }}% of allocated limit</span>
             </div>
           </div>
 
@@ -163,8 +164,8 @@
               </div>
               <div v-else class="donut-legend">
                 <div v-for="stat in categoryStats" :key="stat.name" class="row">
-                  <span>{{ stat.icon }} {{ stat.name }}</span>
-                  <span class="pct">{{ stat.percentage }}%</span>
+                  <span class="flex items-center gap-1.5"><span v-html="getAppLogoHtml(stat.name, stat.icon)"></span> {{ stat.name }}</span>
+                  <span class="pct">{{ Math.round(stat.percentage) }}%</span>
                 </div>
               </div>
             </div>
@@ -514,6 +515,41 @@ const diagnosticResult = computed(() => {
 
   return { icon: 'ℹ️', message: 'Menganalisis pola trafik...', class: 'diag-neutral' }
 })
+
+function getAppLogoHtml(appName?: string, defaultIcon?: string): string {
+  if (!appName) return defaultIcon || '📦'
+  const name = appName.toLowerCase()
+
+  if (name.includes('youtube')) {
+    return `<svg class="app-logo-svg" viewBox="0 0 24 24" width="15" height="15" fill="#FF0000" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`
+  }
+  if (name.includes('tiktok')) {
+    return `<svg class="app-logo-svg" viewBox="0 0 24 24" width="15" height="15" fill="#EE1D52" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.67 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.82.57-1.31 1.56-1.3 2.56.02.92.48 1.8 1.25 2.31.87.58 2 .64 2.91.24.87-.37 1.52-1.19 1.68-2.11.04-.37.03-.75.03-1.12V.02z"/></svg>`
+  }
+  if (name.includes('instagram')) {
+    return `<svg class="app-logo-svg" viewBox="0 0 24 24" width="15" height="15" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><defs><radialGradient id="ig-grad-h" cx="30%" cy="100%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><path fill="url(#ig-grad-h)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>`
+  }
+  if (name.includes('facebook')) {
+    return `<svg class="app-logo-svg" viewBox="0 0 24 24" width="15" height="15" fill="#1877F2" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`
+  }
+  if (name.includes('google')) {
+    return `<svg class="app-logo-svg" viewBox="0 0 24 24" width="15" height="15" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.15C3.26 21.3 7.31 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.61H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.39l3.99-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.61l3.99 3.15c.95-2.85 3.6-4.96 6.72-4.96z"/></svg>`
+  }
+  if (name.includes('zoom')) {
+    return `<svg class="app-logo-svg" viewBox="0 0 24 24" width="15" height="15" fill="#2D8CFF" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path d="M4.5 4.5A2.5 2.5 0 0 0 2 7v10a2.5 2.5 0 0 0 2.5 2.5h11a2.5 2.5 0 0 0 2.5-2.5v-2.18l3.7 2.47a1 1 0 0 0 1.55-.84V7.55a1 1 0 0 0-1.55-.84L18 9.18V7a2.5 2.5 0 0 0-2.5-2.5h-11z"/></svg>`
+  }
+  if (name.includes('netflix')) {
+    return `<svg class="app-logo-svg" viewBox="0 0 24 24" width="15" height="15" fill="#E50914" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path d="M5.398 0v24c1.884-.33 3.77-.66 5.655-1.002V13.82L16.29 24c1.884-.33 3.77-.66 5.655-1.002V0h-5.655v10.18L11.053 0H5.398z"/></svg>`
+  }
+  if (name.includes('steam')) {
+    return `<svg class="app-logo-svg" viewBox="0 0 24 24" width="15" height="15" fill="#66c0f4" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path d="M12 0a12 12 0 0 0-11.968 11.07l5.247 2.169a3.528 3.528 0 0 1 2.451-.976c.266 0 .524.03.774.086l2.846-4.137V8.12A3.529 3.529 0 0 1 14.88 4.6a3.529 3.529 0 0 1 3.53 3.52 3.529 3.529 0 0 1-3.53 3.529h-.088l-4.1 2.872a3.524 3.524 0 0 1-4.088 1.488L1.314 13.87A12 12 0 1 0 12 0z"/></svg>`
+  }
+  if (name.includes('whatsapp')) {
+    return `<svg class="app-logo-svg" viewBox="0 0 24 24" width="15" height="15" fill="#25D366" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.705 1.758zm6.654-4.225l.48.285c1.46.867 3.14 1.324 4.863 1.325 5.277 0 9.571-4.294 9.574-9.573.001-2.557-.996-4.96-2.809-6.772-1.813-1.813-4.216-2.812-6.775-2.812-5.278 0-9.572 4.294-9.575 9.573-.001 1.77.469 3.498 1.36 5.016l.313.528-1.005 3.673 3.759-.986z"/></svg>`
+  }
+
+  return defaultIcon || '📦'
+}
 
 function pingColor(timeStr: string) {
   if (!timeStr) return '#94a3b8'
@@ -1090,6 +1126,7 @@ async function handlePingOnt() {
   overflow-x: auto;
   overflow-y: auto;
   flex: 1;
+  min-height: 230px;
   background: #0d1219;
 }
 
