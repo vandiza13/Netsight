@@ -4,13 +4,19 @@
       <div class="torch-viewer__header">
         <div class="torch-viewer__title">
           <span class="icon-pulse">🔦</span>
-          <h3>Live Inspection: <span>{{ username }}</span></h3>
-          <span v-if="vendorName" class="badge-vendor font-mono" :title="`MAC: ${callerId || '-'}`">
-            📱 Modem: {{ vendorName }}
-          </span>
-          <div class="status-badge" :class="statusClass">
-            <span class="status-dot"></span>
-            {{ statusText }}
+          <div class="title-meta">
+            <div class="title-main">
+              <h3>Live Inspection: <span>{{ username }}</span></h3>
+              <div class="status-badge" :class="statusClass">
+                <span class="status-dot"></span>
+                {{ statusText }}
+              </div>
+            </div>
+            <div class="title-sub" v-if="vendorName">
+              <span class="badge-vendor font-mono" :title="`MAC: ${callerId || '-'}`">
+                📱 {{ vendorName }}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -19,30 +25,30 @@
           <div class="torch-toolbar">
             <button class="btn-action btn-action--blue" @click="runTraceroute" :disabled="status !== 'ACTIVE' || isTracerouting" title="Jalankan Traceroute ke pelanggan">
               <span v-if="isTracerouting" class="icon spin">🔄</span>
-              <span v-else>📍 Traceroute</span>
+              <span v-else>📍 Trace</span>
             </button>
             <button class="btn-action btn-action--emerald" @click="handlePingOnt" :disabled="status !== 'ACTIVE' || isPingingOnt" title="Tes Ping dari Router ke Modem/ONT pelanggan">
               <span v-if="isPingingOnt" class="icon spin">🔄</span>
-              <span v-else>🏓 Ping ONT</span>
+              <span v-else>🏓 Ping</span>
             </button>
             <button class="btn-action btn-action--amber" @click="handleFetchUserLogs" :disabled="status !== 'ACTIVE' || isLoadingUserLogs" title="Lihat log riwayat sesi & penyebab putus koneksi">
               <span v-if="isLoadingUserLogs" class="icon spin">🔄</span>
-              <span v-else>📜 Log Sesi</span>
+              <span v-else>📜 Logs</span>
             </button>
             <button class="btn-action btn-action--rose" @click="handleKickSession" :disabled="status !== 'ACTIVE' || isKicking" title="Putus sesi PPPoE paksa untuk Dial-Up ulang">
               <span v-if="isKicking" class="icon spin">🔄</span>
-              <span v-else>⚡ Kick Session</span>
+              <span v-else>⚡ Kick</span>
             </button>
           </div>
 
           <!-- Mode Switcher -->
           <button class="btn-action btn-action--default" @click="winboxMode = !winboxMode" :title="winboxMode ? 'Beralih ke Tampilan Modern' : 'Beralih ke Tampilan Winbox'">
-            <span>{{ winboxMode ? '⚡ Modern UI' : '🖥️ Winbox UI' }}</span>
+            <span>{{ winboxMode ? '⚡ Modern' : '🖥️ Winbox' }}</span>
           </button>
 
           <!-- Stop Inspection -->
-          <button class="btn-action btn-action--stop" @click="stopTorch" :disabled="status === 'STOPPING'">
-            <span>Stop Inspection</span>
+          <button class="btn-action btn-action--stop" @click="stopTorch" :disabled="status === 'STOPPING'" title="Hentikan Inspeksi">
+            <span>✖ Stop</span>
           </button>
         </div>
       </div>
@@ -915,38 +921,50 @@ async function handlePingOnt() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
+  padding: 12px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(15, 23, 42, 0.6);
-  gap: 16px;
+  background: rgba(15, 23, 42, 0.7);
+  gap: 12px;
 }
 
 .torch-viewer__title {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
-.icon-pulse {
-  font-size: 1.5rem;
-  animation: pulse 2s infinite;
+.title-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.torch-viewer__title h3 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
+.title-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.torch-viewer__title span {
-  color: var(--accent-amber);
+.title-sub {
+  display: flex;
+  align-items: center;
+}
+
+.badge-vendor {
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #38bdf8;
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .torch-viewer__actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: nowrap;
 }
 
@@ -954,28 +972,27 @@ async function handlePingOnt() {
   display: flex;
   align-items: center;
   background: rgba(30, 41, 59, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 4px;
-  border-radius: 10px;
-  gap: 6px;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3px;
+  border-radius: 8px;
+  gap: 4px;
 }
 
 .btn-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
   white-space: nowrap;
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 8px;
-  font-size: 0.85rem;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   border: 1px solid transparent;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .btn-action:disabled {
