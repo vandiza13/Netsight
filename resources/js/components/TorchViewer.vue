@@ -466,54 +466,117 @@ function getAppClass(category: string): string {
 // Phase 4: Diagnostic Engine
 const diagnosticResult = computed(() => {
   if (status.value !== 'ACTIVE' && packets.value.length === 0) {
-    return { icon: '⏳', message: 'Waiting for data...', class: 'diag-neutral' }
+    return {
+      icon: '🔍',
+      message: 'Menganalisis pola trafik & kualitas koneksi pelanggan...',
+      class: 'diag-info',
+      pulseColor: '#38bdf8',
+      bgGradient: 'linear-gradient(135deg, rgba(56,189,248,.14), rgba(56,189,248,.05))',
+      borderColor: 'rgba(56,189,248,.35)',
+      textColor: '#bae6fd'
+    }
   }
 
   let isHighPing = false
   let pingMs = 0
+  let isRto = false
+  let hasLoss = false
+  let lossPct = 0
   
-  if (pingStats.value && pingStats.value.latestTime !== 'timeout') {
-    pingMs = parseMikrotikTime(pingStats.value.latestTime)
-    if (pingMs > 100) isHighPing = true
+  if (pingStats.value) {
+    if (pingStats.value.latestTime === 'timeout') {
+      isRto = true
+    } else {
+      pingMs = parseMikrotikTime(pingStats.value.latestTime)
+      if (pingMs > 100) isHighPing = true
+    }
+
+    lossPct = Number(pingStats.value.loss || 0)
+    if (lossPct >= 100) isRto = true
+    else if (lossPct > 0) hasLoss = true
   }
 
-  const txMbps = totalTx.value / 1000000
-  const rxMbps = totalRx.value / 1000000
-  const totalMbps = txMbps + rxMbps
+  // Dominant application detection
+  const topApp = categoryStats.value.length > 0 ? categoryStats.value[0] : null
+  const dominantAppText = topApp && topApp.percentage >= 30 
+    ? ` Trafik didominasi oleh ${topApp.name} (${Math.round(topApp.percentage)}%).` 
+    : ''
 
-  if (totalMbps > 20) { // Arbitrary heavy traffic threshold for NOC diagnostic
-    return { 
-      icon: '🔴', 
-      message: 'Bandwidth jenuh (Trafik berat). Kecepatan mungkin menurun akibat pemakaian penuh.', 
-      class: 'diag-danger' 
+  // Dynamic limit percent calculation
+  const limitPercent = Math.round(rxUsagePercent.value || 0)
+
+  // 1. CRITICAL / DANGER (Red 🔴)
+  if (isRto) {
+    return {
+      icon: '🔴',
+      message: 'Gagal melakukan Ping ke pelanggan (RTO / Request Timed Out). Cek modem/kabel optik.',
+      class: 'diag-danger',
+      pulseColor: 'var(--red)',
+      bgGradient: 'linear-gradient(135deg, rgba(239,68,68,.14), rgba(239,68,68,.05))',
+      borderColor: 'rgba(239,68,68,.35)',
+      textColor: '#fecaca'
     }
   }
 
-  if (pingStats.value && pingStats.value.loss >= 100) {
-     return { icon: '🔴', message: 'Router gagal melakukan ping ke pelanggan (RTO). Cek modem.', class: 'diag-danger' }
-  }
-
-  if (pingStats.value && pingStats.value.loss > 0) {
-     return { icon: '🟡', message: `Terdeteksi Packet Loss (${pingStats.value.loss}%). Koneksi mungkin tidak stabil.`, class: 'diag-warning' }
-  }
-
-  if (isHighPing) {
-    return { 
-      icon: '🟡', 
-      message: `Ping pelanggan tinggi (${pingMs}ms). Cek kualitas sinyal atau redaman kabel optik.`, 
-      class: 'diag-warning' 
+  if (limitPercent >= 90 || isQueueFull.value) {
+    return {
+      icon: '🔴',
+      message: `Bandwidth Jenuh (100% Full Limit). Pelanggan mengalami pemadatan kecepatan.` + dominantAppText,
+      class: 'diag-danger',
+      pulseColor: 'var(--red)',
+      bgGradient: 'linear-gradient(135deg, rgba(239,68,68,.14), rgba(239,68,68,.05))',
+      borderColor: 'rgba(239,68,68,.35)',
+      textColor: '#fecaca'
     }
   }
 
-  if (totalMbps > 0) {
-    return { 
-      icon: '🟢', 
-      message: 'Koneksi normal. Latensi dan bandwidth terpantau stabil.', 
-      class: 'diag-good' 
+  if (lossPct > 5 || pingMs > 120) {
+    return {
+      icon: '🔴',
+      message: `Kualitas sinyal/latensi terdegradasi parah (${pingMs > 0 ? 'Ping ' + pingMs + 'ms' : ''}${hasLoss ? ', Loss ' + lossPct + '%' : ''}).` + dominantAppText,
+      class: 'diag-danger',
+      pulseColor: 'var(--red)',
+      bgGradient: 'linear-gradient(135deg, rgba(239,68,68,.14), rgba(239,68,68,.05))',
+      borderColor: 'rgba(239,68,68,.35)',
+      textColor: '#fecaca'
     }
   }
 
-  return { icon: 'ℹ️', message: 'Menganalisis pola trafik...', class: 'diag-neutral' }
+  // 2. WARNING / PERHATIAN (Yellow/Amber 🟡)
+  if (limitPercent >= 75) {
+    return {
+      icon: '🟡',
+      message: `Bandwidth mendekati batas paket (${limitPercent}% Full).` + dominantAppText,
+      class: 'diag-warning',
+      pulseColor: 'var(--amber)',
+      bgGradient: 'linear-gradient(135deg, rgba(245,158,11,.14), rgba(245,158,11,.05))',
+      borderColor: 'rgba(245,158,11,.35)',
+      textColor: '#fef08a'
+    }
+  }
+
+  if (hasLoss || pingMs > 50) {
+    return {
+      icon: '🟡',
+      message: `Terdeteksi latensi tinggi/loss (${pingMs > 0 ? 'Ping ' + pingMs + 'ms' : ''}${hasLoss ? ' Loss ' + lossPct + '%' : ''}).` + dominantAppText,
+      class: 'diag-warning',
+      pulseColor: 'var(--amber)',
+      bgGradient: 'linear-gradient(135deg, rgba(245,158,11,.14), rgba(245,158,11,.05))',
+      borderColor: 'rgba(245,158,11,.35)',
+      textColor: '#fef08a'
+    }
+  }
+
+  // 3. GOOD / NORMAL (Green 🟢)
+  return {
+    icon: '🟢',
+    message: `Koneksi sangat lancar & stabil. Pemakaian ${limitPercent}% dari limit paket.` + (pingMs > 0 ? ` Latensi ${pingMs}ms.` : ''),
+    class: 'diag-good',
+    pulseColor: 'var(--green)',
+    bgGradient: 'linear-gradient(135deg, rgba(34,197,94,.14), rgba(34,197,94,.05))',
+    borderColor: 'rgba(34,197,94,.35)',
+    textColor: '#bbf7d0'
+  }
 })
 
 function getAppLogoHtml(appName?: string, defaultIcon?: string): string {
