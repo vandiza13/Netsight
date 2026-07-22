@@ -119,7 +119,7 @@
           <div class="panel">
             <div class="metric-row">
               <span class="k">Latest Ping</span>
-              <span class="v" v-if="pingStats" :style="{ color: pingColor(pingStats.latestTime) }">{{ pingStats.latestTime }}</span>
+              <span class="v" v-if="pingStats" :style="{ color: pingColor(pingStats.latestTime) }">{{ formatPingMs(pingStats.latestTime) }}</span>
               <span class="v text-muted" v-else>-</span>
             </div>
             <div class="metric-row">
@@ -138,7 +138,7 @@
           <div v-if="ontPingResult" class="panel" style="border-color: rgba(74, 222, 128, 0.4);">
             <div style="font-weight: 700; color: #4ade80; font-size: 11px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">🏓 ONT Ping Test ({{ ontPingResult.ip }}):</div>
             <div class="metric-row"><span class="k">Loss</span><span class="v" :class="ontPingResult.packet_loss === '0%' ? 'green' : 'text-red-500'">{{ ontPingResult.packet_loss }}</span></div>
-            <div class="metric-row" v-if="ontPingResult.avg_rtt"><span class="k">Min/Avg/Max</span><span class="v" style="color: #7dd3fc;">{{ ontPingResult.min_rtt }} / {{ ontPingResult.avg_rtt }} / {{ ontPingResult.max_rtt }}</span></div>
+            <div class="metric-row" v-if="ontPingResult.avg_rtt"><span class="k">Min/Avg/Max</span><span class="v" style="color: #7dd3fc;">{{ formatPingMs(ontPingResult.min_rtt) }} / {{ formatPingMs(ontPingResult.avg_rtt) }} / {{ formatPingMs(ontPingResult.max_rtt) }}</span></div>
           </div>
           <div v-if="ontPingError" class="alert alert-error text-xs" style="padding: 8px 10px;">
             {{ ontPingError }}
@@ -637,6 +637,25 @@ function parseMikrotikTime(timeStr: string): number {
   if (usMatch) totalMs += parseInt(usMatch[1]) / 1000;
   
   return Math.round(totalMs);
+}
+
+function formatPingMs(timeStr: string): string {
+  if (!timeStr) return '';
+  if (timeStr === 'timeout') return 'timeout';
+  
+  let totalMs = 0;
+  const sMatch = timeStr.match(/(\d+)s/);
+  if (sMatch) totalMs += parseInt(sMatch[1]) * 1000;
+  
+  const msMatch = timeStr.match(/(\d+)ms/);
+  if (msMatch) totalMs += parseInt(msMatch[1]);
+  
+  const usMatch = timeStr.match(/(\d+)us/);
+  if (usMatch) totalMs += parseInt(usMatch[1]) / 1000;
+  
+  if (totalMs === 0) return '0ms';
+  if (totalMs < 1) return '<1ms';
+  return `${Math.round(totalMs)}ms`;
 }
 
 // Keyboard Shortcuts
