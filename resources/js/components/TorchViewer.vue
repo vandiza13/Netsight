@@ -2082,10 +2082,16 @@ tbody tr:last-child td { border-bottom: none; }
 }
 
 @media (max-width: 768px) {
+  .torch-viewer-overlay {
+    padding: 0;
+  }
   .torch-viewer {
-    width: 100%;
+    width: 100vw;
     height: 100vh;
+    height: 100dvh;
     border-radius: 0;
+    display: flex;
+    flex-direction: column;
   }
   .torch-viewer__header {
     flex-direction: column;
@@ -2100,6 +2106,7 @@ tbody tr:last-child td { border-bottom: none; }
     width: 100%;
     flex-wrap: wrap;
     gap: 8px;
+    justify-content: space-between;
   }
   .torch-viewer__actions .btn-close {
     padding: 6px 10px;
@@ -2111,26 +2118,36 @@ tbody tr:last-child td { border-bottom: none; }
   }
   .torch-viewer__body {
     flex-direction: column;
-    overflow-y: auto;
+    overflow: hidden;
   }
   .torch-viewer__content {
-    flex: none;
+    flex: 1;
     border-right: none;
     border-bottom: 1px solid var(--glass-border);
-    padding: 12px;
-    overflow: visible;
+    padding: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
   .torch-viewer__sidebar {
     flex: none;
+    height: 40%;
     padding: 12px;
+    overflow-y: auto;
   }
   .table-container {
+    flex: 1;
     overflow-x: auto;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
   .torch-table {
     table-layout: auto;
     min-width: 600px;
+  }
+  .torch-table th, .torch-table td {
+    padding: 8px 10px;
+    font-size: 0.75rem;
   }
   .torch-viewer__footer {
     flex-direction: column;
@@ -2140,6 +2157,11 @@ tbody tr:last-child td { border-bottom: none; }
   .traffic-summary {
     flex-wrap: wrap;
     gap: 12px;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .summary-item {
+    width: 48%;
   }
 }
 </style>
