@@ -51,13 +51,13 @@
               @click="selectInterface(iface)"
             >
               <!-- Jack graphic -->
-              <div class="jack" :class="iface.type">
+              <div class="jack" :class="{'sfp': iface.type === 'sfp'}">
                 <div class="jack-bezel"></div>
                 <div class="jack-slot"></div>
-                <div class="jack-pins" v-if="iface.type !== 'sfp'">
+                <div class="jack-pins">
                   <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
                 </div>
-                <div class="jack-tab" v-if="iface.type !== 'sfp'"></div>
+                <div class="jack-tab"></div>
                 <span class="led" :class="getLedClass(iface)"></span>
               </div>
               <div class="port-label" :title="iface.name">{{ shortenName(iface.name) }}</div>
@@ -81,13 +81,13 @@
               }"
               @click="selectInterface(iface)"
             >
-              <div class="jack" :class="iface.type">
+              <div class="jack" :class="{'sfp': iface.type === 'sfp'}">
                 <div class="jack-bezel"></div>
                 <div class="jack-slot"></div>
-                <div class="jack-pins" v-if="iface.type !== 'sfp'">
+                <div class="jack-pins">
                   <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
                 </div>
-                <div class="jack-tab" v-if="iface.type !== 'sfp'"></div>
+                <div class="jack-tab"></div>
                 <span class="led" :class="getLedClass(iface)"></span>
               </div>
               <div class="port-label" :title="iface.name">{{ shortenName(iface.name) }}</div>
@@ -442,7 +442,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 18px;
 }
 
 .panel-title {
@@ -759,7 +759,7 @@ onBeforeUnmount(() => {
 
 /* LIVE MONITOR */
 .monitor {
-  margin-top: 4px;
+  margin-top: 24px;
   background: linear-gradient(160deg, rgba(34,211,238,0.05), var(--panel) 40%);
   border: 1px solid rgba(34,211,238,0.3);
   border-radius: 14px;
