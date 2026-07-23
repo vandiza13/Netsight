@@ -258,7 +258,19 @@ const groupedInterfaces = computed(() => {
       sfp.push(i)
     } else if (typeLower === 'vlan' || nameLower.includes('vlan')) {
       vlan.push(i)
-    } else if (nameLower.startsWith('wg') || nameLower.startsWith('eoip') || nameLower.startsWith('gre') || nameLower.startsWith('l2tp') || nameLower.startsWith('ovpn') || nameLower.startsWith('pptp') || nameLower.startsWith('sstp') || nameLower === 'lo') {
+    } else if (
+      nameLower.startsWith('wg') || 
+      nameLower.startsWith('eoip') || 
+      nameLower.startsWith('gre') || 
+      nameLower.startsWith('l2tp') || 
+      nameLower.startsWith('ovpn') || 
+      nameLower.startsWith('pptp') || 
+      nameLower.startsWith('sstp') || 
+      nameLower === 'lo' ||
+      nameLower.includes('vpn') ||
+      typeLower.includes('vpn') ||
+      typeLower.includes('ovpn')
+    ) {
       vpn.push(i)
     } else {
       rj45.push(i)
