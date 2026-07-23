@@ -35,17 +35,17 @@
       </div>
 
       <!-- ================= PHYSICAL INTERFACES ================= -->
-      <div class="super-group-label" v-if="groupedInterfaces.uplinks.length || groupedInterfaces.access.length || groupedInterfaces.sfp.length">
+      <div class="super-group-label" v-if="groupedInterfaces.rj45.length || groupedInterfaces.sfp.length">
         <span class="icon">🔌</span> PHYSICAL INTERFACES
       </div>
 
       <div class="super-group-content">
-        <!-- 1. Uplinks & Core -->
-        <div class="group" v-if="groupedInterfaces.uplinks.length > 0">
-          <div class="group-label">Uplinks &amp; Core<span class="line"></span></div>
+        <!-- 1. LAN RJ45 -->
+        <div class="group" v-if="groupedInterfaces.rj45.length > 0">
+          <div class="group-label">LAN RJ45<span class="line"></span></div>
           <div class="port-row">
             <div 
-              v-for="iface in groupedInterfaces.uplinks" 
+              v-for="iface in groupedInterfaces.rj45" 
               :key="iface.name"
               class="port"
               :class="{
@@ -65,42 +65,13 @@
                 <span class="led" :class="getLedClass(iface)"></span>
               </div>
               <div class="port-label" :title="iface.name">{{ shortenName(iface.name) }}</div>
-              <div class="port-sub"><span class="port-tag">{{ getPortTag(iface) }}</span></div>
+              <div class="port-sub"><span class="port-tag">RJ45</span></div>
               <div class="port-speed">{{ iface.link_speed || (iface.is_running ? 'Connected' : 'Down') }}</div>
             </div>
           </div>
         </div>
 
-        <!-- 2. Access Ports -->
-        <div class="group" v-if="groupedInterfaces.access.length > 0">
-          <div class="group-label">Access Ports<span class="line"></span></div>
-          <div class="port-row">
-            <div 
-              v-for="iface in groupedInterfaces.access" 
-              :key="iface.name"
-              class="port"
-              :class="{
-                'selected': selectedInterface?.name === iface.name,
-                'dim': !iface.is_running || iface.is_disabled
-              }"
-              @click="selectInterface(iface)"
-            >
-              <div class="jack" :class="{'sfp': iface.type === 'sfp'}">
-                <div class="jack-bezel"></div>
-                <div class="jack-slot"></div>
-                <div class="jack-pins">
-                  <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-                </div>
-                <div class="jack-tab"></div>
-                <span class="led" :class="getLedClass(iface)"></span>
-              </div>
-              <div class="port-label" :title="iface.name">{{ shortenName(iface.name) }}</div>
-              <div class="port-speed">{{ iface.link_speed || (iface.is_running ? 'Connected' : 'Down') }}</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3. SFP Modules -->
+        <!-- 2. SFP Modules -->
         <div class="group" v-if="groupedInterfaces.sfp.length > 0">
           <div class="group-label">SFP Modules<span class="line"></span></div>
           <div class="port-row">
@@ -128,12 +99,12 @@
       </div>
 
       <!-- ================= VIRTUAL INTERFACES ================= -->
-      <div class="super-group-label virtual-label" v-if="groupedInterfaces.vlan.length || groupedInterfaces.services.length">
+      <div class="super-group-label virtual-label" v-if="groupedInterfaces.vlan.length || groupedInterfaces.vpn.length">
         <span class="icon">☁</span> VIRTUAL INTERFACES
       </div>
 
       <div class="super-group-content">
-        <!-- 4. VLAN Interfaces -->
+        <!-- 3. VLAN Interfaces -->
         <div class="group" v-if="groupedInterfaces.vlan.length > 0">
           <div class="group-label">VLAN Interfaces<span class="line"></span></div>
           <div class="port-row">
@@ -160,12 +131,12 @@
           </div>
         </div>
 
-        <!-- 5. Services & Virtual -->
-        <div class="group" v-if="groupedInterfaces.services.length > 0">
-          <div class="group-label">Services<span class="line"></span></div>
+        <!-- 4. VPN & Services -->
+        <div class="group" v-if="groupedInterfaces.vpn.length > 0">
+          <div class="group-label">VPN &amp; Services<span class="line"></span></div>
           <div class="port-row">
             <div 
-              v-for="iface in groupedInterfaces.services" 
+              v-for="iface in groupedInterfaces.vpn" 
               :key="iface.name"
               class="port"
               :class="{
@@ -272,13 +243,12 @@ const txHistory = ref<number[]>([10, 12, 9, 14, 11, 13, 10, 12, 8, 11, 10, 11, 9
 
 let trafficInterval: ReturnType<typeof setInterval> | null = null
 
-// Grouping interfaces dynamically into 5 categories
+// Grouping interfaces dynamically into 4 categories
 const groupedInterfaces = computed(() => {
-  const uplinks: RouterInterface[] = []
-  const access: RouterInterface[] = []
+  const rj45: RouterInterface[] = []
   const sfp: RouterInterface[] = []
   const vlan: RouterInterface[] = []
-  const services: RouterInterface[] = []
+  const vpn: RouterInterface[] = []
 
   interfaces.value.forEach(i => {
     const nameLower = i.name.toLowerCase()
@@ -288,16 +258,14 @@ const groupedInterfaces = computed(() => {
       sfp.push(i)
     } else if (typeLower === 'vlan' || nameLower.includes('vlan')) {
       vlan.push(i)
-    } else if (nameLower.startsWith('wg') || nameLower.startsWith('eoip') || nameLower.startsWith('gre') || nameLower.startsWith('l2tp') || nameLower === 'lo') {
-      services.push(i)
-    } else if (nameLower.includes('uplink') || nameLower.includes('core') || nameLower.includes('vman') || nameLower.includes('vpn') || nameLower === 'ether1') {
-      uplinks.push(i)
+    } else if (nameLower.startsWith('wg') || nameLower.startsWith('eoip') || nameLower.startsWith('gre') || nameLower.startsWith('l2tp') || nameLower.startsWith('ovpn') || nameLower.startsWith('pptp') || nameLower.startsWith('sstp') || nameLower === 'lo') {
+      vpn.push(i)
     } else {
-      access.push(i)
+      rj45.push(i)
     }
   })
 
-  return { uplinks, access, sfp, vlan, services }
+  return { rj45, sfp, vlan, vpn }
 })
 
 async function fetchInterfaces() {
