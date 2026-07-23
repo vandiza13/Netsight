@@ -66,7 +66,7 @@
               </div>
               <div class="port-label" :title="iface.name">{{ shortenName(iface.name) }}</div>
               <div class="port-sub"><span class="port-tag">RJ45</span></div>
-              <div class="port-speed">{{ iface.link_speed || (iface.is_running ? 'Connected' : 'Down') }}</div>
+              <div class="port-speed">{{ formatSpeed(iface) }}</div>
             </div>
           </div>
         </div>
@@ -92,7 +92,7 @@
               </div>
               <div class="port-label" :title="iface.name">{{ shortenName(iface.name) }}</div>
               <div class="port-sub"><span class="port-tag">SFP+</span></div>
-              <div class="port-speed">{{ iface.link_speed || (iface.is_running ? '10Gbps' : 'Down') }}</div>
+              <div class="port-speed">{{ formatSpeed(iface) }}</div>
             </div>
           </div>
         </div>
@@ -126,7 +126,7 @@
                 <span class="led" :class="getLedClass(iface)"></span>
               </div>
               <div class="port-label" :title="iface.name">{{ shortenName(iface.name) }}</div>
-              <div class="port-speed">{{ iface.link_speed || (iface.is_running ? '1Gbps' : 'Down') }}</div>
+              <div class="port-speed">{{ formatSpeed(iface) }}</div>
             </div>
           </div>
         </div>
@@ -153,7 +153,7 @@
                 <span class="led" :class="getLedClass(iface)"></span>
               </div>
               <div class="port-label" :title="iface.name">{{ shortenName(iface.name) }}</div>
-              <div class="port-speed">{{ iface.link_speed || (iface.is_running ? 'Active' : 'Down') }}</div>
+              <div class="port-speed">{{ formatSpeed(iface) }}</div>
             </div>
           </div>
         </div>
@@ -242,6 +242,20 @@ const rxHistory = ref<number[]>([15, 20, 18, 24, 19, 22, 17, 21, 16, 20, 18, 19,
 const txHistory = ref<number[]>([10, 12, 9, 14, 11, 13, 10, 12, 8, 11, 10, 11, 9, 10, 12])
 
 let trafficInterval: ReturnType<typeof setInterval> | null = null
+
+function formatSpeed(iface: RouterInterface): string {
+  if (!iface.is_running && !iface.is_disabled) return 'Down'
+  if (iface.is_disabled) return 'Disabled'
+  
+  // If it's an SFP+ port, force it to 10Gbps if it's 1Gbps or null, as requested
+  const nameLower = iface.name.toLowerCase()
+  if (nameLower.includes('sfp+') || nameLower.includes('sfpplus') || nameLower.includes('10g')) {
+    return '10Gbps'
+  }
+  
+  if (iface.link_speed) return iface.link_speed
+  return 'Connected'
+}
 
 // Grouping interfaces dynamically into 4 categories
 const groupedInterfaces = computed(() => {
