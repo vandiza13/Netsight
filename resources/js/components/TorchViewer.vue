@@ -2085,83 +2085,76 @@ tbody tr:last-child td { border-bottom: none; }
   .torch-viewer-overlay {
     padding: 0;
   }
-  .torch-viewer {
+  .shell {
     width: 100vw;
     height: 100vh;
     height: 100dvh;
+    max-width: 100vw;
+    max-height: 100vh;
     border-radius: 0;
     display: flex;
     flex-direction: column;
   }
-  .torch-viewer__header {
+  .header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
-    padding: 12px 16px;
+    gap: 12px;
+    padding: 16px;
+    height: auto;
   }
-  .torch-viewer__title h3 {
-    font-size: 1rem;
+  .header-left {
+    width: 100%;
   }
-  .torch-viewer__actions {
+  .actions {
     width: 100%;
     flex-wrap: wrap;
     gap: 8px;
-    justify-content: space-between;
+    justify-content: flex-start;
   }
-  .torch-viewer__actions .btn-close {
+  .actions .btn {
     padding: 6px 10px;
-    font-size: 0.75rem;
+    font-size: 11px;
+    flex: 1 1 auto;
+    justify-content: center;
   }
-  .status-badge {
-    padding: 4px 8px;
-    font-size: 0.7rem;
-  }
-  .torch-viewer__body {
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .torch-viewer__content {
-    flex: 1;
-    border-right: none;
-    border-bottom: 1px solid var(--glass-border);
-    padding: 8px;
-    overflow: hidden;
+  .body-grid {
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
-  .torch-viewer__sidebar {
+  .main-col {
+    flex: 1;
+    border-right: none;
+    border-bottom: 1px solid #1e2733;
+    padding: 12px;
+    overflow: hidden;
+  }
+  .side-col {
     flex: none;
     height: 40%;
     padding: 12px;
     overflow-y: auto;
   }
-  .table-container {
-    flex: 1;
+  .table-scroll {
     overflow-x: auto;
-    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    min-height: 150px;
   }
-  .torch-table {
-    table-layout: auto;
+  table {
     min-width: 600px;
   }
-  .torch-table th, .torch-table td {
-    padding: 8px 10px;
-    font-size: 0.75rem;
-  }
-  .torch-viewer__footer {
+  .footer {
     flex-direction: column;
-    gap: 8px;
+    align-items: flex-start;
     padding: 12px 16px;
+    gap: 12px;
   }
-  .traffic-summary {
+  .stat-group {
     flex-wrap: wrap;
     gap: 12px;
-    width: 100%;
-    justify-content: space-between;
   }
-  .summary-item {
-    width: 48%;
+  .stat {
+    width: 45%;
   }
 }
 </style>
