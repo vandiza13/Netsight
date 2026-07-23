@@ -361,11 +361,11 @@ async function fetchTraffic() {
 }
 
 const rxSparkPoints = computed(() => {
-  return rxHistory.value.map((val, idx) => `${idx * 15},${34 - val}`).join(' ')
+  return rxHistory.value.map((val, idx) => `${(idx * (220 / 14)).toFixed(1)},${34 - val}`).join(' ')
 })
 
 const txSparkPoints = computed(() => {
-  return txHistory.value.map((val, idx) => `${idx * 15},${34 - val}`).join(' ')
+  return txHistory.value.map((val, idx) => `${(idx * (220 / 14)).toFixed(1)},${34 - val}`).join(' ')
 })
 
 function getLedClass(iface: RouterInterface): string {
