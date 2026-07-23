@@ -34,8 +34,12 @@
         Tidak ada interface yang ditemukan di router ini.
       </div>
 
-      <!-- Grouped Ports -->
-      <div v-else>
+      <!-- ================= PHYSICAL INTERFACES ================= -->
+      <div class="super-group-label" v-if="groupedInterfaces.uplinks.length || groupedInterfaces.access.length || groupedInterfaces.sfp.length">
+        <span class="icon">🔌</span> PHYSICAL INTERFACES
+      </div>
+
+      <div class="super-group-content">
         <!-- 1. Uplinks & Core -->
         <div class="group" v-if="groupedInterfaces.uplinks.length > 0">
           <div class="group-label">Uplinks &amp; Core<span class="line"></span></div>
@@ -121,7 +125,14 @@
             </div>
           </div>
         </div>
+      </div>
 
+      <!-- ================= VIRTUAL INTERFACES ================= -->
+      <div class="super-group-label virtual-label" v-if="groupedInterfaces.vlan.length || groupedInterfaces.services.length">
+        <span class="icon">☁</span> VIRTUAL INTERFACES
+      </div>
+
+      <div class="super-group-content">
         <!-- 4. VLAN Interfaces -->
         <div class="group" v-if="groupedInterfaces.vlan.length > 0">
           <div class="group-label">VLAN Interfaces<span class="line"></span></div>
@@ -136,10 +147,10 @@
               }"
               @click="selectInterface(iface)"
             >
-              <div class="jack">
+              <div class="jack virtual">
                 <div class="jack-bezel"></div>
                 <div class="jack-slot"></div>
-                <div class="jack-pins"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <div class="jack-pins"></div>
                 <div class="jack-tab"></div>
                 <span class="led" :class="getLedClass(iface)"></span>
               </div>
@@ -163,10 +174,10 @@
               }"
               @click="selectInterface(iface)"
             >
-              <div class="jack">
+              <div class="jack virtual">
                 <div class="jack-bezel"></div>
                 <div class="jack-slot"></div>
-                <div class="jack-pins"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <div class="jack-pins"></div>
                 <div class="jack-tab"></div>
                 <span class="led" :class="getLedClass(iface)"></span>
               </div>
@@ -410,7 +421,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-:root {
+.interface-viewer {
   --bg: #0a0e14;
   --panel: #10161f;
   --panel-2: #0d1219;
@@ -582,6 +593,30 @@ onBeforeUnmount(() => {
   background: var(--border-soft);
 }
 
+.super-group-label {
+  font-size: 13.5px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: var(--text);
+  margin-bottom: 16px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.super-group-label.virtual-label {
+  margin-top: 36px;
+}
+
+.super-group-label .icon {
+  opacity: 0.8;
+}
+
+.super-group-content {
+  margin-left: 6px;
+}
+
 .port-row {
   display: flex;
   flex-wrap: wrap;
@@ -712,6 +747,37 @@ onBeforeUnmount(() => {
   height: 3px;
   background: #1e3538;
   border-radius: 2px;
+}
+
+/* Virtual Variant */
+.jack.virtual .jack-bezel {
+  background: linear-gradient(180deg, #242b35, #121820);
+  border-radius: 6px;
+  border: 1px dashed #3a4350;
+}
+
+.jack.virtual .jack-slot {
+  top: 10px;
+  bottom: 10px;
+  left: 10px;
+  right: 10px;
+  background: #0a0d12;
+  border-radius: 4px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.jack.virtual .jack-pins,
+.jack.virtual .jack-tab {
+  display: none;
+}
+
+.jack.virtual .led {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  right: auto;
+  width: 8px;
+  height: 8px;
 }
 
 .port-label {
