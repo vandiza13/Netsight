@@ -121,8 +121,8 @@ return [
     | @see SECURITY.md Section 4.2
     */
     'sanitization' => [
-        // Regex whitelist untuk username PPPoE (alfanumerik, titik, underscore, strip)
-        'username_pattern' => '/^[a-zA-Z0-9._\-]+$/',
+        // Regex whitelist untuk username PPPoE (alfanumerik, titik, underscore, strip, dan @ untuk email)
+        'username_pattern' => '/^[a-zA-Z0-9._\-@]+$/',
     ],
 
 ];
