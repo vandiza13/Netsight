@@ -825,7 +825,10 @@ onBeforeUnmount(() => {
   opacity: 0.55;
 }
 
-/* LIVE MONITOR SLIDE PANEL */
+</style>
+
+<style>
+/* LIVE MONITOR SLIDE PANEL (Unscoped for Teleport) */
 .monitor-overlay {
   position: fixed;
   top: 0;
