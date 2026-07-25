@@ -48,29 +48,23 @@
           />
         </section>
 
-        <!-- Main Grid Row 1 -->
-        <section class="dashboard__main-grid stagger" style="margin-top: 24px;">
-          <!-- Router Overview Chart -->
-          <div class="glass-card chart-panel">
-            <PppoeDistributionChart />
+        <!-- Main Layout -->
+        <section class="dashboard__layout stagger" style="margin-top: 24px;">
+          <!-- Left Column (Main) -->
+          <div class="layout-main">
+            <div class="glass-card table-panel">
+              <RouterHealthTable />
+            </div>
           </div>
 
-          <!-- Activity Feed Panel -->
-          <div class="glass-card feed-panel">
-            <ActivityFeed />
-          </div>
-        </section>
-
-        <!-- Main Grid Row 2 -->
-        <section class="dashboard__main-grid stagger" style="margin-top: 24px;">
-          <!-- Router Status & Fast Inspect -->
-          <div class="glass-card grid-panel">
-            <RouterHealthGrid />
-          </div>
-
-          <!-- Recent Torch Diagnostics -->
-          <div class="glass-card torch-panel">
-            <RecentTorchWidget />
+          <!-- Right Column (Sidebar/Feeds) -->
+          <div class="layout-sidebar">
+            <div class="glass-card feed-panel" style="margin-bottom: 20px;">
+              <ActivityFeed />
+            </div>
+            <div class="glass-card torch-panel">
+              <RecentTorchWidget />
+            </div>
           </div>
         </section>
       </main>
@@ -86,9 +80,8 @@ import { useRouterStore } from '../stores/routerStore'
 import SidebarNav from '../components/SidebarNav.vue'
 import TopBar from '../components/TopBar.vue'
 import StatCard from '../components/StatCard.vue'
-import PppoeDistributionChart from '../components/PppoeDistributionChart.vue'
 import ActivityFeed from '../components/ActivityFeed.vue'
-import RouterHealthGrid from '../components/RouterHealthGrid.vue'
+import RouterHealthTable from '../components/RouterHealthTable.vue'
 import RecentTorchWidget from '../components/RecentTorchWidget.vue'
 
 const auth = useAuthStore()
@@ -334,36 +327,31 @@ onBeforeUnmount(() => {
   gap: 20px;
 }
 
-/* Dashboard Grid */
-.dashboard__main-grid {
+/* Dashboard Layout */
+.dashboard__layout {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 20px;
+  grid-template-columns: 7fr 3fr;
+  gap: 24px;
 }
 
-.chart-panel {
+.table-panel {
   padding: 24px;
-  min-height: 320px;
+  min-height: 500px;
 }
 
 .feed-panel {
   padding: 20px;
-  min-height: 320px;
-}
-
-.grid-panel {
-  padding: 24px;
-  min-height: 280px;
+  min-height: 250px;
 }
 
 .torch-panel {
   padding: 20px;
-  min-height: 280px;
+  min-height: 250px;
 }
 
 /* Responsive */
 @media (max-width: 1200px) {
-  .dashboard__main-grid {
+  .dashboard__layout {
     grid-template-columns: 1fr;
   }
 }

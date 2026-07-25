@@ -1,55 +1,57 @@
 <template>
-  <div class="router-grid-container">
-    <div class="grid-header">
-      <h3 class="grid-title">
-        <span class="icon">🖧</span> Router Status & Fast Inspect
+  <div class="router-table-container">
+    <div class="table-header">
+      <h3 class="table-title">
+        <span class="icon">🖧</span> Router Overview
       </h3>
-      <button class="btn-refresh" @click="fetchRouters" :disabled="loading" title="Refresh status">
-        <span :class="{'spinning': loading}">🔄</span>
-      </button>
-    </div>
-
-    <div class="router-cards" v-if="routers.length > 0">
-      <div 
-        class="router-card" 
-        v-for="r in routers" 
-        :key="r.id"
-      >
-        <div class="card-top">
-          <div class="router-name">{{ r.name }}</div>
-          <div class="status-badge" :class="getStatusClass(r.status)">
-            <span class="dot"></span>
-            {{ r.status }}
-          </div>
-        </div>
-
-        <div class="card-details">
-          <div class="detail-item">
-            <span class="label">IP Host:</span>
-            <span class="value">{{ r.host }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">RouterOS:</span>
-            <span class="value">{{ r.routeros_version || 'v7.x' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="label">Last Sync:</span>
-            <span class="value">{{ formatTimeAgo(r.last_synced_at) }}</span>
-          </div>
-        </div>
-
-        <button class="btn-inspect" @click="goToInspect(r)">
-          🔍 Inspect Router
+      <div class="header-actions">
+        <button class="btn-refresh" @click="fetchRouters" :disabled="loading" title="Refresh data">
+          <span :class="{'spinning': loading}">🔄</span>
         </button>
       </div>
     </div>
 
-    <div class="empty-state" v-else-if="!loading">
-      No routers configured in system.
-    </div>
+    <div class="table-wrapper">
+      <table class="router-table" v-if="routers.length > 0">
+        <thead>
+          <tr>
+            <th>Router Name</th>
+            <th>Host IP</th>
+            <th>RouterOS</th>
+            <th>Status</th>
+            <th>Last Sync</th>
+            <th class="text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="r in routers" :key="r.id">
+            <td class="font-semibold text-primary">{{ r.name }}</td>
+            <td class="font-mono">{{ r.host }}</td>
+            <td class="text-muted">{{ r.routeros_version || 'v7.x' }}</td>
+            <td>
+              <div class="status-badge" :class="getStatusClass(r.status)">
+                <span class="dot"></span> {{ r.status }}
+              </div>
+            </td>
+            <td class="text-muted text-xs">{{ formatTimeAgo(r.last_synced_at) }}</td>
+            <td class="text-right">
+              <button class="btn-inspect" @click="goToInspect(r)">
+                🔍 Inspect
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-    <div class="skeleton-grid" v-else>
-      <div class="skeleton-card" v-for="n in 2" :key="n"></div>
+      <!-- Empty State -->
+      <div class="empty-state" v-else-if="!loading">
+        No routers configured.
+      </div>
+      
+      <!-- Skeleton Loader -->
+      <div class="skeleton-wrapper" v-else>
+        <div class="skeleton-row" v-for="n in 3" :key="n"></div>
+      </div>
     </div>
   </div>
 </template>
@@ -91,20 +93,20 @@ function formatTimeAgo(dateString: string | null) {
 </script>
 
 <style scoped>
-.router-grid-container {
+.router-table-container {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
-.grid-header {
+.table-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.grid-title {
+.table-title {
   font-size: 1.1rem;
   font-weight: 600;
   display: flex;
@@ -113,7 +115,7 @@ function formatTimeAgo(dateString: string | null) {
   color: var(--text-primary);
 }
 
-.grid-title .icon {
+.table-title .icon {
   font-size: 1.2rem;
 }
 
@@ -139,54 +141,64 @@ function formatTimeAgo(dateString: string | null) {
 .spinning {
   animation: spin 1s linear infinite;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+/* Table Styles */
+.table-wrapper {
+  overflow-x: auto;
+  flex: 1;
 }
 
-.router-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
+.router-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
 }
 
-.router-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
-  border-radius: 12px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  transition: all 0.2s ease;
-}
-
-.router-card:hover {
-  border-color: rgba(34, 211, 238, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
-
-.card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.router-name {
+.router-table th {
+  padding: 12px 16px;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim, #5c6774);
   font-weight: 600;
-  font-size: 1rem;
-  color: var(--text-primary);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.router-table td {
+  padding: 14px 16px;
+  font-size: 0.9rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  vertical-align: middle;
+}
+
+.router-table tr:last-child td {
+  border-bottom: none;
+}
+
+.router-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* Typography Utils */
+.font-semibold { font-weight: 600; }
+.font-mono { font-family: var(--font-mono, monospace); font-size: 0.85rem; color: var(--cyan, #22d3ee); }
+.text-primary { color: var(--text-primary); }
+.text-muted { color: var(--text-muted, #8b96a5); }
+.text-xs { font-size: 0.8rem; }
+.text-right { text-align: right; }
+
+/* Status Badges */
 .status-badge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   font-size: 0.75rem;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 20px;
+  white-space: nowrap;
 }
 
 .status-badge .dot {
@@ -213,39 +225,18 @@ function formatTimeAgo(dateString: string | null) {
 }
 .status--unreachable .dot { background: var(--accent-red, #ef4444); }
 
-.card-details {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 0.82rem;
-}
-
-.detail-item {
-  display: flex;
-  justify-content: space-between;
-}
-
-.detail-item .label {
-  color: var(--text-muted, #8b96a5);
-}
-
-.detail-item .value {
-  color: var(--text-primary);
-  font-family: var(--font-mono, monospace);
-}
-
+/* Buttons */
 .btn-inspect {
-  margin-top: 4px;
-  width: 100%;
-  padding: 8px 12px;
+  padding: 6px 12px;
   background: rgba(34, 211, 238, 0.1);
   border: 1px solid rgba(34, 211, 238, 0.25);
   color: var(--accent-cyan, #22d3ee);
-  border-radius: 8px;
-  font-size: 0.85rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .btn-inspect:hover {
@@ -253,23 +244,25 @@ function formatTimeAgo(dateString: string | null) {
   border-color: rgba(34, 211, 238, 0.4);
 }
 
+/* States */
 .empty-state {
+  padding: 40px 0;
+  text-align: center;
   color: var(--text-dim);
   font-size: 0.9rem;
-  padding: 30px 0;
-  text-align: center;
 }
 
-.skeleton-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+.skeleton-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
 }
 
-.skeleton-card {
-  height: 120px;
+.skeleton-row {
+  height: 40px;
   background: rgba(255, 255, 255, 0.03);
-  border-radius: 12px;
+  border-radius: 6px;
   animation: pulse 1.5s infinite;
 }
 
