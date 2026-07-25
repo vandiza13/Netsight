@@ -89,7 +89,20 @@ function getIconClass(action: string) {
 }
 
 function getActionText(action: string) {
-  return action.replace(/_/g, ' ').toLowerCase()
+  const a = action.toLowerCase()
+  if (a.includes('auth/complete-onboarding') || a.includes('onboarding completed')) return 'menyelesaikan pengaturan awal sistem'
+  if (a.includes('auth login success') || a.includes('login')) return 'berhasil masuk ke sistem'
+  if (a.includes('logout')) return 'keluar dari sistem'
+  if (a.includes('torch') && a.includes('cancel')) return 'menghentikan inspeksi Torch'
+  if (a.includes('torch') && (a.includes('heartbeat') || a.includes('monitor'))) return 'memantau aliran Torch'
+  if (a.includes('torch')) return 'memulai inspeksi Torch'
+  if (a.includes('sync')) return 'melakukan sinkronisasi router'
+  if (a.includes('create') || a.includes('add')) return 'menambahkan data baru'
+  if (a.includes('update') || a.includes('edit')) return 'memperbarui data'
+  if (a.includes('delete') || a.includes('remove')) return 'menghapus data'
+  
+  // Fallback cleanup
+  return 'mengakses ' + a.replace(/post api\//g, '').replace(/get api\//g, '').replace(/\//g, ' ')
 }
 
 function formatTimeAgo(dateString: string) {
