@@ -48,15 +48,15 @@
           />
         </section>
 
-        <!-- Add simple system overview or leave it as stats only -->
-        <section class="dashboard__system-overview fade-in" style="margin-top: 32px;">
-          <div class="glass-card">
-            <div class="dashboard__panel-header">
-              <h3 class="dashboard__panel-title">System Overview</h3>
-            </div>
-            <div class="panel-content" style="padding: 24px; color: var(--text-dim);">
-              <p>Welcome to Netsight Dashboard. Use the <strong>Inspect</strong> menu on the sidebar to monitor interfaces, diagnostic history, and active sessions.</p>
-            </div>
+        <section class="dashboard__main-grid stagger" style="margin-top: 24px;">
+          <!-- Chart Panel -->
+          <div class="glass-card chart-panel">
+            <TrafficChart />
+          </div>
+
+          <!-- Activity Feed Panel -->
+          <div class="glass-card feed-panel">
+            <ActivityFeed />
           </div>
         </section>
       </main>
@@ -74,6 +74,8 @@ import { useRouterStore } from '../stores/routerStore'
 import SidebarNav from '../components/SidebarNav.vue'
 import TopBar from '../components/TopBar.vue'
 import StatCard from '../components/StatCard.vue'
+import TrafficChart from '../components/TrafficChart.vue'
+import ActivityFeed from '../components/ActivityFeed.vue'
 
 const auth = useAuthStore()
 const routerStore = useRouterStore()
@@ -315,9 +317,34 @@ onBeforeUnmount(() => {
   padding: 12px;
   border-radius: 8px;
   font-size: 0.85rem;
+  gap: 20px;
 }
 
+/* Dashboard Grid */
+.dashboard__main-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+.chart-panel {
+  padding: 24px;
+  min-height: 380px;
+}
+
+.feed-panel {
+  padding: 20px;
+  min-height: 380px;
+}
+
+/* Responsive */
 @media (max-width: 1200px) {
+  .dashboard__main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
   .dashboard__stats {
     grid-template-columns: repeat(2, 1fr);
   }
