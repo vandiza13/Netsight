@@ -160,49 +160,55 @@
       </div>
     </div>
 
-    <!-- LIVE MONITOR (Only displayed when an interface is selected) -->
-    <div class="monitor fade-in" v-if="selectedInterface">
-      <div class="monitor-head">
-        <div class="monitor-title">⚡ Live Monitor: <span class="name">{{ selectedInterface.name }}</span></div>
-        <span class="link-up" :class="selectedInterface.is_running ? 'link-up--active' : 'link-up--down'">
-          <span class="dot"></span>
-          {{ selectedInterface.is_running ? 'LINK UP (Running)' : 'LINK DOWN' }}
-        </span>
-      </div>
-      <div class="mac">MAC: {{ selectedInterface.mac_address || 'N/A' }}</div>
-
-      <div class="traffic-grid">
-        <!-- Download RX -->
-        <div class="traffic-card">
-          <div class="traffic-label">Download Traffic (RX)</div>
-          <div class="traffic-value rx">
-            {{ formatBpsParts(trafficData.rx_bps).val }} 
-            <span class="unit">{{ formatBpsParts(trafficData.rx_bps).unit }}</span>
-          </div>
-          <div class="traffic-pkts">{{ trafficData.rx_packet_per_sec.toLocaleString() }} pkts/sec</div>
-          <svg class="spark" width="100%" height="34" viewBox="0 0 220 34" preserveAspectRatio="none">
-            <polyline fill="none" stroke="var(--cyan)" stroke-width="1.6" :points="rxSparkPoints"/>
-          </svg>
+    <!-- LIVE MONITOR SLIDE PANEL -->
+    <div class="monitor-overlay" v-if="selectedInterface" @click="selectedInterface = null"></div>
+    <div class="monitor-panel" :class="{ 'is-open': selectedInterface }">
+      <div v-if="selectedInterface" class="monitor-panel-content">
+        <div class="monitor-head">
+          <div class="monitor-title">⚡ Live Monitor: <span class="name">{{ selectedInterface.name }}</span></div>
+          <button class="btn-close-monitor" @click="selectedInterface = null" title="Close Panel">✕</button>
+        </div>
+        <div class="monitor-subhead">
+          <span class="link-up" :class="selectedInterface.is_running ? 'link-up--active' : 'link-up--down'">
+            <span class="dot"></span>
+            {{ selectedInterface.is_running ? 'LINK UP (Running)' : 'LINK DOWN' }}
+          </span>
+          <div class="mac">MAC: {{ selectedInterface.mac_address || 'N/A' }}</div>
         </div>
 
-        <!-- Upload TX -->
-        <div class="traffic-card">
-          <div class="traffic-label">Upload Traffic (TX)</div>
-          <div class="traffic-value tx">
-            {{ formatBpsParts(trafficData.tx_bps).val }} 
-            <span class="unit">{{ formatBpsParts(trafficData.tx_bps).unit }}</span>
+        <div class="traffic-grid">
+          <!-- Download RX -->
+          <div class="traffic-card">
+            <div class="traffic-label">Download Traffic (RX)</div>
+            <div class="traffic-value rx">
+              {{ formatBpsParts(trafficData.rx_bps).val }} 
+              <span class="unit">{{ formatBpsParts(trafficData.rx_bps).unit }}</span>
+            </div>
+            <div class="traffic-pkts">{{ trafficData.rx_packet_per_sec.toLocaleString() }} pkts/sec</div>
+            <svg class="spark" width="100%" height="34" viewBox="0 0 220 34" preserveAspectRatio="none">
+              <polyline fill="none" stroke="var(--cyan)" stroke-width="1.6" :points="rxSparkPoints"/>
+            </svg>
           </div>
-          <div class="traffic-pkts">{{ trafficData.tx_packet_per_sec.toLocaleString() }} pkts/sec</div>
-          <svg class="spark" width="100%" height="34" viewBox="0 0 220 34" preserveAspectRatio="none">
-            <polyline fill="none" stroke="var(--orange)" stroke-width="1.6" :points="txSparkPoints"/>
-          </svg>
-        </div>
-      </div>
 
-      <div class="meta-row">
-        <span>Link Speed: <b>{{ selectedInterface.link_speed || 'N/A' }}</b></span>
-        <span>Type: <b>{{ selectedInterface.type.toUpperCase() }}</b></span>
-        <span>Status: <b :style="{ color: selectedInterface.is_disabled ? 'var(--orange)' : 'var(--green)' }">{{ selectedInterface.is_disabled ? 'Disabled' : 'Enabled' }}</b></span>
+          <!-- Upload TX -->
+          <div class="traffic-card">
+            <div class="traffic-label">Upload Traffic (TX)</div>
+            <div class="traffic-value tx">
+              {{ formatBpsParts(trafficData.tx_bps).val }} 
+              <span class="unit">{{ formatBpsParts(trafficData.tx_bps).unit }}</span>
+            </div>
+            <div class="traffic-pkts">{{ trafficData.tx_packet_per_sec.toLocaleString() }} pkts/sec</div>
+            <svg class="spark" width="100%" height="34" viewBox="0 0 220 34" preserveAspectRatio="none">
+              <polyline fill="none" stroke="var(--orange)" stroke-width="1.6" :points="txSparkPoints"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="meta-row">
+          <span>Link Speed: <b>{{ selectedInterface.link_speed || 'N/A' }}</b></span>
+          <span>Type: <b>{{ selectedInterface.type.toUpperCase() }}</b></span>
+          <span>Status: <b :style="{ color: selectedInterface.is_disabled ? 'var(--orange)' : 'var(--green)' }">{{ selectedInterface.is_disabled ? 'Disabled' : 'Enabled' }}</b></span>
+        </div>
       </div>
     </div>
   </div>
@@ -817,24 +823,85 @@ onBeforeUnmount(() => {
   opacity: 0.55;
 }
 
-/* LIVE MONITOR */
-.monitor {
-  margin-top: 24px;
-  background: linear-gradient(160deg, rgba(34,211,238,0.05), var(--panel) 40%);
-  border: 1px solid rgba(34,211,238,0.3);
-  border-radius: 14px;
-  padding: 20px 22px;
+/* LIVE MONITOR SLIDE PANEL */
+.monitor-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 900;
+  animation: fadeIn 0.3s ease;
+}
+
+.monitor-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 100vh;
+  height: 100dvh;
+  background: #10161f;
+  border-left: 1px solid rgba(34, 211, 238, 0.2);
+  box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+  z-index: 910;
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.monitor-panel.is-open {
+  transform: translateX(0);
+}
+
+.monitor-panel-content {
+  padding: 24px;
+  overflow-y: auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  background: linear-gradient(160deg, rgba(34,211,238,0.03), transparent 30%);
 }
 
 .monitor-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+}
+
+.btn-close-monitor {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-dim);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 14px;
+}
+.btn-close-monitor:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--red);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.monitor-subhead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: -10px;
 }
 
 .monitor-title {
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -888,7 +955,6 @@ onBeforeUnmount(() => {
   font-family: var(--mono);
   font-size: 11px;
   color: var(--text-dimmer);
-  margin-bottom: 16px;
 }
 
 .traffic-grid {
@@ -959,7 +1025,24 @@ onBeforeUnmount(() => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .monitor-panel {
+    top: auto;
+    bottom: 0;
+    right: 0;
+    width: 100vw;
+    height: 70vh;
+    border-left: none;
+    border-top: 1px solid rgba(34, 211, 238, 0.2);
+    border-radius: 20px 20px 0 0;
+    transform: translateY(100%);
+  }
+  .monitor-panel.is-open {
+    transform: translateY(0);
+  }
 }
 </style>
