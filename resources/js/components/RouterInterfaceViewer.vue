@@ -842,6 +842,22 @@ onBeforeUnmount(() => {
 }
 
 .monitor-panel {
+  --bg: #0a0e14;
+  --panel: #10161f;
+  --panel-2: #0d1219;
+  --border: #1e2733;
+  --border-soft: #161d27;
+  --text: #e8ecf1;
+  --text-dim: #8b96a5;
+  --text-dimmer: #5c6774;
+  --teal: #2dd4bf;
+  --cyan: #22d3ee;
+  --green: #22c55e;
+  --orange: #f5a623;
+  --red: #ef4444;
+  --mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  --sans: 'Inter', -apple-system, sans-serif;
+
   position: fixed;
   top: 0;
   right: 0;
@@ -849,6 +865,8 @@ onBeforeUnmount(() => {
   height: 100vh;
   height: 100dvh;
   background: #10161f;
+  color: var(--text);
+  font-family: var(--sans);
   border-left: 1px solid rgba(34, 211, 238, 0.2);
   box-shadow: -10px 0 30px rgba(0,0,0,0.5);
   z-index: 910;
