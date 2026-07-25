@@ -161,56 +161,58 @@
     </div>
 
     <!-- LIVE MONITOR SLIDE PANEL -->
-    <div class="monitor-overlay" v-if="selectedInterface" @click="selectedInterface = null"></div>
-    <div class="monitor-panel" :class="{ 'is-open': selectedInterface }">
-      <div v-if="selectedInterface" class="monitor-panel-content">
-        <div class="monitor-head">
-          <div class="monitor-title">⚡ Live Monitor: <span class="name">{{ selectedInterface.name }}</span></div>
-          <button class="btn-close-monitor" @click="selectedInterface = null" title="Close Panel">✕</button>
-        </div>
-        <div class="monitor-subhead">
-          <span class="link-up" :class="selectedInterface.is_running ? 'link-up--active' : 'link-up--down'">
-            <span class="dot"></span>
-            {{ selectedInterface.is_running ? 'LINK UP (Running)' : 'LINK DOWN' }}
-          </span>
-          <div class="mac">MAC: {{ selectedInterface.mac_address || 'N/A' }}</div>
-        </div>
-
-        <div class="traffic-grid">
-          <!-- Download RX -->
-          <div class="traffic-card">
-            <div class="traffic-label">Download Traffic (RX)</div>
-            <div class="traffic-value rx">
-              {{ formatBpsParts(trafficData.rx_bps).val }} 
-              <span class="unit">{{ formatBpsParts(trafficData.rx_bps).unit }}</span>
-            </div>
-            <div class="traffic-pkts">{{ trafficData.rx_packet_per_sec.toLocaleString() }} pkts/sec</div>
-            <svg class="spark" width="100%" height="34" viewBox="0 0 220 34" preserveAspectRatio="none">
-              <polyline fill="none" stroke="var(--cyan)" stroke-width="1.6" :points="rxSparkPoints"/>
-            </svg>
+    <Teleport to="body">
+      <div class="monitor-overlay" v-if="selectedInterface" @click="selectedInterface = null"></div>
+      <div class="monitor-panel" :class="{ 'is-open': selectedInterface }">
+        <div v-if="selectedInterface" class="monitor-panel-content">
+          <div class="monitor-head">
+            <div class="monitor-title">⚡ Live Monitor: <span class="name">{{ selectedInterface.name }}</span></div>
+            <button class="btn-close-monitor" @click="selectedInterface = null" title="Close Panel">✕</button>
+          </div>
+          <div class="monitor-subhead">
+            <span class="link-up" :class="selectedInterface.is_running ? 'link-up--active' : 'link-up--down'">
+              <span class="dot"></span>
+              {{ selectedInterface.is_running ? 'LINK UP (Running)' : 'LINK DOWN' }}
+            </span>
+            <div class="mac">MAC: {{ selectedInterface.mac_address || 'N/A' }}</div>
           </div>
 
-          <!-- Upload TX -->
-          <div class="traffic-card">
-            <div class="traffic-label">Upload Traffic (TX)</div>
-            <div class="traffic-value tx">
-              {{ formatBpsParts(trafficData.tx_bps).val }} 
-              <span class="unit">{{ formatBpsParts(trafficData.tx_bps).unit }}</span>
+          <div class="traffic-grid">
+            <!-- Download RX -->
+            <div class="traffic-card">
+              <div class="traffic-label">Download Traffic (RX)</div>
+              <div class="traffic-value rx">
+                {{ formatBpsParts(trafficData.rx_bps).val }} 
+                <span class="unit">{{ formatBpsParts(trafficData.rx_bps).unit }}</span>
+              </div>
+              <div class="traffic-pkts">{{ trafficData.rx_packet_per_sec.toLocaleString() }} pkts/sec</div>
+              <svg class="spark" width="100%" height="34" viewBox="0 0 220 34" preserveAspectRatio="none">
+                <polyline fill="none" stroke="var(--cyan)" stroke-width="1.6" :points="rxSparkPoints"/>
+              </svg>
             </div>
-            <div class="traffic-pkts">{{ trafficData.tx_packet_per_sec.toLocaleString() }} pkts/sec</div>
-            <svg class="spark" width="100%" height="34" viewBox="0 0 220 34" preserveAspectRatio="none">
-              <polyline fill="none" stroke="var(--orange)" stroke-width="1.6" :points="txSparkPoints"/>
-            </svg>
-          </div>
-        </div>
 
-        <div class="meta-row">
-          <span>Link Speed: <b>{{ selectedInterface.link_speed || 'N/A' }}</b></span>
-          <span>Type: <b>{{ selectedInterface.type.toUpperCase() }}</b></span>
-          <span>Status: <b :style="{ color: selectedInterface.is_disabled ? 'var(--orange)' : 'var(--green)' }">{{ selectedInterface.is_disabled ? 'Disabled' : 'Enabled' }}</b></span>
+            <!-- Upload TX -->
+            <div class="traffic-card">
+              <div class="traffic-label">Upload Traffic (TX)</div>
+              <div class="traffic-value tx">
+                {{ formatBpsParts(trafficData.tx_bps).val }} 
+                <span class="unit">{{ formatBpsParts(trafficData.tx_bps).unit }}</span>
+              </div>
+              <div class="traffic-pkts">{{ trafficData.tx_packet_per_sec.toLocaleString() }} pkts/sec</div>
+              <svg class="spark" width="100%" height="34" viewBox="0 0 220 34" preserveAspectRatio="none">
+                <polyline fill="none" stroke="var(--orange)" stroke-width="1.6" :points="txSparkPoints"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="meta-row">
+            <span>Link Speed: <b>{{ selectedInterface.link_speed || 'N/A' }}</b></span>
+            <span>Type: <b>{{ selectedInterface.type.toUpperCase() }}</b></span>
+            <span>Status: <b :style="{ color: selectedInterface.is_disabled ? 'var(--orange)' : 'var(--green)' }">{{ selectedInterface.is_disabled ? 'Disabled' : 'Enabled' }}</b></span>
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
