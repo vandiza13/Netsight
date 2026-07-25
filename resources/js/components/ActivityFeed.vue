@@ -16,11 +16,8 @@
         </div>
         <div class="feed-content">
           <div class="feed-desc">
-            <span class="feed-user">{{ log.user?.name || 'System' }}</span> 
-            {{ getActionText(log.action) }} 
-            <span class="feed-target" v-if="log.target_type">
-              {{ log.target_type }} <span v-if="log.target_id">#{{ log.target_id }}</span>
-            </span>
+            <span class="feed-user font-semibold text-primary">{{ log.staff?.name || 'Sistem' }}</span> 
+            {{ getActionText(log) }} 
           </div>
           <div class="feed-time">{{ formatTimeAgo(log.created_at) }}</div>
         </div>
@@ -39,13 +36,14 @@ import api from '../utils/api'
 
 interface AuditLog {
   id: number
-  user_id: number | null
+  staff_noc_id: number | null
   action: string
   target_type: string | null
   target_id: string | null
   ip_address: string | null
   created_at: string
-  user: { name: string, role: string } | null
+  staff: { name: string, role: string } | null
+  router: { name: string } | null
 }
 
 const logs = ref<AuditLog[]>([])
@@ -88,19 +86,28 @@ function getIconClass(action: string) {
   return 'is-info'
 }
 
-function getActionText(action: string) {
-  const a = action.toLowerCase()
+function getActionText(log: AuditLog) {
+  const a = log.action.toLowerCase()
+  const router = log.router?.name ? ` router ${log.router.name}` : ''
+  const target = log.target_type ? ` ${log.target_type.toLowerCase()}` : ' data'
+  const targetId = log.target_id ? ` #${log.target_id}` : ''
+  
+  const targetStr = `${target}${targetId}`
+
   if (a.includes('auth/complete-onboarding') || a.includes('onboarding completed')) return 'menyelesaikan pengaturan awal sistem'
   if (a.includes('auth login success') || a.includes('login')) return 'berhasil masuk ke sistem'
   if (a.includes('logout')) return 'keluar dari sistem'
-  if (a.includes('torch') && a.includes('cancel')) return 'menghentikan inspeksi Torch'
-  if (a.includes('torch') && (a.includes('heartbeat') || a.includes('monitor'))) return 'memantau aliran Torch'
-  if (a.includes('torch')) return 'memulai inspeksi Torch'
-  if (a.includes('sync')) return 'melakukan sinkronisasi router'
-  if (a.includes('create') || a.includes('add')) return 'menambahkan data baru'
-  if (a.includes('update') || a.includes('edit')) return 'memperbarui data'
-  if (a.includes('delete') || a.includes('remove')) return 'menghapus data'
+  if (a.includes('torch') && a.includes('cancel')) return `menghentikan inspeksi jaringan (Torch)${router}`
+  if (a.includes('torch') && (a.includes('heartbeat') || a.includes('monitor'))) return `memantau aliran jaringan (Torch)${router}`
+  if (a.includes('torch')) return `memulai inspeksi jaringan (Torch)${router}`
+  if (a.includes('sync')) return `melakukan sinkronisasi${router}`
   
+  if (a.includes('create') || a.includes('add')) return `menambahkan${targetStr} baru`
+  if (a.includes('update') || a.includes('edit')) return `memperbarui${targetStr}`
+  if (a.includes('delete') || a.includes('remove')) return `menghapus${targetStr}`
+  if (a.includes('assign')) return `menugaskan${targetStr}`
+  if (a.includes('revoke')) return `mencabut akses${targetStr}`
+
   // Fallback cleanup
   return 'mengakses ' + a.replace(/post api\//g, '').replace(/get api\//g, '').replace(/\//g, ' ')
 }
