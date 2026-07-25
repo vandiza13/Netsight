@@ -1999,35 +1999,43 @@ tbody tr:last-child td { border-bottom: none; }
   border-radius: 0 !important;
   border: 1px solid #ccc !important;
 }
-.winbox-mode .torch-table th {
+.winbox-mode table th {
   background: #f0f0f0 !important;
   color: #333 !important;
   padding: 4px 8px !important;
-  font-size: 0.75rem !important;
+  font-size: 11px !important;
   border: 1px solid #dcdcdc !important;
   text-transform: none !important;
   letter-spacing: normal !important;
 }
-.winbox-mode .torch-table td {
+.winbox-mode table td {
   padding: 2px 8px !important;
   border: 1px solid #e0e0e0 !important;
   color: #000 !important;
-  font-size: 0.75rem !important;
-  font-family: var(--font-mono, monospace);
+  font-size: 11px !important;
+  font-family: var(--mono) !important;
 }
-.winbox-mode .torch-table tbody tr:nth-child(even) {
+.winbox-mode table tbody tr:nth-child(even) {
   background: #f9f9f9 !important;
 }
-.winbox-mode .torch-table tbody tr:hover {
+.winbox-mode table tbody tr:hover {
   background: #e6f7ff !important;
 }
-.winbox-mode .badge-service, .winbox-mode .badge-geo {
+.winbox-mode .app-chip, 
+.winbox-mode .dest-loc,
+.winbox-mode .dest-sub,
+.winbox-mode .proto,
+.winbox-mode .ip-empty,
+.winbox-mode .dest-ip {
   background: transparent !important;
   color: #000 !important;
+  border: none !important;
   padding: 0 !important;
   font-weight: normal !important;
+  font-family: var(--mono) !important;
 }
-.winbox-mode .tx-rate, .winbox-mode .rx-rate {
+.winbox-mode .num-tx, 
+.winbox-mode .num-rx {
   color: #000 !important;
 }
 .winbox-mode .text-muted {
@@ -2127,7 +2135,7 @@ tbody tr:last-child td { border-bottom: none; }
     border-right: none;
     border-bottom: 1px solid #1e2733;
     padding: 12px;
-    overflow: hidden;
+    overflow-y: auto;
   }
   .side-col {
     flex: none;
