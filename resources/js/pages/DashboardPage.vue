@@ -48,10 +48,11 @@
           />
         </section>
 
+        <!-- Main Grid Row 1 -->
         <section class="dashboard__main-grid stagger" style="margin-top: 24px;">
-          <!-- Chart Panel -->
+          <!-- Router Overview Chart -->
           <div class="glass-card chart-panel">
-            <TrafficChart />
+            <PppoeDistributionChart />
           </div>
 
           <!-- Activity Feed Panel -->
@@ -59,23 +60,36 @@
             <ActivityFeed />
           </div>
         </section>
+
+        <!-- Main Grid Row 2 -->
+        <section class="dashboard__main-grid stagger" style="margin-top: 24px;">
+          <!-- Router Status & Fast Inspect -->
+          <div class="glass-card grid-panel">
+            <RouterHealthGrid />
+          </div>
+
+          <!-- Recent Torch Diagnostics -->
+          <div class="glass-card torch-panel">
+            <RecentTorchWidget />
+          </div>
+        </section>
       </main>
     </div>
-
-
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '../stores/authStore'
 import { useRouterStore } from '../stores/routerStore'
 import SidebarNav from '../components/SidebarNav.vue'
 import TopBar from '../components/TopBar.vue'
 import StatCard from '../components/StatCard.vue'
-import TrafficChart from '../components/TrafficChart.vue'
+import PppoeDistributionChart from '../components/PppoeDistributionChart.vue'
 import ActivityFeed from '../components/ActivityFeed.vue'
+import RouterHealthGrid from '../components/RouterHealthGrid.vue'
+import RecentTorchWidget from '../components/RecentTorchWidget.vue'
 
 const auth = useAuthStore()
 const routerStore = useRouterStore()
@@ -329,12 +343,22 @@ onBeforeUnmount(() => {
 
 .chart-panel {
   padding: 24px;
-  min-height: 380px;
+  min-height: 320px;
 }
 
 .feed-panel {
   padding: 20px;
-  min-height: 380px;
+  min-height: 320px;
+}
+
+.grid-panel {
+  padding: 24px;
+  min-height: 280px;
+}
+
+.torch-panel {
+  padding: 20px;
+  min-height: 280px;
 }
 
 /* Responsive */
