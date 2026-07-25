@@ -31,6 +31,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, transition: 'slide' },
   },
   {
+    path: '/inspect',
+    name: 'Inspect',
+    component: () => import('../pages/InspectPage.vue'),
+    meta: { requiresAuth: true, transition: 'slide' },
+  },
+  {
     path: '/routers',
     name: 'Routers',
     component: () => import('../pages/RouterManagementPage.vue'),

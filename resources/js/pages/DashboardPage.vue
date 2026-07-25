@@ -48,119 +48,21 @@
           />
         </section>
 
-        <!-- Main Workspace -->
-        <section class="dashboard__panels stagger">
-          
-          <!-- Left Panel: Router Selection -->
-          <div class="glass-card dashboard__panel dashboard__sidebar-panel">
+        <!-- Add simple system overview or leave it as stats only -->
+        <section class="dashboard__system-overview fade-in" style="margin-top: 32px;">
+          <div class="glass-card">
             <div class="dashboard__panel-header">
-              <h3 class="dashboard__panel-title">🖧 Routers</h3>
-              <button class="btn-refresh" @click="fetchRouters" :disabled="loadingRouters" title="Refresh list">
-                <span :class="{'spinning': loadingRouters}">🔄</span>
-              </button>
+              <h3 class="dashboard__panel-title">System Overview</h3>
             </div>
-            
-            <div class="router-list" v-if="routers.length > 0">
-              <RouterCard 
-                v-for="r in routers" 
-                :key="r.id" 
-                :router="r" 
-                :is-selected="selectedRouter?.id === r.id"
-                @select="selectRouter(r.id)"
-              />
-            </div>
-            <div class="router-list empty-state" v-else-if="!loadingRouters">
-              No routers found.
-            </div>
-            <div class="router-list skeleton-list" v-else>
-               <div class="skeleton-card" v-for="n in 3" :key="n"></div>
+            <div class="panel-content" style="padding: 24px; color: var(--text-dim);">
+              <p>Welcome to Netsight Dashboard. Use the <strong>Inspect</strong> menu on the sidebar to monitor interfaces, diagnostic history, and active sessions.</p>
             </div>
           </div>
-
-          <!-- Right Panel: PPPoE Users / Details -->
-          <div class="glass-card dashboard__panel dashboard__main-panel">
-            <div class="dashboard__panel-header-tabs" v-if="selectedRouter">
-              <button 
-                class="panel-tab-btn" 
-                :class="{ 'panel-tab-btn--active': activeTab === 'users' }"
-                @click="activeTab = 'users'"
-              >
-                📡 Active Users
-              </button>
-              <button 
-                class="panel-tab-btn" 
-                :class="{ 'panel-tab-btn--active': activeTab === 'interfaces' }"
-                @click="activeTab = 'interfaces'"
-              >
-                🔌 Interfaces
-              </button>
-              <button 
-                class="panel-tab-btn" 
-                :class="{ 'panel-tab-btn--active': activeTab === 'history' }"
-                @click="activeTab = 'history'"
-              >
-                📋 Diagnostic History
-              </button>
-            </div>
-            <div class="dashboard__panel-header" v-else>
-              <h3 class="dashboard__panel-title">📡 User Details</h3>
-            </div>
-            
-            <div class="panel-content" v-if="selectedRouter">
-              <div v-show="activeTab === 'users'">
-                <PppoeUserTable 
-                  :users="pppoeUsers"
-                  :loading="loadingUsers"
-                  :is-syncing="syncing"
-                  :pagination="pppoePagination"
-                  @search="handleSearch"
-                  @page-change="handlePageChange"
-                  @force-sync="triggerForceSync"
-                  @inspect="startTorch"
-                />
-              </div>
-
-              <div v-if="activeTab === 'interfaces'">
-                <RouterInterfaceViewer 
-                  :router-id="selectedRouter.id"
-                />
-              </div>
-
-              <div v-show="activeTab === 'history'">
-                <TorchHistoryTable 
-                  :router-id="selectedRouter.id"
-                  @view-report="id => selectedReportId = id"
-                />
-              </div>
-              
-              <div v-if="syncError" class="alert alert-error fade-in">
-                {{ syncError }}
-              </div>
-            </div>
-            
-            <div class="panel-content empty-selection" v-else>
-              <div class="empty-icon">👈</div>
-              <p>Select a router from the left panel to view PPPoE users and perform Torch inspection.</p>
-            </div>
-          </div>
-          
         </section>
       </main>
     </div>
 
-    <!-- Torch Viewer Overlay -->
-    <TorchViewer 
-      v-if="activeTorchUser && selectedRouter"
-      :router-id="selectedRouter.id"
-      :username="activeTorchUser"
-      @close="activeTorchUser = null"
-    />
-    <!-- Torch Report Modal Overlay -->
-    <TorchHistoryModal
-      v-if="selectedReportId"
-      :session-id="selectedReportId"
-      @close="selectedReportId = null"
-    />
+
   </div>
 </template>
 
@@ -172,31 +74,18 @@ import { useRouterStore } from '../stores/routerStore'
 import SidebarNav from '../components/SidebarNav.vue'
 import TopBar from '../components/TopBar.vue'
 import StatCard from '../components/StatCard.vue'
-import RouterCard from '../components/RouterCard.vue'
-import PppoeUserTable from '../components/PppoeUserTable.vue'
-import TorchViewer from '../components/TorchViewer.vue'
-import TorchHistoryTable from '../components/TorchHistoryTable.vue'
-import TorchHistoryModal from '../components/TorchHistoryModal.vue'
-import RouterInterfaceViewer from '../components/RouterInterfaceViewer.vue'
 
 const auth = useAuthStore()
 const routerStore = useRouterStore()
 const sidebarOpen = ref(false)
-const activeTorchUser = ref<string | null>(null)
-const activeTab = ref<'users' | 'interfaces' | 'history'>('users')
-const selectedReportId = ref<number | null>(null)
 
 const { 
   routers, 
-  selectedRouter, 
-  pppoeUsers, 
-  pppoePagination, 
-  loading: loadingRouters, 
-  loadingUsers, 
-  error 
+  selectedRouter,
+  pppoePagination
 } = storeToRefs(routerStore)
 
-const { fetchRouters, selectRouter, fetchPppoeUsers, forceSync } = routerStore
+const { fetchRouters } = routerStore
 
 // Computed stats (stubbed totals combined with real data)
 const stats = computed(() => {
@@ -204,7 +93,7 @@ const stats = computed(() => {
   return {
     routersOnline: `${healthy} / ${routers.value.length}`,
     pppoeSessions: selectedRouter.value ? pppoePagination.value.total : '---', // Showing total for selected for now
-    torchSessions: activeTorchUser.value ? 1 : 0,
+    torchSessions: 0,
     systemStatus: healthy === routers.value.length && healthy > 0 ? 'Healthy' : 'Degraded',
   }
 })
@@ -218,10 +107,6 @@ onMounted(() => {
   // Polling data every 60 seconds to keep dashboard fresh
   autoRefreshInterval = setInterval(() => {
     fetchRouters()
-    if (selectedRouter.value) {
-      // Refresh current page of PPPoE users with active search filter
-      fetchPppoeUsers(pppoePagination.value.currentPage, currentSearch.value)
-    }
   }, 60000)
 })
 
@@ -230,43 +115,6 @@ onBeforeUnmount(() => {
     clearInterval(autoRefreshInterval)
   }
 })
-
-// PppoeUserTable handlers
-const currentSearch = ref('')
-const syncing = ref(false)
-const syncError = ref('')
-
-function handleSearch(query: string) {
-  currentSearch.value = query
-  fetchPppoeUsers(1, query)
-}
-
-function handlePageChange(page: number) {
-  fetchPppoeUsers(page, currentSearch.value)
-}
-
-async function triggerForceSync() {
-  if (!selectedRouter.value) return
-  syncing.value = true
-  syncError.value = ''
-  try {
-    await forceSync(selectedRouter.value.id)
-    // Wait a bit then refresh users list
-    setTimeout(() => {
-      fetchPppoeUsers(pppoePagination.value.currentPage, currentSearch.value)
-      syncing.value = false
-    }, 2000)
-  } catch (err: any) {
-    syncError.value = err.message
-    syncing.value = false
-    
-    setTimeout(() => { syncError.value = '' }, 5000)
-  }
-}
-
-function startTorch(username: string) {
-  activeTorchUser.value = username
-}
 </script>
 
 <style scoped>

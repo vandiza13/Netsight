@@ -96,8 +96,12 @@ watch(() => route.path, (newPath) => {
     activeItem.value = 'routers'
   } else if (newPath === '/dashboard') {
     activeItem.value = 'dashboard'
+  } else if (newPath === '/inspect') {
+    activeItem.value = 'inspect'
   } else if (newPath === '/audit') {
     activeItem.value = 'audit'
+  } else if (newPath === '/staff') {
+    activeItem.value = 'staff'
   }
 }, { immediate: true })
 
@@ -129,8 +133,7 @@ function handleNav(key: string) {
   } else if (key === 'audit') {
     router.push('/audit')
   } else if (key === 'inspect') {
-    // Inspect is part of Dashboard in our current design
-    router.push('/dashboard')
+    router.push('/inspect')
   }
   
   emit('close') // Close sidebar on mobile
@@ -139,10 +142,12 @@ function handleNav(key: string) {
 
 <style scoped>
 .sidebar {
-  position: relative;
+  position: sticky;
+  top: 0;
   width: 240px;
   flex-shrink: 0;
-  height: 100%;
+  height: 100vh;
+  height: 100dvh;
   z-index: 200;
 }
 
