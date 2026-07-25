@@ -2,16 +2,16 @@
   <div class="distribution-chart-container">
     <div class="chart-header">
       <h3 class="chart-title">
-        <span class="icon">📊</span> Router Network Overview
+        <span class="icon">📊</span> Status Ringkas Router
       </h3>
-      <span class="chart-sub">Real Data from Database</span>
+      <span class="chart-sub">Data Real Server</span>
     </div>
 
     <div class="chart-wrapper" v-if="routers.length > 0">
       <Bar :data="chartData" :options="chartOptions" />
     </div>
     <div class="empty-state" v-else>
-      No router data available.
+      Tidak ada data router.
     </div>
   </div>
 </template>
@@ -45,11 +45,10 @@ const { routers } = storeToRefs(routerStore)
 
 const chartData = computed(() => {
   const labels = routers.value.map(r => r.name)
-  // Determine color based on status
   const backgroundColors = routers.value.map(r => {
-    if (r.status === 'HEALTHY') return 'rgba(34, 197, 94, 0.6)'
-    if (r.status === 'DEGRADED') return 'rgba(245, 166, 35, 0.6)'
-    return 'rgba(239, 68, 68, 0.6)'
+    if (r.status === 'HEALTHY') return 'rgba(34, 197, 94, 0.5)'
+    if (r.status === 'DEGRADED') return 'rgba(245, 166, 35, 0.5)'
+    return 'rgba(239, 68, 68, 0.5)'
   })
   const borderColors = routers.value.map(r => {
     if (r.status === 'HEALTHY') return '#22c55e'
@@ -57,7 +56,7 @@ const chartData = computed(() => {
     return '#ef4444'
   })
 
-  // Value representing health score (Healthy = 100, Degraded = 50, Unreachable = 10)
+  // Value representing health score (Healthy = 100%, Degraded = 50%, Unreachable = 10%)
   const dataValues = routers.value.map(r => {
     if (r.status === 'HEALTHY') return 100
     if (r.status === 'DEGRADED') return 50
@@ -68,11 +67,12 @@ const chartData = computed(() => {
     labels,
     datasets: [
       {
-        label: 'Health & Reachability (%)',
+        label: 'Kesehatan Router (%)',
         backgroundColor: backgroundColors,
         borderColor: borderColors,
-        borderWidth: 1,
-        borderRadius: 6,
+        borderWidth: 1.5,
+        borderRadius: 8,
+        maxBarThickness: 45,
         data: dataValues
       }
     ]
