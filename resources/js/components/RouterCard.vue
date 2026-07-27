@@ -58,20 +58,20 @@ function timeAgo(dateString: string | null): string {
 .router-card {
   padding: 16px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid var(--glass-border);
+  transition: all var(--transition-base);
+  border: 1px solid var(--border);
 }
 
 .router-card:hover {
   transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border-color: var(--border-hover);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .router-card--selected {
-  border-color: var(--accent-cyan);
-  background: rgba(6, 182, 212, 0.05);
-  box-shadow: 0 0 0 1px var(--accent-cyan);
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  box-shadow: 0 0 0 1px var(--accent);
 }
 
 .router-card__header {
@@ -85,12 +85,12 @@ function timeAgo(dateString: string | null): string {
   font-size: 1rem;
   font-weight: 600;
   margin: 0 0 4px 0;
-  color: var(--text-primary);
+  color: var(--text-1);
 }
 
 .router-card__host {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--text-3);
   font-family: var(--font-mono, monospace);
 }
 
@@ -112,27 +112,27 @@ function timeAgo(dateString: string | null): string {
 }
 
 .status--healthy {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--accent-green);
+  background: var(--success-dim);
+  color: var(--success);
 }
-.status--healthy .status-dot { background: var(--accent-green); }
+.status--healthy .status-dot { background: var(--success); }
 
 .status--degraded {
-  background: rgba(245, 158, 11, 0.1);
-  color: var(--accent-amber);
+  background: var(--warning-dim);
+  color: var(--warning);
 }
-.status--degraded .status-dot { background: var(--accent-amber); }
+.status--degraded .status-dot { background: var(--warning); }
 
 .status--unreachable {
-  background: rgba(239, 68, 68, 0.1);
-  color: var(--accent-red);
+  background: var(--danger-dim);
+  color: var(--danger);
 }
-.status--unreachable .status-dot { background: var(--accent-red); }
+.status--unreachable .status-dot { background: var(--danger); }
 
 .router-card__footer {
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--border);
   padding-top: 12px;
 }
 
@@ -145,12 +145,12 @@ function timeAgo(dateString: string | null): string {
 .info-label {
   font-size: 0.65rem;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--text-3);
   letter-spacing: 0.05em;
 }
 
 .info-value {
   font-size: 0.8rem;
-  color: var(--text-secondary);
+  color: var(--text-2);
 }
 </style>

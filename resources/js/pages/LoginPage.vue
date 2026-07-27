@@ -615,6 +615,8 @@ function triggerShake() {
   flex: 1;
   background: none;
   border: none;
+  outline: none;
+  box-shadow: none;
   color: var(--text-primary);
   font-size: 0.9rem;
   height: 100%;

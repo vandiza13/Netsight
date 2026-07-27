@@ -9,7 +9,7 @@
     </div>
 
     <div class="stat-card__value" :style="{ color: accentColor }">
-      {{ displayValue }}
+      {{ formattedDisplayValue }}
     </div>
 
     <div v-if="subtitle" class="stat-card__subtitle">
@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const props = withDefaults(
   defineProps<{
@@ -31,18 +31,46 @@ const props = withDefaults(
   }>(),
   {
     icon: '📊',
-    accentColor: '#06b6d4',
+    accentColor: 'var(--accent)',
     subtitle: '',
   }
 )
 
-const displayValue = computed(() =>
-  typeof props.value === 'number' ? props.value.toLocaleString() : props.value
+const displayValue = ref(props.value)
+
+watch(() => props.value, (newVal, oldVal) => {
+  if (typeof newVal === 'number' && typeof oldVal === 'number') {
+    const start = oldVal
+    const end = newVal
+    const duration = 400
+    const startTime = performance.now()
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      const easeOut = (t: number) => 1 - Math.pow(1 - t, 3)
+      
+      displayValue.value = Math.round(start + (end - start) * easeOut(progress))
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      } else {
+        displayValue.value = end
+      }
+    }
+    requestAnimationFrame(animate)
+  } else {
+    displayValue.value = newVal
+  }
+}, { immediate: true })
+
+const formattedDisplayValue = computed(() =>
+  typeof displayValue.value === 'number' ? displayValue.value.toLocaleString() : displayValue.value
 )
 
 const cardStyle = computed(() => ({
   '--card-accent': props.accentColor,
-  '--card-accent-dim': `${props.accentColor}20`,
+  '--card-accent-dim': 'color-mix(in srgb, var(--card-accent) 20%, transparent)',
 }))
 </script>
 
@@ -94,7 +122,7 @@ const cardStyle = computed(() => ({
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--text-secondary);
+  color: var(--text-2);
 }
 
 .stat-card__value {
@@ -108,6 +136,6 @@ const cardStyle = computed(() => ({
 .stat-card__subtitle {
   margin-top: 8px;
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--text-3);
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <header class="topbar glass-card">
+  <header class="topbar">
     <!-- Left: page context -->
     <div class="topbar__left">
       <button class="topbar__menu-btn" @click="$emit('toggle-sidebar')" aria-label="Toggle sidebar">
@@ -9,17 +9,22 @@
       </button>
       <h1 class="topbar__title">
         <span class="topbar__brand">NET</span><span class="topbar__brand topbar__brand--accent">SIGHT</span>
-        <span class="topbar__version">v2.1</span>
+        <span class="topbar__version">v3.0</span>
       </h1>
     </div>
 
-    <!-- Right: user info -->
+    <!-- Right: actions -->
     <div class="topbar__right">
       <!-- Status indicator -->
       <div class="topbar__status">
         <span class="topbar__status-dot" />
         <span class="topbar__status-text">System Online</span>
       </div>
+
+      <div class="topbar__divider" />
+
+      <!-- Theme toggle -->
+      <ThemeToggle />
 
       <div class="topbar__divider" />
 
@@ -45,18 +50,23 @@
 
         <!-- Dropdown Menu -->
         <Transition name="fade-slide">
-          <div v-if="dropdownOpen" class="topbar__dropdown-menu glass-card">
+          <div v-if="dropdownOpen" class="topbar__dropdown-menu">
             <router-link to="/profile" class="dropdown-item" @click="dropdownOpen = false">
-              <span class="dropdown-item-icon">👤</span>
+              <span class="dropdown-item-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </span>
               My Profile
             </router-link>
             <div class="dropdown-divider"></div>
             <button class="dropdown-item dropdown-item--danger" @click="handleLogout">
               <span class="dropdown-item-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16,17 21,12 16,7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
               </span>
               Logout
@@ -72,6 +82,7 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
+import ThemeToggle from './ThemeToggle.vue'
 
 defineEmits<{
   'toggle-sidebar': []
@@ -114,14 +125,13 @@ function handleLogout() {
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
-  height: 64px;
-  border-radius: 0;
-  border-top: none;
-  border-left: none;
-  border-right: none;
+  height: var(--topbar-height);
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 100;
+  transition: background var(--transition-slow), border-color var(--transition-slow);
 }
 
 .topbar__left {
@@ -134,15 +144,15 @@ function handleLogout() {
   display: none;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  color: var(--text-secondary);
-  border-radius: var(--radius-sm);
+  width: 34px;
+  height: 34px;
+  color: var(--text-2);
+  border-radius: var(--radius-md);
   transition: all var(--transition-fast);
 }
 .topbar__menu-btn:hover {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-1);
+  background: var(--surface-2);
 }
 
 @media (max-width: 768px) {
@@ -152,34 +162,36 @@ function handleLogout() {
 }
 
 .topbar__title {
-  font-size: 1.1rem;
+  font-size: 0.9375rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   display: flex;
   align-items: baseline;
-  gap: 2px;
+  gap: 1px;
 }
 
 .topbar__brand {
-  color: var(--text-primary);
+  color: var(--text-1);
 }
 .topbar__brand--accent {
-  color: var(--accent-cyan);
-  text-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
+  color: var(--accent);
 }
 
 .topbar__version {
-  font-size: 0.65rem;
+  font-size: 0.625rem;
   font-weight: 500;
-  color: var(--text-muted);
-  margin-left: 6px;
+  color: var(--text-3);
+  margin-left: 8px;
   font-family: var(--font-mono);
+  background: var(--surface-2);
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
 }
 
 .topbar__right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 /* Status */
@@ -189,23 +201,23 @@ function handleLogout() {
   gap: 6px;
 }
 .topbar__status-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: var(--accent-green);
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+  background: var(--success);
+  box-shadow: 0 0 6px var(--success-dim);
   animation: pulse 2s ease-in-out infinite;
 }
 .topbar__status-text {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--text-3);
   font-weight: 500;
 }
 
 .topbar__divider {
   width: 1px;
-  height: 28px;
-  background: var(--glass-border);
+  height: 24px;
+  background: var(--border);
 }
 
 /* User */
@@ -216,33 +228,33 @@ function handleLogout() {
 .topbar__user {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
   padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  transition: background 0.2s;
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast);
 }
 .topbar__user:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface-2);
 }
 
 .topbar__dropdown-icon {
-  color: var(--text-muted);
-  transition: transform 0.2s ease;
+  color: var(--text-3);
+  transition: transform var(--transition-fast);
 }
 .topbar__dropdown-icon--open {
   transform: rotate(180deg);
 }
 
 .topbar__avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--accent), var(--info));
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #fff;
   flex-shrink: 0;
@@ -251,25 +263,25 @@ function handleLogout() {
 .topbar__user-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .topbar__user-name {
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-1);
   line-height: 1;
 }
 
 .topbar__role-badge {
   display: inline-flex;
   align-items: center;
-  font-size: 0.6rem;
-  font-weight: 700;
+  font-size: 0.5625rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 2px 6px;
-  border-radius: 4px;
+  letter-spacing: 0.05em;
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
   line-height: 1;
   width: fit-content;
 }
@@ -279,26 +291,28 @@ function handleLogout() {
   top: calc(100% + 8px);
   right: 0;
   width: 180px;
-  padding: 8px;
-  border-radius: var(--radius-md);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  padding: 6px;
+  background: var(--elevated-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--elevated-shadow);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   z-index: 200;
 }
 
 .dropdown-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  color: var(--text-1);
   text-decoration: none;
-  font-size: 0.85rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -306,37 +320,36 @@ function handleLogout() {
   width: 100%;
 }
 .dropdown-item:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--surface-2);
 }
 .dropdown-item-icon {
-  font-size: 1rem;
   display: flex;
   align-items: center;
-  color: var(--text-muted);
+  color: var(--text-3);
 }
 .dropdown-item--danger:hover {
-  background: var(--accent-red-dim);
-  color: var(--accent-red);
+  background: var(--danger-dim);
+  color: var(--danger);
 }
 .dropdown-item--danger:hover .dropdown-item-icon {
-  color: var(--accent-red);
+  color: var(--danger);
 }
 
 .dropdown-divider {
   height: 1px;
-  background: var(--glass-border);
-  margin: 4px 0;
+  background: var(--border);
+  margin: 2px 0;
 }
 
 /* Animations */
 .fade-slide-enter-active,
 .fade-slide-leave-active {
-  transition: all 0.2s ease;
+  transition: all 200ms var(--ease);
 }
 .fade-slide-enter-from,
 .fade-slide-leave-to {
   opacity: 0;
-  transform: translateY(-8px);
+  transform: translateY(-6px);
 }
 
 /* Responsive: hide text on small screens */

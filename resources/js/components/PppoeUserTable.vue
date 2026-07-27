@@ -171,39 +171,40 @@ function formatTime(dateString: string | null): string {
 
 .search-input {
   width: 100%;
-  background: rgba(17, 24, 39, 0.6);
-  border: 1px solid var(--glass-border);
-  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  color: var(--text-1);
   padding: 8px 12px 8px 36px;
   border-radius: 8px;
-  font-family: inherit;
+  font-family: var(--font-sans, inherit);
   font-size: 0.85rem;
-  transition: all 0.2s;
+  transition: all var(--transition, 0.2s);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.2);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-dim);
 }
 
 .btn-sync {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(59, 130, 246, 0.1);
-  color: var(--accent-blue);
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: var(--info-dim);
+  color: var(--info);
+  border: 1px solid var(--info-dim);
   padding: 8px 16px;
   border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition, 0.2s);
 }
 
 .btn-sync:hover:not(:disabled) {
-  background: rgba(59, 130, 246, 0.2);
+  background: var(--info);
+  color: var(--surface-0);
 }
 
 .btn-sync:disabled {
@@ -221,8 +222,8 @@ function formatTime(dateString: string | null): string {
 
 .table-wrapper {
   overflow-x: auto;
-  background: var(--bg-card);
-  border: 1px solid var(--glass-border);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 12px;
   backdrop-filter: blur(16px);
 }
@@ -237,8 +238,8 @@ function formatTime(dateString: string | null): string {
 .user-table th {
   padding: 12px 16px;
   font-weight: 600;
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--glass-border);
+  color: var(--text-2);
+  border-bottom: 1px solid var(--border);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 0.75rem;
@@ -246,7 +247,7 @@ function formatTime(dateString: string | null): string {
 
 .user-table td {
   padding: 12px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid var(--border);
 }
 
 .user-table tr:last-child td {
@@ -254,12 +255,12 @@ function formatTime(dateString: string | null): string {
 }
 
 .user-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--card-bg-hover);
 }
 
 .col-username {
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-1);
 }
 
 .badge {
@@ -270,8 +271,8 @@ function formatTime(dateString: string | null): string {
 }
 
 .badge--profile {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary);
+  background: var(--surface-2);
+  color: var(--text-1);
 }
 
 .status-indicator {
@@ -284,47 +285,47 @@ function formatTime(dateString: string | null): string {
 }
 
 .status-active {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--accent-green);
+  background: var(--success-dim);
+  color: var(--success);
 }
 
 .status-inactive {
-  background: rgba(239, 68, 68, 0.1);
-  color: var(--accent-red);
+  background: var(--danger-dim);
+  color: var(--danger);
 }
 
 .text-muted {
-  color: var(--text-muted);
+  color: var(--text-3);
 }
 
 .btn-action {
   background: transparent;
-  border: 1px solid var(--glass-border);
-  color: var(--text-primary);
+  border: 1px solid var(--border);
+  color: var(--text-1);
   padding: 6px 10px;
   border-radius: 6px;
   font-size: 0.75rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition, 0.2s);
 }
 
 .btn-torch:hover {
-  border-color: var(--accent-amber);
-  color: var(--accent-amber);
-  background: rgba(245, 158, 11, 0.1);
+  border-color: var(--warning);
+  color: var(--warning);
+  background: var(--warning-dim);
 }
 
 .empty-state {
   text-align: center;
   padding: 40px !important;
-  color: var(--text-muted);
+  color: var(--text-3);
 }
 
 .skeleton-row .skeleton-line {
   height: 16px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+  background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%);
   background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  animation: shimmer 1.5s ease-in-out infinite;
   border-radius: 4px;
 }
 
@@ -337,12 +338,13 @@ function formatTime(dateString: string | null): string {
 }
 
 .page-btn {
-  background: var(--bg-card);
-  border: 1px solid var(--glass-border);
-  color: var(--text-primary);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: var(--text-1);
   padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
+  transition: all var(--transition, 0.2s);
 }
 
 .page-btn:disabled {
@@ -352,11 +354,11 @@ function formatTime(dateString: string | null): string {
 
 .page-info {
   font-size: 0.85rem;
-  color: var(--text-secondary);
+  color: var(--text-2);
 }
 
 .total-users {
-  color: var(--text-muted);
+  color: var(--text-3);
   font-size: 0.75rem;
 }
 

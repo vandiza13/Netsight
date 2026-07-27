@@ -5,11 +5,12 @@
         <component :is="Component" :key="route.path" />
       </transition>
     </router-view>
+    <ToastNotification />
   </div>
 </template>
 
 <script setup lang="ts">
-// Root component — all layout logic lives in pages/layouts
+import ToastNotification from './components/ToastNotification.vue'
 </script>
 
 <style scoped>
