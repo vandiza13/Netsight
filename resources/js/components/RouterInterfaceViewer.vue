@@ -16,7 +16,7 @@
           <span class="dot" :class="{ 'dot--pulse': !isLivePaused }"></span>
           {{ isLivePaused ? 'PAUSED' : 'LIVE (3s)' }}
         </button>
-        <div class="icon-btn" @click="fetchInterfaces" :disabled="loading" title="Refresh list">
+        <div class="icon-btn" @click="fetchInterfaces(true)" :disabled="loading" title="Refresh list">
           <span :class="{ 'spinning': loading }">⟳</span>
         </div>
       </div>
@@ -302,10 +302,11 @@ const groupedInterfaces = computed(() => {
   return { rj45, sfp, vlan, vpn }
 })
 
-async function fetchInterfaces() {
+async function fetchInterfaces(force = false) {
   loading.value = true
   try {
-    const { data } = await api.get(`/routers/${props.routerId}/interfaces`)
+    const url = force ? `/routers/${props.routerId}/interfaces?refresh=true` : `/routers/${props.routerId}/interfaces`
+    const { data } = await api.get(url)
     interfaces.value = data.data || []
   } catch (err) {
     console.error('Failed to fetch router interfaces:', err)
