@@ -68,45 +68,47 @@
         <h3 class="modal-title">{{ isEditing ? 'Edit Router' : 'Add New Router' }}</h3>
         
         <form @submit.prevent="submitForm" class="router-form">
-          <div class="form-group">
-            <label>Router Name</label>
-            <input type="text" v-model="form.name" class="form-input" required placeholder="e.g. NOC Edge 01" />
-          </div>
-          
-          <div class="form-group">
-            <label>IP Address / Host</label>
-            <input type="text" v-model="form.host" class="form-input" required placeholder="e.g. 192.168.1.1" />
-          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Router Name</label>
+              <input type="text" v-model="form.name" class="form-input" required placeholder="e.g. NOC Edge 01" />
+            </div>
+            
+            <div class="form-group">
+              <label>IP Address / Host</label>
+              <input type="text" v-model="form.host" class="form-input" required placeholder="e.g. 192.168.1.1" />
+            </div>
 
-          <div class="form-group">
-            <label>API Username</label>
-            <input type="text" v-model="form.api_user" class="form-input" placeholder="admin" />
-          </div>
-          
-          <div class="form-group">
-            <label>API Port</label>
-            <input type="number" v-model="form.api_port" class="form-input" required placeholder="8728 or 8729" />
-          </div>
-          
-          <div class="form-group">
-            <label>API Password</label>
-            <input type="password" v-model="form.credential" class="form-input" :required="!isEditing" placeholder="API Password" />
-            <small v-if="isEditing" class="form-help">Leave blank to keep current password</small>
-          </div>
-          
-          <div class="form-group">
-            <label>Sync Offset (minutes)</label>
-            <input type="number" v-model="form.sync_offset_minutes" class="form-input" min="1" placeholder="15" />
-          </div>
+            <div class="form-group">
+              <label>API Username</label>
+              <input type="text" v-model="form.api_user" class="form-input" placeholder="admin" />
+            </div>
+            
+            <div class="form-group">
+              <label>API Port</label>
+              <input type="number" v-model="form.api_port" class="form-input" required placeholder="8728 or 8729" />
+            </div>
+            
+            <div class="form-group">
+              <label>SNMP Community (Optional)</label>
+              <input type="text" v-model="form.snmp_community" class="form-input" placeholder="public" />
+            </div>
 
-          <div class="form-group">
-            <label>SNMP Community (Optional)</label>
-            <input type="text" v-model="form.snmp_community" class="form-input" placeholder="public" />
-          </div>
+            <div class="form-group">
+              <label>Monitored Interface (Optional)</label>
+              <input type="text" v-model="form.monitored_interface" class="form-input" placeholder="e.g. ether1" />
+            </div>
 
-          <div class="form-group">
-            <label>Monitored Interface (Optional)</label>
-            <input type="text" v-model="form.monitored_interface" class="form-input" placeholder="e.g. ether1" />
+            <div class="form-group">
+              <label>API Password</label>
+              <input type="password" v-model="form.credential" class="form-input" :required="!isEditing" placeholder="API Password" />
+              <small v-if="isEditing" class="form-help">Leave blank to keep current password</small>
+            </div>
+            
+            <div class="form-group">
+              <label>Sync Offset (minutes)</label>
+              <input type="number" v-model="form.sync_offset_minutes" class="form-input" min="1" placeholder="15" />
+            </div>
           </div>
 
           <div v-if="formError" class="alert alert-error">{{ formError }}</div>
@@ -357,8 +359,15 @@ async function testConnection(router: MikroTikRouter) {
 }
 .modal-content {
   width: 100%;
-  max-width: 500px;
+  max-width: 600px;
   padding: 24px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 @media (max-width: 640px) {
   .modal-content {
@@ -372,7 +381,7 @@ async function testConnection(router: MikroTikRouter) {
   margin-bottom: 20px;
 }
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 0;
 }
 .form-group label {
   display: block;
