@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('routers', function (Blueprint $table) {
-            $table->string('snmp_community')->nullable()->after('password');
+            $table->string('snmp_community')->nullable()->after('credential_encrypted');
             $table->string('monitored_interface')->nullable()->after('snmp_community');
         });
     }
