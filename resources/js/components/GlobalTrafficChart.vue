@@ -63,7 +63,7 @@ import {
   Filler
 } from 'chart.js';
 import { Line } from 'vue-chartjs';
-import axios from 'axios';
+import api from '../utils/api';
 
 ChartJS.register(
   CategoryScale,
@@ -145,11 +145,7 @@ const formatTime = (timestamp) => {
 
 const fetchTrafficData = async () => {
   try {
-    const response = await axios.get('/api/traffic/dashboard', {
-        headers: {
-            'X-Demo-Schema': window.location.hostname.includes('demo') ? 'true' : ''
-        }
-    });
+    const response = await api.get('/traffic/dashboard');
     const newData = response.data.data;
     
     // Update existing charts or create new ones
