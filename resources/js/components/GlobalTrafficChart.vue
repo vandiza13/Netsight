@@ -22,7 +22,10 @@
       <div v-for="chart in chartsData" :key="chart.router_id" class="chart-card">
         <div class="chart-header">
           <div class="router-info">
-            <h4 class="router-name">{{ chart.router_name }}</h4>
+            <h4 class="router-name">
+              {{ chart.router_name }}
+              <span v-if="chart.status === 'offline'" class="offline-badge">SNMP Offline</span>
+            </h4>
             <span class="interface-badge">{{ chart.interface }}</span>
           </div>
           <div class="current-speed">
@@ -334,10 +337,22 @@ onUnmounted(() => {
 }
 
 .router-name {
-  margin: 0;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  color: #f8fafc;
+  color: #fff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.offline-badge {
+  font-size: 0.7rem;
+  background-color: #ef4444;
+  color: white;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-weight: bold;
 }
 
 .interface-badge {
