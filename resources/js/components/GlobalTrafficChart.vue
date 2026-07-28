@@ -208,10 +208,20 @@ const fetchTrafficData = async () => {
           existingChart.chartData.datasets[1].data.shift();
         }
         
-        // Trigger reactivity (Vue-Chartjs requires creating a new object)
-        existingChart.chartData = { ...existingChart.chartData };
+        // Trigger reactivity for Vue-Chartjs by creating a completely new object
+        existingChart.chartData = {
+          ...existingChart.chartData,
+          labels: [...existingChart.chartData.labels],
+          datasets: [
+            { ...existingChart.chartData.datasets[0], data: [...existingChart.chartData.datasets[0].data] },
+            { ...existingChart.chartData.datasets[1], data: [...existingChart.chartData.datasets[1].data] }
+          ]
+        };
       }
     });
+    
+    // Force Vue to recognize array update
+    chartsData.value = [...chartsData.value];
     
   } catch (error) {
     console.error("Failed to fetch traffic dashboard data:", error);
@@ -342,6 +352,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  white-space: nowrap;
 }
 
 .offline-badge {
@@ -361,6 +372,10 @@ onUnmounted(() => {
   border-radius: 1rem;
   display: inline-block;
   width: fit-content;
+  white-space: nowrap;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .current-speed {
@@ -370,6 +385,7 @@ onUnmounted(() => {
   background: rgba(0, 0, 0, 0.2);
   padding: 0.375rem 0.75rem;
   border-radius: 0.5rem;
+  white-space: nowrap;
 }
 
 .speed-rx, .speed-tx {
