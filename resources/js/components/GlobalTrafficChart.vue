@@ -145,7 +145,8 @@ const formatTime = (timestamp) => {
 
 const fetchTrafficData = async () => {
   try {
-    const response = await api.get('/traffic/dashboard');
+    // Use timestamp to prevent browser/Cloudflare caching
+    const response = await api.get('/traffic/dashboard?_t=' + Date.now());
     const newData = response.data.data;
     
     // Update existing charts or create new ones
