@@ -6,8 +6,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
-use App\Models\StaffNoc;
-use App\Models\Router;
+use Vandiza\NetsightCore\Models\StaffNoc;
+use Vandiza\NetsightCore\Models\Router;
 use Illuminate\Support\Facades\Hash;
 use PragmaRX\Google2FA\Google2FA;
 
