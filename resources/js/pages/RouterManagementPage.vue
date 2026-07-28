@@ -99,6 +99,16 @@
             <input type="number" v-model="form.sync_offset_minutes" class="form-input" min="1" placeholder="15" />
           </div>
 
+          <div class="form-group">
+            <label>SNMP Community (Optional)</label>
+            <input type="text" v-model="form.snmp_community" class="form-input" placeholder="public" />
+          </div>
+
+          <div class="form-group">
+            <label>Monitored Interface (Optional)</label>
+            <input type="text" v-model="form.monitored_interface" class="form-input" placeholder="e.g. ether1" />
+          </div>
+
           <div v-if="formError" class="alert alert-error">{{ formError }}</div>
 
           <div class="modal-actions">
@@ -139,7 +149,9 @@ const form = reactive({
   api_user: 'admin',
   api_port: 8729,
   credential: '',
-  sync_offset_minutes: 15
+  sync_offset_minutes: 15,
+  snmp_community: '',
+  monitored_interface: ''
 })
 
 onMounted(() => {
@@ -159,6 +171,8 @@ function resetForm() {
   form.api_port = 8729
   form.credential = ''
   form.sync_offset_minutes = 15
+  form.snmp_community = ''
+  form.monitored_interface = ''
   formError.value = ''
 }
 
@@ -177,7 +191,9 @@ function openEditModal(router: MikroTikRouter) {
   form.host = router.host
   form.api_user = router.api_user || 'admin'
   form.api_port = router.api_port
-  form.sync_offset_minutes = 15 // Assuming default if not available
+  form.sync_offset_minutes = router.sync_offset_minutes || 15
+  form.snmp_community = router.snmp_community || ''
+  form.monitored_interface = router.monitored_interface || ''
   showModal.value = true
 }
 

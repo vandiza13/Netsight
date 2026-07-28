@@ -12,6 +12,8 @@ export interface MikroTikRouter {
   status: 'HEALTHY' | 'DEGRADED' | 'UNREACHABLE'
   last_synced_at: string | null
   consecutive_sync_failures: number
+  snmp_community?: string | null
+  monitored_interface?: string | null
 }
 
 export interface PppoeUser {

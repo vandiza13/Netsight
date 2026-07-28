@@ -40,6 +40,7 @@ RUN apk add --no-cache \
     icu-dev \
     linux-headers \
     supervisor \
+    net-snmp-dev \
     $PHPIZE_DEPS
 
 # Install PHP extensions
@@ -50,7 +51,8 @@ RUN docker-php-ext-install \
     sockets \
     gmp \
     bcmath \
-    intl
+    intl \
+    snmp
 
 # Install Redis extension via PECL
 RUN pecl install redis \

@@ -48,6 +48,11 @@
           />
         </section>
 
+        <!-- Global Traffic Chart -->
+        <section class="dashboard__traffic stagger" style="margin-top: 24px;">
+          <GlobalTrafficChart />
+        </section>
+
         <!-- Main Layout -->
         <section class="dashboard__layout stagger" style="margin-top: 24px;">
           <!-- Left Column (Main) -->
@@ -83,6 +88,7 @@ import StatCard from '../components/StatCard.vue'
 import ActivityFeed from '../components/ActivityFeed.vue'
 import RouterHealthTable from '../components/RouterHealthTable.vue'
 import RecentTorchWidget from '../components/RecentTorchWidget.vue'
+import GlobalTrafficChart from '../components/GlobalTrafficChart.vue'
 
 const auth = useAuthStore()
 const routerStore = useRouterStore()
