@@ -162,6 +162,7 @@ const fetchTrafficData = async () => {
           interface: routerData.interface,
           latest_rx: routerData.rx,
           latest_tx: routerData.tx,
+          status: routerData.status,
           chartData: {
             labels: [timeStr],
             datasets: [
@@ -194,6 +195,7 @@ const fetchTrafficData = async () => {
         existingChart.interface = routerData.interface;
         existingChart.latest_rx = routerData.rx;
         existingChart.latest_tx = routerData.tx;
+        existingChart.status = routerData.status;
         
         existingChart.chartData.labels.push(timeStr);
         existingChart.chartData.datasets[0].data.push(routerData.rx);
