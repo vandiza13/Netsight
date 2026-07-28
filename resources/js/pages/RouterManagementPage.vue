@@ -96,7 +96,16 @@
 
             <div class="form-group">
               <label>Monitored Interface (Optional)</label>
-              <input type="text" v-model="form.monitored_interface" class="form-input" placeholder="e.g. ether1" />
+              <div v-if="isEditing">
+                <select v-if="!loadingInterfaces && availableInterfaces.length > 0" v-model="form.monitored_interface" class="form-input">
+                  <option value="">-- Select Interface --</option>
+                  <option v-for="iface in availableInterfaces" :key="iface.name" :value="iface.name">{{ iface.name }}</option>
+                </select>
+                <input v-else type="text" v-model="form.monitored_interface" class="form-input" :placeholder="loadingInterfaces ? 'Loading interfaces...' : 'e.g. ether1'" :disabled="loadingInterfaces" />
+              </div>
+              <div v-else>
+                <input type="text" v-model="form.monitored_interface" class="form-input" placeholder="Save router first to load interfaces, or type manually" />
+              </div>
             </div>
 
             <div class="form-group">
@@ -131,6 +140,7 @@ import { storeToRefs } from 'pinia'
 import { useRouterStore, type MikroTikRouter } from '../stores/routerStore'
 import SidebarNav from '../components/SidebarNav.vue'
 import TopBar from '../components/TopBar.vue'
+import api from '../utils/api'
 
 const routerStore = useRouterStore()
 const { routers, loading, error } = storeToRefs(routerStore)
@@ -144,6 +154,9 @@ const submitting = ref(false)
 const formError = ref('')
 const testingId = ref<number | null>(null)
 let editingId: number | null = null
+
+const availableInterfaces = ref<{name: string}[]>([])
+const loadingInterfaces = ref(false)
 
 const form = reactive({
   name: '',
@@ -185,7 +198,7 @@ function openAddModal() {
   showModal.value = true
 }
 
-function openEditModal(router: MikroTikRouter) {
+async function openEditModal(router: MikroTikRouter) {
   isEditing.value = true
   editingId = router.id
   resetForm()
@@ -197,6 +210,18 @@ function openEditModal(router: MikroTikRouter) {
   form.snmp_community = router.snmp_community || ''
   form.monitored_interface = router.monitored_interface || ''
   showModal.value = true
+
+  // Fetch available interfaces
+  availableInterfaces.value = []
+  loadingInterfaces.value = true
+  try {
+    const res = await api.get(`/routers/${router.id}/interfaces`)
+    availableInterfaces.value = res.data.data || []
+  } catch (err) {
+    console.error('Failed to load interfaces', err)
+  } finally {
+    loadingInterfaces.value = false
+  }
 }
 
 function closeModal() {
