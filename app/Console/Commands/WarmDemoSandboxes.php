@@ -72,10 +72,7 @@ class WarmDemoSandboxes extends Command
             '--force' => true,
         ]);
 
-        // 5. Create default admin user in this schema
-        $google2fa = new Google2FA();
-        $totpSecret = $google2fa->generateSecretKey();
-
+        // 5. Create default admin user in this schema (no TOTP required for instant demo access)
         $admin = new StaffNoc([
             'name' => 'Demo Admin',
             'email' => 'demo@netsight.id',
@@ -83,7 +80,6 @@ class WarmDemoSandboxes extends Command
             'role' => 'ADMIN',
             'is_active' => true,
         ]);
-        $admin->totp_secret = $totpSecret;
         $admin->save();
 
         // 6. Seed a Dummy Router for the sandbox

@@ -184,6 +184,8 @@ export const useAuthStore = defineStore('auth', () => {
       const { data } = await api.post('/demo/start')
       localStorage.setItem('netsight_demo_schema', data.schema)
       demoSetupData.value = data.admin
+      // Auto login directly without OTP requirement
+      await login(data.admin.email, data.admin.password)
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Gagal menyiapkan sandbox demo.'
       throw err

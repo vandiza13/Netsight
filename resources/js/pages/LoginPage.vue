@@ -185,38 +185,14 @@
       </Transition>
 
       <!-- Demo Section -->
-      <div v-if="!auth.totpRequired && !auth.demoSetupData && (appConfig?.env === 'local' || appConfig?.showDemoButton)" class="demo-section">
+      <div v-if="!auth.totpRequired && (appConfig?.env === 'local' || appConfig?.showDemoButton)" class="demo-section">
         <div class="demo-divider"><span>OR</span></div>
         <button type="button" class="demo-btn" @click="handleStartDemo" :disabled="auth.demoStarting">
           <span v-if="!auth.demoStarting">🚀 Try Demo Sandbox</span>
           <span v-else class="login-btn__spinner">
             <span class="spinner" />
-            <span>Creating Sandbox...</span>
+            <span>Creating Sandbox &amp; Logging In...</span>
           </span>
-        </button>
-      </div>
-
-      <!-- Demo Setup Info -->
-      <div v-if="auth.demoSetupData" class="demo-setup-box">
-        <h3 class="demo-setup-title">🎉 Sandbox Created!</h3>
-        <p class="demo-setup-desc">Scan this QR code with Google Authenticator or Authy:</p>
-        <div class="demo-qr-container">
-          <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(auth.demoSetupData.totp_qr_url)}`" alt="TOTP QR Code" class="demo-qr" />
-        </div>
-        <div class="demo-totp-manual">
-          <p class="text-sm text-muted mt-2 mb-1">Mobile Users? Copy manual setup key:</p>
-          <code class="manual-key" @click="copyToClipboard(auth.demoSetupData.totp_secret)" title="Click to copy">
-            {{ auth.demoSetupData.totp_secret }}
-            <span v-if="copySuccess" class="copy-success">✓ Copied</span>
-            <span v-else class="copy-hint">📋</span>
-          </code>
-        </div>
-        <div class="demo-credentials">
-          <p><strong>Email:</strong> {{ auth.demoSetupData.email }}</p>
-          <p><strong>Password:</strong> {{ auth.demoSetupData.password }}</p>
-        </div>
-        <button type="button" class="login-btn mt-4" @click="fillDemoCredentials">
-          Login to Sandbox
         </button>
       </div>
 
@@ -262,18 +238,11 @@ function copyToClipboard(text: string) {
 async function handleStartDemo() {
   try {
     await auth.startDemo()
+    if (auth.isAuthenticated) {
+      router.push('/dashboard')
+    }
   } catch (err) {
     triggerShake()
-  }
-}
-
-function fillDemoCredentials() {
-  if (auth.demoSetupData) {
-    email.value = auth.demoSetupData.email
-    password.value = auth.demoSetupData.password
-    // Clear demo setup data to show login form again, or just trigger login
-    auth.demoSetupData = null
-    handleLogin()
   }
 }
 
