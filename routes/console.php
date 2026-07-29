@@ -77,3 +77,11 @@ Schedule::call(function () {
         }
     }
 })->everyMinute()->name('snmp-poller');
+
+// ==========================================
+// 5. OLT ONU Status & Power Poller
+// ==========================================
+Schedule::command('netsight:poll-olts')
+    ->everyFiveMinutes()
+    ->name('olt-poller')
+    ->withoutOverlapping();
