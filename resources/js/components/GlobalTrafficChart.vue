@@ -29,6 +29,7 @@
             <span class="interface-badge">{{ chart.interface }}</span>
           </div>
           <div class="current-speed">
+            <span style="font-size: 10px; color: gray; margin-right: 10px;">{{ chart.chartData.labels.length }} pts</span>
             <div class="speed-rx">
               <span class="label">RX (In)</span>
               <span class="value">{{ formatSpeed(chart.latest_rx) }}</span>
@@ -174,7 +175,8 @@ const fetchTrafficData = async () => {
                 data: [routerData.rx],
                 fill: true,
                 tension: 0.4,
-                pointRadius: 0,
+                pointRadius: 1,
+                pointHoverRadius: 4,
                 borderWidth: 2
               },
               {
@@ -184,7 +186,8 @@ const fetchTrafficData = async () => {
                 data: [routerData.tx],
                 fill: true,
                 tension: 0.4,
-                pointRadius: 0,
+                pointRadius: 1,
+                pointHoverRadius: 4,
                 borderWidth: 2
               }
             ]
@@ -210,7 +213,7 @@ const fetchTrafficData = async () => {
         }
         
         // Trigger reactivity for Vue-Chartjs by creating a completely new object
-        existingChart.chartData = {
+        const newChartData = {
           ...existingChart.chartData,
           labels: [...existingChart.chartData.labels],
           datasets: [
@@ -218,6 +221,14 @@ const fetchTrafficData = async () => {
             { ...existingChart.chartData.datasets[1], data: [...existingChart.chartData.datasets[1].data] }
           ]
         };
+        
+        const index = chartsData.value.findIndex(c => c.router_id === routerData.router_id);
+        if (index !== -1) {
+          chartsData.value[index] = {
+            ...existingChart,
+            chartData: newChartData
+          };
+        }
       }
     });
     
