@@ -242,10 +242,14 @@ const fetchTrafficData = async () => {
     if (range === 'live') {
       newData.forEach(routerData => {
         let existingChart = chartsData.value.find(c => c.router_id === routerData.router_id);
-        const timeStr = formatTime(routerData.timestamp, 'live');
+        
+        const points = routerData.points || [];
+        const labels = points.map(p => formatTime(p.timestamp, 'live'));
+        const rxData = points.map(p => p.rx);
+        const txData = points.map(p => p.tx);
 
         if (!existingChart || existingChart.range !== 'live') {
-          const newChart = createChartObject(routerData, [timeStr], [routerData.rx], [routerData.tx], 'live');
+          const newChart = createChartObject(routerData, labels, rxData, txData, 'live');
           const idx = chartsData.value.findIndex(c => c.router_id === routerData.router_id);
           if (idx !== -1) {
             chartsData.value[idx] = newChart;
@@ -253,36 +257,44 @@ const fetchTrafficData = async () => {
             chartsData.value.push(newChart);
           }
         } else {
+          // It's already running, just append the LATEST point to keep it live
+          const lastPoint = points.length > 0 ? points[points.length - 1] : { rx: 0, tx: 0, timestamp: Date.now() / 1000 };
+          const timeStr = formatTime(lastPoint.timestamp, 'live');
+
           existingChart.interface = routerData.interface;
-          existingChart.latest_rx = routerData.rx;
-          existingChart.latest_tx = routerData.tx;
+          existingChart.latest_rx = lastPoint.rx;
+          existingChart.latest_tx = lastPoint.tx;
           existingChart.status = routerData.status;
 
-          existingChart.chartData.labels.push(timeStr);
-          existingChart.chartData.datasets[0].data.push(routerData.rx);
-          existingChart.chartData.datasets[1].data.push(routerData.tx);
+          // Only push if it's a new timestamp
+          const lastLabel = existingChart.chartData.labels[existingChart.chartData.labels.length - 1];
+          if (lastLabel !== timeStr) {
+            existingChart.chartData.labels.push(timeStr);
+            existingChart.chartData.datasets[0].data.push(lastPoint.rx);
+            existingChart.chartData.datasets[1].data.push(lastPoint.tx);
 
-          if (existingChart.chartData.labels.length > MAX_POINTS) {
-            existingChart.chartData.labels.shift();
-            existingChart.chartData.datasets[0].data.shift();
-            existingChart.chartData.datasets[1].data.shift();
-          }
+            if (existingChart.chartData.labels.length > MAX_POINTS) {
+              existingChart.chartData.labels.shift();
+              existingChart.chartData.datasets[0].data.shift();
+              existingChart.chartData.datasets[1].data.shift();
+            }
 
-          const newChartData = {
-            ...existingChart.chartData,
-            labels: [...existingChart.chartData.labels],
-            datasets: [
-              { ...existingChart.chartData.datasets[0], data: [...existingChart.chartData.datasets[0].data] },
-              { ...existingChart.chartData.datasets[1], data: [...existingChart.chartData.datasets[1].data] }
-            ]
-          };
-
-          const idx = chartsData.value.findIndex(c => c.router_id === routerData.router_id);
-          if (idx !== -1) {
-            chartsData.value[idx] = {
-              ...existingChart,
-              chartData: newChartData
+            const newChartData = {
+              ...existingChart.chartData,
+              labels: [...existingChart.chartData.labels],
+              datasets: [
+                { ...existingChart.chartData.datasets[0], data: [...existingChart.chartData.datasets[0].data] },
+                { ...existingChart.chartData.datasets[1], data: [...existingChart.chartData.datasets[1].data] }
+              ]
             };
+
+            const idx = chartsData.value.findIndex(c => c.router_id === routerData.router_id);
+            if (idx !== -1) {
+              chartsData.value[idx] = {
+                ...existingChart,
+                chartData: newChartData
+              };
+            }
           }
         }
       });

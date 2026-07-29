@@ -101,6 +101,7 @@ jobs:
             for i in {1..15}; do docker compose exec -T db pg_isready -U netsight 2>/dev/null && break || sleep 2; done
             docker compose exec -T app mkdir -p /var/www/html/storage/framework/views /var/www/html/storage/framework/cache/data /var/www/html/storage/framework/sessions /var/www/html/storage/logs
             docker compose exec -T app php artisan migrate --force
+            docker compose exec -T app php artisan queue:restart
             docker compose exec -T app php artisan db:seed --class=DemoDataSeeder --force
             docker compose exec -T app php artisan app:warm-demo-sandboxes > /dev/null 2>&1 &
 
@@ -164,6 +165,7 @@ jobs:
                 for i in {1..10}; do docker compose exec -T db pg_isready -U netsight 2>/dev/null && break || sleep 2; done
                 docker compose exec -T app mkdir -p /var/www/html/storage/framework/views /var/www/html/storage/framework/cache/data /var/www/html/storage/framework/sessions /var/www/html/storage/logs
                 docker compose exec -T app php artisan migrate --force
+                docker compose exec -T app php artisan queue:restart
                 docker compose exec -T app php artisan config:cache
                 docker compose exec -T app php artisan route:cache
                 docker compose exec -T app php artisan view:cache
