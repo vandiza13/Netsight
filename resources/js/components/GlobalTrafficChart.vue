@@ -169,10 +169,12 @@ const getChartOptions = (range) => {
 
 const formatSpeed = (bps) => {
   if (bps === 0 || !bps) return '0 bps';
+  if (bps < 1000) return Math.round(bps) + ' bps';
   const k = 1000;
   const sizes = ['bps', 'Kbps', 'Mbps', 'Gbps'];
   const i = Math.floor(Math.log(bps) / Math.log(k));
-  return parseFloat((bps / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  const sizeIndex = Math.min(Math.max(i, 0), sizes.length - 1);
+  return parseFloat((bps / Math.pow(k, sizeIndex)).toFixed(1)) + ' ' + sizes[sizeIndex];
 };
 
 const formatTime = (timestamp, range = 'live') => {
