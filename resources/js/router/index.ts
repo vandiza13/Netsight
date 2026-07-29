@@ -43,6 +43,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, requiresAdmin: true, transition: 'slide' },
   },
   {
+    path: '/olts',
+    name: 'OLTs',
+    component: () => import('../pages/OltManagementPage.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true, transition: 'slide' },
+  },
+  {
     path: '/audit',
     name: 'Audit',
     component: () => import('../pages/AuditLogPage.vue'),
