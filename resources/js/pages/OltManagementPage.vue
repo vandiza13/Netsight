@@ -65,6 +65,7 @@
                     <span class="vendor-badge">{{ getVendorName(olt.vendor_code) }}</span>
                   </div>
                   <div class="olt-card-actions">
+                    <button class="btn btn-sm btn-icon" title="Sync Redaman Sekarang" @click="syncOlt(olt)">🔄</button>
                     <button class="btn btn-sm btn-icon" title="Inspect ONUs" @click="inspectOlt(olt)">🔍</button>
                     <button class="btn btn-sm btn-icon" title="Edit OLT" @click="editOlt(olt)">✏️</button>
                     <button class="btn btn-sm btn-icon btn-danger" title="Hapus OLT" @click="deleteOlt(olt)">🗑️</button>
@@ -389,6 +390,22 @@ const fetchOnus = async (oltId: number) => {
     onusList.value = response.data.data || [];
   } catch (err) {
     console.error("Failed to fetch ONUs:", err);
+  }
+};
+
+const syncOlt = async (olt: any) => {
+  if (!confirm(`Tarik data redaman terbaru dari OLT ${olt.name} sekarang? (Membutuhkan waktu beberapa detik)`)) return;
+  
+  try {
+    const response = await api.post(`/olts/${olt.id}/sync`);
+    alert(response.data.message || 'Sync berhasil dikirim ke background.');
+    // Beri jeda sebentar sebelum me-refresh list OLT (biasanya background job butuh 1-3 detik)
+    setTimeout(() => {
+      fetchOlts();
+    }, 2000);
+  } catch (err) {
+    alert("Gagal melakukan sync OLT.");
+    console.error(err);
   }
 };
 
