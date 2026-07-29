@@ -1,8 +1,21 @@
 <template>
   <div class="global-traffic-dashboard">
     <div class="header">
-      <h3 class="title">Live Router Traffic Monitoring</h3>
-      <p class="subtitle">Real-time throughput on monitored interfaces (refreshed every 10s)</p>
+      <div>
+        <h3 class="title">Live Router Traffic Monitoring</h3>
+        <p class="subtitle">Real-time throughput & historical trends for monitored interfaces</p>
+      </div>
+
+      <div class="time-range-selector">
+        <button 
+          v-for="range in rangeOptions" 
+          :key="range.value"
+          :class="['range-btn', { active: selectedRange === range.value }]"
+          @click="selectRange(range.value)"
+        >
+          {{ range.label }}
+        </button>
+      </div>
     </div>
 
     <div v-if="loading && chartsData.length === 0" class="loading-state">
@@ -43,7 +56,7 @@
         </div>
         
         <div class="chart-body">
-          <Line :data="chart.chartData" :options="chartOptions" class="canvas-chart" />
+          <Line :data="chart.chartData" :options="getChartOptions(selectedRange)" class="canvas-chart" />
         </div>
       </div>
     </div>
@@ -80,55 +93,78 @@ ChartJS.register(
 const MAX_POINTS = 60; // 10 minutes (60 * 10s)
 const chartsData = ref([]);
 const loading = ref(true);
+const selectedRange = ref('live');
 let pollInterval = null;
 
-const chartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  animation: {
-    duration: 0 // Disable animation for smoother live updates
-  },
-  interaction: {
-    mode: 'index',
-    intersect: false,
-  },
-  plugins: {
-    legend: {
-      display: false
+const rangeOptions = [
+  { label: 'Live (10m)', value: 'live' },
+  { label: '1H', value: '1h' },
+  { label: '3H', value: '3h' },
+  { label: '6H', value: '6h' },
+  { label: '12H', value: '12h' },
+  { label: '24H', value: '24h' },
+  { label: '7D', value: '7d' },
+  { label: '30D', value: '30d' },
+];
+
+const getChartOptions = (range) => {
+  const isLive = range === 'live';
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: {
+      duration: isLive ? 0 : 200
     },
-    tooltip: {
-      backgroundColor: 'rgba(15, 23, 42, 0.9)',
-      titleColor: '#fff',
-      bodyColor: '#cbd5e1',
-      borderColor: 'rgba(51, 65, 85, 0.5)',
-      borderWidth: 1,
-      padding: 10,
-      callbacks: {
-        label: function(context) {
-          return `${context.dataset.label}: ${formatSpeed(context.raw)}`;
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+        titleColor: '#fff',
+        bodyColor: '#cbd5e1',
+        borderColor: 'rgba(51, 65, 85, 0.5)',
+        borderWidth: 1,
+        padding: 10,
+        callbacks: {
+          label: function(context) {
+            return `${context.dataset.label}: ${formatSpeed(context.raw)}`;
+          }
         }
       }
-    }
-  },
-  scales: {
-    x: {
-      display: false,
     },
-    y: {
-      display: true,
-      grid: {
-        color: 'rgba(255, 255, 255, 0.05)',
-      },
-      ticks: {
-        color: '#94a3b8',
-        callback: function(value) {
-          return formatSpeed(value);
+    scales: {
+      x: {
+        display: !isLive,
+        grid: {
+          color: 'rgba(255, 255, 255, 0.05)',
         },
-        maxTicksLimit: 5
+        ticks: {
+          color: '#64748b',
+          maxTicksLimit: 8,
+          font: { size: 10 }
+        }
       },
-      beginAtZero: true
+      y: {
+        display: true,
+        grid: {
+          color: 'rgba(255, 255, 255, 0.05)',
+        },
+        ticks: {
+          color: '#94a3b8',
+          callback: function(value) {
+            return formatSpeed(value);
+          },
+          maxTicksLimit: 5
+        },
+        beginAtZero: true
+      }
     }
-  }
+  };
 };
 
 const formatSpeed = (bps) => {
@@ -139,102 +175,128 @@ const formatSpeed = (bps) => {
   return parseFloat((bps / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 };
 
-const formatTime = (timestamp) => {
+const formatTime = (timestamp, range = 'live') => {
+  if (!timestamp) return '';
   const date = new Date(timestamp * 1000);
-  return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const seconds = date.getSeconds().toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+
+  if (range === 'live') {
+    return `${hours}:${minutes}:${seconds}`;
+  } else if (range === '7d' || range === '30d') {
+    return `${day}/${month} ${hours}:${minutes}`;
+  } else {
+    return `${hours}:${minutes}`;
+  }
+};
+
+const createChartObject = (routerData, labels, rxData, txData, range) => {
+  const isLive = range === 'live';
+  return {
+    router_id: routerData.router_id,
+    router_name: routerData.router_name,
+    interface: routerData.interface,
+    latest_rx: routerData.rx,
+    latest_tx: routerData.tx,
+    status: routerData.status,
+    range: range,
+    chartData: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'RX (Download)',
+          backgroundColor: 'rgba(6, 182, 212, 0.1)',
+          borderColor: '#06b6d4',
+          data: rxData,
+          fill: true,
+          tension: 0.4,
+          pointRadius: isLive ? 1 : 0,
+          pointHoverRadius: 4,
+          borderWidth: 2
+        },
+        {
+          label: 'TX (Upload)',
+          backgroundColor: 'rgba(245, 158, 11, 0.1)',
+          borderColor: '#f59e0b',
+          data: txData,
+          fill: true,
+          tension: 0.4,
+          pointRadius: isLive ? 1 : 0,
+          pointHoverRadius: 4,
+          borderWidth: 2
+        }
+      ]
+    }
+  };
 };
 
 const fetchTrafficData = async () => {
   try {
-    // Use timestamp to prevent browser/Cloudflare caching
-    const response = await api.get('/traffic/dashboard?_t=' + Date.now());
+    const range = selectedRange.value;
+    const response = await api.get(`/traffic/dashboard?range=${range}&_t=${Date.now()}`);
     const newData = response.data.data;
-    
-    // Update existing charts or create new ones
-    newData.forEach(routerData => {
-      let existingChart = chartsData.value.find(c => c.router_id === routerData.router_id);
-      
-      const timeStr = formatTime(routerData.timestamp);
-      
-      if (!existingChart) {
-        // Initialize new chart
-        existingChart = {
-          router_id: routerData.router_id,
-          router_name: routerData.router_name,
-          interface: routerData.interface,
-          latest_rx: routerData.rx,
-          latest_tx: routerData.tx,
-          status: routerData.status,
-          chartData: {
-            labels: [timeStr],
-            datasets: [
-              {
-                label: 'RX (Download)',
-                backgroundColor: 'rgba(6, 182, 212, 0.1)',
-                borderColor: '#06b6d4',
-                data: [routerData.rx],
-                fill: true,
-                tension: 0.4,
-                pointRadius: 1,
-                pointHoverRadius: 4,
-                borderWidth: 2
-              },
-              {
-                label: 'TX (Upload)',
-                backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                borderColor: '#f59e0b',
-                data: [routerData.tx],
-                fill: true,
-                tension: 0.4,
-                pointRadius: 1,
-                pointHoverRadius: 4,
-                borderWidth: 2
-              }
-            ]
+
+    if (range === 'live') {
+      newData.forEach(routerData => {
+        let existingChart = chartsData.value.find(c => c.router_id === routerData.router_id);
+        const timeStr = formatTime(routerData.timestamp, 'live');
+
+        if (!existingChart || existingChart.range !== 'live') {
+          const newChart = createChartObject(routerData, [timeStr], [routerData.rx], [routerData.tx], 'live');
+          const idx = chartsData.value.findIndex(c => c.router_id === routerData.router_id);
+          if (idx !== -1) {
+            chartsData.value[idx] = newChart;
+          } else {
+            chartsData.value.push(newChart);
           }
-        };
-        chartsData.value.push(existingChart);
-      } else {
-        // Update existing chart
-        existingChart.interface = routerData.interface;
-        existingChart.latest_rx = routerData.rx;
-        existingChart.latest_tx = routerData.tx;
-        existingChart.status = routerData.status;
-        
-        existingChart.chartData.labels.push(timeStr);
-        existingChart.chartData.datasets[0].data.push(routerData.rx);
-        existingChart.chartData.datasets[1].data.push(routerData.tx);
-        
-        // Trim history
-        if (existingChart.chartData.labels.length > MAX_POINTS) {
-          existingChart.chartData.labels.shift();
-          existingChart.chartData.datasets[0].data.shift();
-          existingChart.chartData.datasets[1].data.shift();
-        }
-        
-        // Trigger reactivity for Vue-Chartjs by creating a completely new object
-        const newChartData = {
-          ...existingChart.chartData,
-          labels: [...existingChart.chartData.labels],
-          datasets: [
-            { ...existingChart.chartData.datasets[0], data: [...existingChart.chartData.datasets[0].data] },
-            { ...existingChart.chartData.datasets[1], data: [...existingChart.chartData.datasets[1].data] }
-          ]
-        };
-        
-        const index = chartsData.value.findIndex(c => c.router_id === routerData.router_id);
-        if (index !== -1) {
-          chartsData.value[index] = {
-            ...existingChart,
-            chartData: newChartData
+        } else {
+          existingChart.interface = routerData.interface;
+          existingChart.latest_rx = routerData.rx;
+          existingChart.latest_tx = routerData.tx;
+          existingChart.status = routerData.status;
+
+          existingChart.chartData.labels.push(timeStr);
+          existingChart.chartData.datasets[0].data.push(routerData.rx);
+          existingChart.chartData.datasets[1].data.push(routerData.tx);
+
+          if (existingChart.chartData.labels.length > MAX_POINTS) {
+            existingChart.chartData.labels.shift();
+            existingChart.chartData.datasets[0].data.shift();
+            existingChart.chartData.datasets[1].data.shift();
+          }
+
+          const newChartData = {
+            ...existingChart.chartData,
+            labels: [...existingChart.chartData.labels],
+            datasets: [
+              { ...existingChart.chartData.datasets[0], data: [...existingChart.chartData.datasets[0].data] },
+              { ...existingChart.chartData.datasets[1], data: [...existingChart.chartData.datasets[1].data] }
+            ]
           };
+
+          const idx = chartsData.value.findIndex(c => c.router_id === routerData.router_id);
+          if (idx !== -1) {
+            chartsData.value[idx] = {
+              ...existingChart,
+              chartData: newChartData
+            };
+          }
         }
-      }
-    });
-    
-    // Force Vue to recognize array update
-    chartsData.value = [...chartsData.value];
-    
+      });
+    } else {
+      // Historical mode logic (full replace)
+      chartsData.value = newData.map(routerData => {
+        const points = routerData.points || [];
+        const labels = points.map(p => formatTime(p.timestamp, range));
+        const rxData = points.map(p => p.rx);
+        const txData = points.map(p => p.tx);
+
+        return createChartObject(routerData, labels, rxData, txData, range);
+      });
+    }
   } catch (error) {
     console.error("Failed to fetch traffic dashboard data:", error);
   } finally {
@@ -242,9 +304,25 @@ const fetchTrafficData = async () => {
   }
 };
 
+const selectRange = (rangeValue) => {
+  if (selectedRange.value === rangeValue) return;
+  selectedRange.value = rangeValue;
+  loading.value = true;
+
+  if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
+
+  fetchTrafficData();
+
+  if (rangeValue === 'live') {
+    pollInterval = setInterval(fetchTrafficData, 10000);
+  }
+};
+
 onMounted(() => {
   fetchTrafficData();
-  // Poll every 10 seconds
   pollInterval = setInterval(fetchTrafficData, 10000);
 });
 
@@ -259,74 +337,99 @@ onUnmounted(() => {
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 1rem;
   padding: 1.5rem;
-  margin-bottom: 2rem;
-  backdrop-filter: blur(12px);
 }
 
 .header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
 .title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #f8fafc;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
   margin: 0 0 0.25rem 0;
 }
 
 .subtitle {
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   color: #94a3b8;
   margin: 0;
 }
 
-.loading-state {
+.time-range-selector {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 3rem 0;
+  gap: 0.25rem;
+  background: rgba(15, 23, 42, 0.6);
+  padding: 0.25rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.range-btn {
+  background: transparent;
+  border: none;
   color: #94a3b8;
-  gap: 1rem;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.range-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.range-btn.active {
+  background: #3b82f6;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.loading-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  color: #94a3b8;
+  text-align: center;
 }
 
 .spinner {
-  width: 1.5rem;
-  height: 1.5rem;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #3b82f6;
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid rgba(59, 130, 246, 0.2);
   border-radius: 50%;
+  border-top-color: #3b82f6;
   animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-.empty-state {
-  text-align: center;
-  padding: 3rem 1rem;
-  background: rgba(15, 23, 42, 0.3);
-  border-radius: 0.75rem;
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-}
-
 .empty-icon {
   width: 3rem;
   height: 3rem;
   color: #475569;
-  margin: 0 auto 1rem;
-}
-
-.empty-state p {
-  color: #f8fafc;
-  font-weight: 500;
-  margin: 0 0 0.5rem 0;
+  margin-bottom: 1rem;
 }
 
 .empty-hint {
-  display: block;
-  color: #94a3b8;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.5rem;
 }
 
 .charts-grid {
@@ -339,15 +442,17 @@ onUnmounted(() => {
   background: rgba(15, 23, 42, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 0.75rem;
-  overflow: hidden;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .chart-header {
-  padding: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 1rem;
 }
 
 .router-info {
@@ -409,29 +514,33 @@ onUnmounted(() => {
 .label {
   font-size: 0.65rem;
   text-transform: uppercase;
-  font-weight: 600;
   letter-spacing: 0.05em;
+  font-weight: 600;
 }
 
-.speed-rx .label { color: #06b6d4; }
-.speed-tx .label { color: #f59e0b; }
+.speed-rx .label {
+  color: #06b6d4;
+}
+
+.speed-tx .label {
+  color: #f59e0b;
+}
 
 .value {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #f8fafc;
-  font-variant-numeric: tabular-nums;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  font-family: monospace;
 }
 
 .speed-divider {
   width: 1px;
-  height: 20px;
+  height: 24px;
   background: rgba(255, 255, 255, 0.1);
 }
 
 .chart-body {
-  height: 150px;
-  padding: 1rem;
+  height: 200px;
   position: relative;
 }
 </style>
