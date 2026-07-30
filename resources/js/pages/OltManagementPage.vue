@@ -122,21 +122,20 @@
               </div>
 
               <div class="table-responsive">
-                <table class="styled-table">
+                <table class="data-table" style="table-layout: fixed; width: 100%;">
                   <thead>
                     <tr>
-                      <th>PORT / INDEX</th>
-                      <th>PELANGGAN / USER PPPoE</th>
-                      <th>GPON SN / EPON MAC</th>
-                      <th>STATUS</th>
-                      <th>REDAMAN OPTIK (RX POWER)</th>
-                      <th>JARAK MODEM</th>
-                      <th>AKSI</th>
+                      <th style="width: 15%;">PORT / INDEX</th>
+                      <th style="width: 25%;">PELANGGAN / USER PPPoE</th>
+                      <th style="width: 20%;">SN / MAC</th>
+                      <th style="width: 10%;">STATUS</th>
+                      <th style="width: 15%;">REDAMAN (RX)</th>
+                      <th style="width: 15%; text-align: right;">AKSI</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-if="filteredOnus.length === 0">
-                      <td colspan="7" class="text-center py-4 text-muted">Tidak ada data ONU yang cocok dengan filter.</td>
+                      <td colspan="6" class="text-center text-gray-500 py-4">Tidak ada data ONU yang cocok dengan filter.</td>
                     </tr>
                     <tr v-for="onu in filteredOnus" :key="onu.id">
                       <td class="font-bold">{{ onu.pon_port }} / ONU {{ onu.onu_index }}</td>
@@ -160,10 +159,7 @@
                           <span class="lbl">{{ getDbmStatusText(onu.rx_power_dbm) }}</span>
                         </div>
                       </td>
-                      <td>
-                        {{ onu.distance_meters ? (onu.distance_meters / 1000).toFixed(2) + ' KM' : '-' }}
-                      </td>
-                      <td>
+                      <td class="text-right">
                         <button class="btn btn-sm btn-secondary" @click="linkCustomer(onu)">🔗 Link User</button>
                       </td>
                     </tr>
