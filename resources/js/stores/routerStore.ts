@@ -16,6 +16,7 @@ export interface MikroTikRouter {
   monitored_interface?: string | null
   health?: {
     cpu_load: number
+    cpu_cores?: number[]
     ram_total: number
     ram_used: number
     uptime: string

@@ -45,14 +45,20 @@
             <div class="metric-block">
               <div class="metric-label">
                 <span>🧠 CPU Load</span>
-                <span class="metric-value font-mono" :class="getCpuColor(r.health?.cpu_load)">
+                <span class="metric-value font-mono" :class="getCpuTextColor(r.health?.cpu_load)">
                   {{ r.health ? r.health.cpu_load + '%' : '--' }}
                 </span>
               </div>
               <div class="progress-bar">
                 <div class="progress-fill" 
-                     :class="getCpuColor(r.health?.cpu_load)" 
+                     :class="getCpuBgColor(r.health?.cpu_load)" 
                      :style="{ width: (r.health?.cpu_load || 0) + '%' }">
+                </div>
+              </div>
+              <!-- Multi-core display -->
+              <div class="cpu-cores-grid" v-if="r.health?.cpu_cores && r.health.cpu_cores.length > 1">
+                <div class="core-item" v-for="(coreLoad, idx) in r.health.cpu_cores" :key="idx" :title="'Core ' + idx + ': ' + coreLoad + '%'">
+                  <div class="core-bar" :class="getCpuBgColor(coreLoad)" :style="{ height: coreLoad + '%' }"></div>
                 </div>
               </div>
             </div>
@@ -126,11 +132,18 @@ function getBorderClass(r: MikroTikRouter) {
   return 'border-green'
 }
 
-function getCpuColor(cpu: number | undefined) {
-  if (cpu === undefined) return 'color-dim'
-  if (cpu > 85) return 'color-red'
-  if (cpu > 60) return 'color-yellow'
-  return 'color-green'
+function getCpuTextColor(cpu: number | undefined) {
+  if (cpu === undefined) return 'text-dim'
+  if (cpu > 85) return 'text-red'
+  if (cpu > 60) return 'text-yellow'
+  return 'text-green'
+}
+
+function getCpuBgColor(cpu: number | undefined) {
+  if (cpu === undefined) return 'bg-dim'
+  if (cpu > 85) return 'bg-red'
+  if (cpu > 60) return 'bg-yellow'
+  return 'bg-green'
 }
 
 function getRamPercent(used: number | undefined, total: number | undefined) {
@@ -140,10 +153,10 @@ function getRamPercent(used: number | undefined, total: number | undefined) {
 
 function getRamColor(used: number | undefined, total: number | undefined) {
   const pct = getRamPercent(used, total)
-  if (pct === 0) return 'color-dim'
-  if (pct > 90) return 'color-red'
-  if (pct > 75) return 'color-yellow'
-  return 'color-cyan'
+  if (pct === 0) return 'bg-dim'
+  if (pct > 90) return 'bg-red'
+  if (pct > 75) return 'bg-yellow'
+  return 'bg-cyan'
 }
 
 function formatRam(used: number | undefined, total: number | undefined) {
@@ -361,11 +374,37 @@ function formatTimeAgo(dateString: string | null) {
 }
 
 /* Colors */
-.color-green { color: var(--accent-green, #22c55e); background-color: var(--accent-green, #22c55e); }
-.color-yellow { color: var(--accent-amber, #f5a623); background-color: var(--accent-amber, #f5a623); }
-.color-red { color: var(--accent-red, #ef4444); background-color: var(--accent-red, #ef4444); }
-.color-cyan { color: var(--accent-cyan, #22d3ee); background-color: var(--accent-cyan, #22d3ee); }
-.color-dim { color: var(--text-dim, #5c6774); background-color: rgba(255,255,255,0.1); }
+.text-green { color: var(--accent-green, #22c55e); }
+.text-yellow { color: var(--accent-amber, #f5a623); }
+.text-red { color: var(--accent-red, #ef4444); }
+.text-cyan { color: var(--accent-cyan, #22d3ee); }
+.text-dim { color: var(--text-dim, #5c6774); }
+
+.bg-green { background-color: var(--accent-green, #22c55e); }
+.bg-yellow { background-color: var(--accent-amber, #f5a623); }
+.bg-red { background-color: var(--accent-red, #ef4444); }
+.bg-cyan { background-color: var(--accent-cyan, #22d3ee); }
+.bg-dim { background-color: rgba(255,255,255,0.1); }
+
+.cpu-cores-grid {
+  display: flex;
+  gap: 2px;
+  margin-top: 4px;
+  height: 12px;
+}
+.core-item {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+.core-bar {
+  width: 100%;
+  border-radius: 2px;
+  transition: height 0.5s ease-out;
+}
 
 .font-mono { font-family: var(--font-mono, monospace); }
 
