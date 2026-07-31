@@ -292,6 +292,49 @@ const createChartObject = (routerData, labels, rxData, txData, range) => {
     };
   }
 
+  const datasets = [
+    {
+      label: 'RX (Download)',
+      backgroundColor: 'rgba(6, 182, 212, 0.1)',
+      borderColor: '#06b6d4',
+      data: rxData,
+      fill: true,
+      tension: 0.4,
+      pointRadius: isLive ? 1 : 0,
+      pointHoverRadius: 4,
+      borderWidth: 2
+    },
+    {
+      label: 'TX (Upload)',
+      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+      borderColor: '#f59e0b',
+      data: txData,
+      fill: true,
+      tension: 0.4,
+      pointRadius: isLive ? 1 : 0,
+      pointHoverRadius: 4,
+      borderWidth: 2
+    }
+  ];
+
+  const capMbps = routerData.bandwidth_capacity_mbps;
+  const threshPct = routerData.warning_threshold_pct || 90;
+  if (capMbps && capMbps > 0) {
+    const capacityBps = capMbps * 1000000;
+    const thresholdBps = capacityBps * (threshPct / 100);
+    datasets.push({
+      label: `Limit Warning (${threshPct}% of ${formatSpeed(capacityBps)})`,
+      backgroundColor: 'transparent',
+      borderColor: '#ef4444',
+      borderWidth: 1.5,
+      borderDash: [6, 4],
+      data: new Array(labels.length).fill(thresholdBps),
+      fill: false,
+      pointRadius: 0,
+      pointHoverRadius: 0,
+    });
+  }
+
   return {
     router_id: routerData.router_id,
     router_name: routerData.router_name,
@@ -301,32 +344,11 @@ const createChartObject = (routerData, labels, rxData, txData, range) => {
     status: routerData.status,
     range: range,
     stats: stats,
+    bandwidth_capacity_mbps: capMbps,
+    warning_threshold_pct: threshPct,
     chartData: {
       labels: labels,
-      datasets: [
-        {
-          label: 'RX (Download)',
-          backgroundColor: 'rgba(6, 182, 212, 0.1)',
-          borderColor: '#06b6d4',
-          data: rxData,
-          fill: true,
-          tension: 0.4,
-          pointRadius: isLive ? 1 : 0,
-          pointHoverRadius: 4,
-          borderWidth: 2
-        },
-        {
-          label: 'TX (Upload)',
-          backgroundColor: 'rgba(245, 158, 11, 0.1)',
-          borderColor: '#f59e0b',
-          data: txData,
-          fill: true,
-          tension: 0.4,
-          pointRadius: isLive ? 1 : 0,
-          pointHoverRadius: 4,
-          borderWidth: 2
-        }
-      ]
+      datasets: datasets
     }
   };
 };
@@ -696,6 +718,16 @@ onUnmounted(() => {
   font-weight: 700;
   color: var(--text-1);
   line-height: 1;
+}
+
+.val-rx {
+  color: #06b6d4;
+  font-weight: 600;
+}
+
+.val-tx {
+  color: #f59e0b;
+  font-weight: 600;
 }
 
 .volume-details {

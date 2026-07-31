@@ -146,6 +146,22 @@
               <input type="password" v-model="form.credential" class="form-input" :required="!isEditing" placeholder="API Password" />
               <small v-if="isEditing" class="form-help">Leave blank to keep current password</small>
             </div>
+
+            <div class="form-group">
+              <label>
+                Bandwidth Capacity (Mbps)
+                <span class="info-icon" title="Kapasitas total bandwidth langganan (misal: 1500 untuk 1.5 Gbps). Digunakan untuk membuat garis batas peringatan di grafik.">ℹ️</span>
+              </label>
+              <input type="number" v-model="form.bandwidth_capacity_mbps" class="form-input" min="1" placeholder="e.g. 1000 or 1500" />
+            </div>
+
+            <div class="form-group">
+              <label>
+                Warning Threshold (%)
+                <span class="info-icon" title="Persentase ambang batas peringatan (default: 90%). Garis putus-putus di grafik akan dirender di persentase ini.">ℹ️</span>
+              </label>
+              <input type="number" v-model="form.warning_threshold_pct" class="form-input" min="1" max="100" placeholder="90" />
+            </div>
             
             <div class="form-group">
               <label>
@@ -202,7 +218,9 @@ const form = reactive({
   credential: '',
   sync_offset_minutes: 15,
   snmp_community: '',
-  monitored_interface: ''
+  monitored_interface: '',
+  bandwidth_capacity_mbps: null as number | null,
+  warning_threshold_pct: 90,
 })
 
 const copied = ref(false)
@@ -239,6 +257,8 @@ function resetForm() {
   form.sync_offset_minutes = 15
   form.snmp_community = ''
   form.monitored_interface = ''
+  form.bandwidth_capacity_mbps = null
+  form.warning_threshold_pct = 90
   formError.value = ''
 }
 
@@ -260,6 +280,8 @@ async function openEditModal(router: MikroTikRouter) {
   form.sync_offset_minutes = router.sync_offset_minutes || 15
   form.snmp_community = router.snmp_community || ''
   form.monitored_interface = router.monitored_interface || ''
+  form.bandwidth_capacity_mbps = (router as any).bandwidth_capacity_mbps || null
+  form.warning_threshold_pct = (router as any).warning_threshold_pct || 90
   showModal.value = true
 
   // Fetch available interfaces
