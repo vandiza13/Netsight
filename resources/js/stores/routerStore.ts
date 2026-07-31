@@ -15,6 +15,7 @@ export interface MikroTikRouter {
   snmp_community?: string | null
   monitored_interface?: string | null
   health?: {
+    board_name?: string | null
     cpu_load: number
     cpu_cores?: number[]
     ram_total: number

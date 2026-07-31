@@ -2,11 +2,19 @@
   <div class="router-cards-container">
     <div class="header-section">
       <h3 class="section-title">
-        <span class="icon">🖧</span> Router Overview
+        <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="2" width="20" height="8" rx="2"/>
+          <rect x="2" y="14" width="20" height="8" rx="2"/>
+          <line x1="6" y1="6" x2="6.01" y2="6"/>
+          <line x1="6" y1="18" x2="6.01" y2="18"/>
+        </svg>
+        Router Overview
       </h3>
       <div class="header-actions">
         <button class="btn-refresh" @click="fetchRouters" :disabled="loading" title="Refresh data">
-          <span :class="{'spinning': loading}">🔄</span>
+          <svg class="refresh-icon" :class="{'spinning': loading}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+          </svg>
         </button>
       </div>
     </div>
@@ -27,14 +35,19 @@
         <!-- Card Header -->
         <div class="card-header">
           <div class="header-info">
-            <h4 class="router-name">{{ r.name }}</h4>
+            <div class="title-row">
+              <h4 class="router-name">{{ r.name }}</h4>
+              <span v-if="r.health?.board_name" class="board-badge font-mono">{{ r.health.board_name }}</span>
+            </div>
             <div class="router-meta">
-              <span class="meta-ip">🌐 {{ r.host }}</span>
-              <span class="meta-os">• RouterOS {{ r.routeros_version || 'v7.x' }}</span>
+              <span class="meta-ip font-mono">{{ r.host }}</span>
+              <span class="meta-divider">•</span>
+              <span class="meta-os font-mono">RouterOS {{ r.routeros_version || 'v7.x' }}</span>
             </div>
           </div>
           <div class="status-badge" :class="getStatusClass(r.status)">
-            <span class="dot"></span> {{ r.status }}
+            <span class="dot" :class="{'pulse': r.status === 'HEALTHY'}"></span>
+            {{ r.status }}
           </div>
         </div>
 
@@ -44,7 +57,7 @@
             <!-- CPU Load -->
             <div class="metric-block">
               <div class="metric-label">
-                <span>🧠 CPU Load</span>
+                <span class="label-text">CPU LOAD</span>
                 <span class="metric-value font-mono" :class="getCpuTextColor(r.health?.cpu_load)">
                   {{ r.health ? r.health.cpu_load + '%' : '--' }}
                 </span>
@@ -55,9 +68,9 @@
                      :style="{ width: (r.health?.cpu_load || 0) + '%' }">
                 </div>
               </div>
-              <!-- Multi-core display -->
+              <!-- Multi-core Spectrum -->
               <div class="cpu-cores-grid" v-if="r.health?.cpu_cores && r.health.cpu_cores.length > 1">
-                <div class="core-item" v-for="(coreLoad, idx) in r.health.cpu_cores" :key="idx" :title="'Core ' + idx + ': ' + coreLoad + '%'">
+                <div class="core-item" v-for="(coreLoad, idx) in r.health.cpu_cores" :key="idx" :title="'Core ' + (idx + 1) + ': ' + coreLoad + '%'">
                   <div class="core-bar" :class="getCpuBgColor(coreLoad)" :style="{ height: coreLoad + '%' }"></div>
                 </div>
               </div>
@@ -66,7 +79,7 @@
             <!-- RAM Usage -->
             <div class="metric-block">
               <div class="metric-label">
-                <span>🗄️ RAM Usage</span>
+                <span class="label-text">RAM USAGE</span>
                 <span class="metric-value font-mono">
                   {{ formatRam(r.health?.ram_used, r.health?.ram_total) }}
                 </span>
@@ -80,29 +93,30 @@
             </div>
           </div>
 
-          <div class="metric-row secondary-metrics">
-            <div class="metric-item">
-              <span class="icon">⏱️</span> 
-              <span class="value">{{ r.health?.uptime || '--' }}</span>
+          <!-- Telemetry Grid -->
+          <div class="telemetry-grid">
+            <div class="telemetry-card">
+              <span class="telemetry-title">UPTIME</span>
+              <span class="telemetry-value font-mono">{{ r.health?.uptime || '--' }}</span>
             </div>
-            <div class="metric-item">
-              <span class="icon">🌡️</span> 
-              <span class="value">{{ r.health?.temperature ? r.health.temperature + '°C' : '--' }}</span>
+            <div class="telemetry-card">
+              <span class="telemetry-title">TEMP</span>
+              <span class="telemetry-value font-mono">{{ r.health?.temperature ? r.health.temperature + '°C' : '--' }}</span>
             </div>
-            <div class="metric-item">
-              <span class="icon">⚡</span> 
-              <span class="value">{{ r.health?.voltage ? r.health.voltage + 'V' : '--' }}</span>
+            <div class="telemetry-card">
+              <span class="telemetry-title">VOLTAGE</span>
+              <span class="telemetry-value font-mono">{{ r.health?.voltage ? r.health.voltage + 'V' : '--' }}</span>
             </div>
           </div>
         </div>
 
         <!-- Card Footer -->
         <div class="card-footer">
-          <div class="last-sync text-muted text-xs">
-            🕒 Sync: {{ formatTimeAgo(r.last_synced_at) }}
+          <div class="last-sync text-muted text-xs font-mono">
+            SYNC: {{ formatTimeAgo(r.last_synced_at) }}
           </div>
           <button class="btn-inspect" @click="goToInspect(r)">
-            🔍 Inspect
+            Inspect
           </button>
         </div>
       </div>
@@ -163,11 +177,9 @@ function formatRam(used: number | undefined, total: number | undefined) {
   if (!used || !total) return '--'
   const pct = getRamPercent(used, total)
   
-  // Format to MB or GB
   const usedMB = (used / 1024 / 1024).toFixed(0)
-  const totalGB = (total / 1024 / 1024 / 1024).toFixed(1)
-  
   if (total > 1024 * 1024 * 1024) {
+    const totalGB = (total / 1024 / 1024 / 1024).toFixed(1)
     return `${pct}% (${usedMB}MB / ${totalGB}GB)`
   }
   const totalMB = (total / 1024 / 1024).toFixed(0)
@@ -180,7 +192,7 @@ function goToInspect(r: MikroTikRouter) {
 }
 
 function formatTimeAgo(dateString: string | null) {
-  if (!dateString) return 'Never'
+  if (!dateString) return 'NEVER'
   const date = new Date(dateString)
   const now = new Date()
   const seconds = Math.round((now.getTime() - date.getTime()) / 1000)
@@ -205,35 +217,43 @@ function formatTimeAgo(dateString: string | null) {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .section-title {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: var(--text-primary);
+  gap: 8px;
+  color: var(--text-primary, #f8fafc);
+  letter-spacing: 0.01em;
+}
+
+.title-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--accent-cyan, #06b6d4);
 }
 
 .btn-refresh {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-secondary);
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #94a3b8;
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 .btn-refresh:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary);
+  background: #334155;
+  color: #f8fafc;
 }
+.refresh-icon { width: 14px; height: 14px; }
 .spinning { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -241,37 +261,37 @@ function formatTimeAgo(dateString: string | null) {
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 20px;
+  gap: 18px;
 }
 
-/* Card Design */
+/* Card Design - NOC Slate Style */
 .router-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
-  backdrop-filter: blur(10px);
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
   overflow: hidden;
 }
 
 .router-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  border-color: #334155;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
-.border-green { border-top: 2px solid rgba(34, 197, 94, 0.5); }
-.border-yellow { border-top: 2px solid rgba(245, 166, 35, 0.6); }
-.border-red { border-top: 2px solid rgba(239, 68, 68, 0.6); }
+.border-green { border-top: 2px solid #22c55e; }
+.border-yellow { border-top: 2px solid #f59e0b; }
+.border-red { border-top: 2px solid #ef4444; }
 
 /* Header */
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 16px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 14px 16px;
+  border-bottom: 1px solid #1e293b;
+  background: #0f172a;
 }
 
 .header-info {
@@ -280,180 +300,242 @@ function formatTimeAgo(dateString: string | null) {
   gap: 4px;
 }
 
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .router-name {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #f8fafc;
   margin: 0;
 }
 
+.board-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  color: #22d3ee;
+  letter-spacing: 0.02em;
+}
+
 .router-meta {
-  font-size: 0.8rem;
-  color: var(--text-muted);
+  font-size: 0.75rem;
+  color: #64748b;
   display: flex;
+  align-items: center;
   gap: 6px;
 }
 
-.meta-ip { color: var(--cyan, #22d3ee); font-family: var(--font-mono, monospace); }
+.meta-ip { color: #38bdf8; }
+.meta-divider { color: #334155; }
 
 /* Body */
 .card-body {
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   flex: 1;
 }
 
 .metric-row {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .metric-block {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .metric-label {
   display: flex;
   justify-content: space-between;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  font-weight: 500;
+  align-items: center;
+}
+
+.label-text {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #64748b;
 }
 
 .metric-value {
+  font-size: 0.78rem;
   font-weight: 600;
 }
 
 .progress-bar {
   width: 100%;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  height: 5px;
+  background: #1e293b;
+  border-radius: 3px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  border-radius: 4px;
-  transition: width 0.5s ease-out, background-color 0.3s;
+  border-radius: 3px;
+  transition: width 0.4s ease-out;
 }
 
-.secondary-metrics {
-  flex-direction: row;
-  justify-content: space-between;
-  padding-top: 10px;
-  border-top: 1px dashed rgba(255, 255, 255, 0.05);
-}
-
-.metric-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-}
-
-.metric-item .value {
-  font-family: var(--font-mono, monospace);
-  color: var(--text-primary);
-}
-
-/* Footer */
-.card-footer {
-  padding: 14px 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.03);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.1);
-}
-
-/* Colors */
-.text-green { color: var(--accent-green, #22c55e); }
-.text-yellow { color: var(--accent-amber, #f5a623); }
-.text-red { color: var(--accent-red, #ef4444); }
-.text-cyan { color: var(--accent-cyan, #22d3ee); }
-.text-dim { color: var(--text-dim, #5c6774); }
-
-.bg-green { background-color: var(--accent-green, #22c55e); }
-.bg-yellow { background-color: var(--accent-amber, #f5a623); }
-.bg-red { background-color: var(--accent-red, #ef4444); }
-.bg-cyan { background-color: var(--accent-cyan, #22d3ee); }
-.bg-dim { background-color: rgba(255,255,255,0.1); }
-
+/* Multi-core Spectrum */
 .cpu-cores-grid {
   display: flex;
   gap: 2px;
   margin-top: 4px;
-  height: 12px;
+  height: 10px;
 }
+
 .core-item {
   flex: 1;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 2px;
+  background: #1e293b;
+  border-radius: 1px;
   display: flex;
   align-items: flex-end;
   overflow: hidden;
 }
+
 .core-bar {
   width: 100%;
-  border-radius: 2px;
-  transition: height 0.5s ease-out;
+  transition: height 0.4s ease-out;
 }
 
-.font-mono { font-family: var(--font-mono, monospace); }
+/* Telemetry Grid */
+.telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.telemetry-card {
+  background: #182234;
+  border: 1px solid #1e293b;
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.telemetry-title {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.telemetry-value {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+/* Footer */
+.card-footer {
+  padding: 10px 16px;
+  border-top: 1px solid #1e293b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0b1120;
+}
+
+.last-sync {
+  font-size: 0.7rem;
+  color: #64748b;
+  letter-spacing: 0.02em;
+}
+
+/* Colors */
+.text-green { color: #22c55e; }
+.text-yellow { color: #f59e0b; }
+.text-red { color: #ef4444; }
+.text-cyan { color: #38bdf8; }
+.text-dim { color: #64748b; }
+
+.bg-green { background-color: #22c55e; }
+.bg-yellow { background-color: #f59e0b; }
+.bg-red { background-color: #ef4444; }
+.bg-cyan { background-color: #38bdf8; }
+.bg-dim { background-color: #334155; }
+
+.font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
 
 /* Buttons & Badges */
 .btn-inspect {
-  padding: 6px 14px;
-  background: rgba(34, 211, 238, 0.1);
-  border: 1px solid rgba(34, 211, 238, 0.25);
-  color: var(--accent-cyan, #22d3ee);
-  border-radius: 6px;
-  font-size: 0.8rem;
+  padding: 4px 12px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #38bdf8;
+  border-radius: 4px;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
+
 .btn-inspect:hover {
-  background: rgba(34, 211, 238, 0.2);
-  border-color: rgba(34, 211, 238, 0.4);
+  background: #334155;
+  color: #f8fafc;
 }
 
 .status-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  padding: 4px 8px;
-  border-radius: 12px;
+  padding: 3px 8px;
+  border-radius: 4px;
   white-space: nowrap;
+  letter-spacing: 0.04em;
 }
-.status-badge .dot { width: 6px; height: 6px; border-radius: 50%; }
 
-.status--healthy { background: rgba(34, 197, 94, 0.15); color: var(--accent-green, #22c55e); }
-.status--healthy .dot { background: var(--accent-green, #22c55e); }
-.status--degraded { background: rgba(245, 166, 35, 0.15); color: var(--accent-amber, #f5a623); }
-.status--degraded .dot { background: var(--accent-amber, #f5a623); }
-.status--unreachable { background: rgba(239, 68, 68, 0.15); color: var(--accent-red, #ef4444); }
-.status--unreachable .dot { background: var(--accent-red, #ef4444); }
+.status-badge .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-badge .dot.pulse {
+  animation: status-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes status-ping {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.2); }
+}
+
+.status--healthy { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
+.status--healthy .dot { background: #22c55e; }
+.status--degraded { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+.status--degraded .dot { background: #f59e0b; }
+.status--unreachable { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+.status--unreachable .dot { background: #ef4444; }
 
 /* Skeleton */
 .skeleton-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 20px;
+  gap: 18px;
 }
 .skeleton-card {
-  height: 240px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 12px;
+  height: 220px;
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
   animation: pulse 1.5s infinite;
 }
 @keyframes pulse {
