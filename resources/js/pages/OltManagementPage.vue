@@ -127,6 +127,15 @@
                   <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                   <input v-model="onuSearch" type="text" placeholder="Cari User PPPoE, Nama, SN, atau MAC..." class="input-modern search-input" />
                 </div>
+                
+                <!-- OLT Selector -->
+                <select :value="oltStore.selectedOlt?.id" @change="onOltFilterChange" class="input-modern filter-select" style="max-width: 250px;">
+                  <option v-for="olt in oltStore.olts" :key="olt.id" :value="olt.id">
+                    {{ olt.name }}
+                  </option>
+                  <option v-if="oltStore.olts.length === 0" value="" disabled>Belum ada OLT</option>
+                </select>
+
                 <select v-model="onuStatusFilter" class="input-modern filter-select">
                   <option value="all">Semua Status ONU</option>
                   <option value="online">Online</option>
@@ -523,6 +532,14 @@ const linkCustomer = (onu: any) => {
   if (name !== null) {
     onu.customer_name = name;
     toastStore.addToast('Customer name linked (Local preview only)', 'success');
+  }
+};
+
+const onOltFilterChange = (event: Event) => {
+  const target = event.target as HTMLSelectElement;
+  const oltId = parseInt(target.value, 10);
+  if (!isNaN(oltId)) {
+    oltStore.selectOlt(oltId);
   }
 };
 
@@ -1028,6 +1045,13 @@ onMounted(() => {
 .btn-outline:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); border-color: rgba(255,255,255,0.2); }
 .btn-sm { padding: 8px 14px; font-size: 0.85rem; }
 .btn-lg { padding: 14px 28px; font-size: 1rem; }
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
 
 .spinning { display: inline-block; animation: spin 1s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
