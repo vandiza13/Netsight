@@ -652,7 +652,6 @@ onMounted(() => {
   font-weight: 600;
 }
 
-/* Premium Card (Glassmorphism) */
 .premium-card {
   background: var(--surface-1);
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -662,6 +661,31 @@ onMounted(() => {
   -webkit-backdrop-filter: blur(12px);
 }
 .panel-full { padding: 24px; }
+
+.empty-panel {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--surface-2);
+  border: 1px dashed var(--border-color);
+  border-radius: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.empty-icon-wrap {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.8;
+}
+.empty-panel h3 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+.empty-panel p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-bottom: 24px;
+}
 
 .olts-grid-container {
   display: grid;
