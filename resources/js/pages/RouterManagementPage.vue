@@ -89,9 +89,21 @@
               <input type="number" v-model="form.api_port" class="form-input" required placeholder="8728 or 8729" />
             </div>
             
-            <div class="form-group">
+            <div class="form-group full-width">
               <label>SNMP Community (Optional)</label>
-              <input type="text" v-model="form.snmp_community" class="form-input" placeholder="public" />
+              <input type="text" v-model="form.snmp_community" class="form-input" placeholder="e.g. public or BimaNet-SNMP" />
+              
+              <!-- Smart SNMP Quick Setup Helper -->
+              <div class="snmp-helper-box mt-2">
+                <div class="helper-header">
+                  <span class="helper-title">⚡ MikroTik SNMP Quick-Setup Script</span>
+                  <button type="button" class="btn-copy" @click="copySnmpScript">
+                    {{ copied ? 'Copied! ✓' : '📋 Copy Script' }}
+                  </button>
+                </div>
+                <pre class="script-code font-mono">{{ generatedSnmpScript }}</pre>
+                <small class="helper-note">Copas script ini ke Terminal Winbox untuk mengaktifkan SNMP secara instan.</small>
+              </div>
             </div>
 
             <div class="form-group">
@@ -135,7 +147,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted, reactive, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRouterStore, type MikroTikRouter } from '../stores/routerStore'
 import SidebarNav from '../components/SidebarNav.vue'
@@ -168,6 +180,21 @@ const form = reactive({
   snmp_community: '',
   monitored_interface: ''
 })
+
+const copied = ref(false)
+
+const generatedSnmpScript = computed(() => {
+  const comm = form.snmp_community.trim() || 'public'
+  return `/snmp set enabled=yes; :if ([:len [/snmp community find name="${comm}"]] = 0) do={ /snmp community add name="${comm}" }`
+})
+
+function copySnmpScript() {
+  navigator.clipboard.writeText(generatedSnmpScript.value)
+  copied.value = true
+  setTimeout(() => {
+    copied.value = false
+  }, 2000)
+}
 
 onMounted(() => {
   routerStore.fetchRouters()
@@ -445,9 +472,63 @@ async function testConnection(router: MikroTikRouter) {
   margin-bottom: 16px;
   font-size: 0.85rem;
 }
-.alert-error {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.snmp-helper-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  margin-top: 8px;
+}
+
+.helper-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.helper-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent-cyan);
+}
+
+.btn-copy {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--surface-3);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-copy:hover {
+  background: var(--accent-dim);
+  color: var(--accent-cyan);
+}
+
+.script-code {
+  background: var(--surface-0);
+  color: #4ade80;
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  border: 1px solid var(--border);
+}
+
+.helper-note {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+  display: block;
 }
 </style>
