@@ -263,13 +263,19 @@ function formatTimeAgo(dateString: string | null) {
 
 /* Card Design - Glassmorphism Mockup Style */
 .router-card {
-  background: linear-gradient(145deg, rgba(17, 24, 39, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
   transition: all 0.3s ease;
   overflow: hidden;
+  box-shadow: var(--card-shadow);
+}
+
+[data-theme="dark"] .router-card {
+  background: linear-gradient(145deg, rgba(17, 24, 39, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
@@ -294,7 +300,7 @@ function formatTimeAgo(dateString: string | null) {
   justify-content: space-between;
   align-items: flex-start;
   padding: 18px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--border);
 }
 
 .header-info {
@@ -305,14 +311,14 @@ function formatTimeAgo(dateString: string | null) {
 .router-name {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-1);
   margin: 0;
   letter-spacing: 0.02em;
 }
 
 .router-meta {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--text-2);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -324,7 +330,7 @@ function formatTimeAgo(dateString: string | null) {
 }
 
 .board-badge {
-  color: #94a3b8;
+  color: var(--text-2);
   white-space: nowrap;
 }
 
@@ -340,7 +346,7 @@ function formatTimeAgo(dateString: string | null) {
   white-space: nowrap;
   letter-spacing: 0.05em;
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid var(--border);
 }
 
 .status-badge .dot {
@@ -393,14 +399,14 @@ function formatTimeAgo(dateString: string | null) {
 
 .ram-text {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--text-2);
 }
 
 /* Progress Bars */
 .metric-label {
   font-size: 0.85rem;
   font-weight: 500;
-  color: #e2e8f0;
+  color: var(--text-1);
   margin-bottom: 8px;
   white-space: nowrap;
 }
@@ -408,7 +414,7 @@ function formatTimeAgo(dateString: string | null) {
 .progress-bar {
   width: 100%;
   height: 6px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--surface-3);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -438,7 +444,7 @@ function formatTimeAgo(dateString: string | null) {
 .segment {
   width: 14px;
   height: 2px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--surface-3);
   border-radius: 1px;
   transition: background 0.3s;
 }
@@ -457,8 +463,8 @@ function formatTimeAgo(dateString: string | null) {
 }
 
 .telemetry-card {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 12px;
   display: flex;
@@ -473,28 +479,28 @@ function formatTimeAgo(dateString: string | null) {
   right: 12px;
   width: 14px;
   height: 14px;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--text-3);
 }
 
 .telemetry-title {
   font-size: 0.65rem;
   font-weight: 600;
   letter-spacing: 0.05em;
-  color: #94a3b8;
+  color: var(--text-2);
   white-space: nowrap;
 }
 
 .telemetry-value {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--text-1);
   white-space: nowrap;
 }
 
 /* Footer */
 .card-footer {
   padding: 12px 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -502,14 +508,14 @@ function formatTimeAgo(dateString: string | null) {
 
 .last-sync {
   font-size: 0.7rem;
-  color: #64748b;
+  color: var(--text-3);
 }
 
 .btn-inspect {
   padding: 5px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #e2e8f0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-1);
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -518,8 +524,8 @@ function formatTimeAgo(dateString: string | null) {
 }
 
 .btn-inspect:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  background: var(--surface-3);
+  color: var(--text-1);
 }
 
 /* Colors */

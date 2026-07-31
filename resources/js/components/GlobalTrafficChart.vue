@@ -427,10 +427,11 @@ onUnmounted(() => {
 
 <style scoped>
 .global-traffic-dashboard {
-  background: rgba(30, 41, 59, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 1rem;
   padding: 1.5rem;
+  transition: background var(--transition-base), border-color var(--transition-base);
 }
 
 .header {
@@ -445,13 +446,13 @@ onUnmounted(() => {
 .title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #fff;
+  color: var(--text-1);
   margin: 0 0 0.25rem 0;
 }
 
 .subtitle {
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: var(--text-2);
   margin: 0;
 }
 
@@ -459,16 +460,16 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  background: rgba(15, 23, 42, 0.6);
+  background: var(--surface-2);
   padding: 0.25rem;
   border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
 }
 
 .range-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: var(--text-2);
   padding: 0.25rem 0.6rem;
   font-size: 0.75rem;
   font-weight: 500;
@@ -478,15 +479,15 @@ onUnmounted(() => {
 }
 
 .range-btn:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-1);
+  background: var(--surface-3);
 }
 
 .range-btn.active {
-  background: #3b82f6;
+  background: var(--accent);
   color: #fff;
   font-weight: 600;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
 }
 
 .loading-state, .empty-state {
@@ -495,16 +496,16 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   padding: 3rem 1.5rem;
-  color: #94a3b8;
+  color: var(--text-2);
   text-align: center;
 }
 
 .spinner {
   width: 2rem;
   height: 2rem;
-  border: 3px solid rgba(59, 130, 246, 0.2);
+  border: 3px solid var(--border);
   border-radius: 50%;
-  border-top-color: #3b82f6;
+  border-top-color: var(--accent);
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
 }
@@ -516,13 +517,13 @@ onUnmounted(() => {
 .empty-icon {
   width: 3rem;
   height: 3rem;
-  color: #475569;
+  color: var(--text-3);
   margin-bottom: 1rem;
 }
 
 .empty-hint {
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-3);
   margin-top: 0.5rem;
 }
 
@@ -533,13 +534,14 @@ onUnmounted(() => {
 }
 
 .chart-card {
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
   border-radius: 0.75rem;
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  transition: background var(--transition-base), border-color var(--transition-base);
 }
 
 .chart-header {
@@ -558,7 +560,7 @@ onUnmounted(() => {
 .router-name {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--text-1);
   margin: 0;
   display: flex;
   align-items: center;
@@ -568,7 +570,7 @@ onUnmounted(() => {
 
 .offline-badge {
   font-size: 0.7rem;
-  background-color: #ef4444;
+  background-color: var(--danger);
   color: white;
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
@@ -577,8 +579,8 @@ onUnmounted(() => {
 
 .interface-badge {
   font-size: 0.75rem;
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
+  background: var(--accent-dim);
+  color: var(--accent);
   padding: 0.125rem 0.5rem;
   border-radius: 1rem;
   display: inline-block;
@@ -593,10 +595,11 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--surface-2);
   padding: 0.375rem 0.75rem;
   border-radius: 0.5rem;
   white-space: nowrap;
+  border: 1px solid var(--border);
 }
 
 .speed-rx, .speed-tx {
@@ -623,14 +626,14 @@ onUnmounted(() => {
 .value {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #fff;
-  font-family: monospace;
+  color: var(--text-1);
+  font-family: var(--font-mono);
 }
 
 .speed-divider {
   width: 1px;
   height: 24px;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border);
 }
 
 .chart-body {
@@ -642,10 +645,10 @@ onUnmounted(() => {
   display: flex;
   gap: 1.25rem;
   align-items: stretch;
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--surface-2);
   padding: 0.5rem 0.75rem;
   border-radius: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
 }
 
 .stats-grid {
@@ -660,7 +663,7 @@ onUnmounted(() => {
   justify-content: center;
   gap: 0.15rem;
   font-size: 0.75rem;
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
 .stat-column {
@@ -675,13 +678,13 @@ onUnmounted(() => {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-2);
   margin-bottom: 0.1rem;
 }
 
 .stat-divider {
   width: 1px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--border);
 }
 
 .volume-col {
@@ -691,7 +694,7 @@ onUnmounted(() => {
 .volume-total {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #f8fafc;
+  color: var(--text-1);
   line-height: 1;
 }
 
@@ -699,7 +702,7 @@ onUnmounted(() => {
   display: flex;
   gap: 0.75rem;
   font-size: 0.7rem;
-  font-family: monospace;
+  font-family: var(--font-mono);
   margin-top: 0.1rem;
 }
 </style>
