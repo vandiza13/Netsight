@@ -96,7 +96,7 @@
                     <span class="val-code">{{ olt.snmp_community }}</span>
                   </div>
                   <div v-if="olt.notes" class="notes-box">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; opacity:0.7"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; opacity:0.7; flex-shrink:0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                     {{ olt.notes }}
                   </div>
                 </div>
@@ -125,9 +125,9 @@
               <div class="filter-flex-bar">
                 <div class="search-wrap">
                   <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                  <input v-model="onuSearch" type="text" placeholder="Cari User PPPoE, Nama, SN, atau MAC..." class="form-input search-input" />
+                  <input v-model="onuSearch" type="text" placeholder="Cari User PPPoE, Nama, SN, atau MAC..." class="input-modern search-input" />
                 </div>
-                <select v-model="onuStatusFilter" class="form-select filter-select">
+                <select v-model="onuStatusFilter" class="input-modern filter-select">
                   <option value="all">Semua Status ONU</option>
                   <option value="online">Online</option>
                   <option value="offline">Offline</option>
@@ -174,7 +174,7 @@
                       </td>
                       <td class="text-right">
                         <button class="btn btn-sm btn-outline" @click="linkCustomer(onu)">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                           Link User
                         </button>
                       </td>
@@ -233,7 +233,7 @@
                 </div>
               </form>
 
-              <div v-if="debugResult" class="terminal-box">
+              <div v-if="debugResult" class="terminal-box fade-in">
                 <div class="terminal-header">
                   <div class="window-controls">
                     <span></span><span></span><span></span>
@@ -266,23 +266,23 @@
           </button>
         </div>
 
-        <form @submit.prevent="saveOlt">
+        <form @submit.prevent="saveOlt" class="modal-form">
           <div class="modal-body-scroll custom-scrollbar">
-            <div class="form-group mb-3">
+            <div class="form-group-modern mb-4">
               <label>Nama OLT / POP <span class="tooltip-icon" title="Nama lokasi atau identitas perangkat OLT">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
               </span></label>
               <input v-model="oltForm.name" type="text" class="input-modern" placeholder="Contoh: OLT POP Utama Kasihan" required />
             </div>
 
-            <div class="form-row-2 mb-3">
-              <div class="form-group">
+            <div class="form-row-2 mb-4">
+              <div class="form-group-modern">
                 <label>IP Address OLT / VPN <span class="tooltip-icon" title="Alamat IP yang bisa dijangkau oleh Netsight (misal: IP VPN / Tailscale)">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                 </span></label>
                 <input v-model="oltForm.ip_address" type="text" class="input-modern" placeholder="10.200.0.5" required />
               </div>
-              <div class="form-group">
+              <div class="form-group-modern">
                 <label>SNMP Port (UDP) <span class="tooltip-icon" title="Port SNMP, standarnya 161. Jika via VPN MikroTik bisa menggunakan port lain (contoh: 1610)">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                 </span></label>
@@ -291,9 +291,9 @@
               </div>
             </div>
 
-            <div class="form-row-2 mb-3">
-              <div class="form-group">
-                <label>Vendor OID Profile Preset <span class="tooltip-icon" title="Pilih merek OLT untuk menentukan cara sistem membaca data dari perangkat tersebut">
+            <div class="form-row-2 mb-4">
+              <div class="form-group-modern">
+                <label>Vendor OID Profile <span class="tooltip-icon" title="Pilih merek OLT untuk menentukan cara sistem membaca data dari perangkat tersebut">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                 </span></label>
                 <select v-model="oltForm.vendor_code" class="input-modern" required @change="onVendorChange">
@@ -302,7 +302,7 @@
                   </option>
                 </select>
               </div>
-              <div class="form-group">
+              <div class="form-group-modern">
                 <label>SNMP Community <span class="tooltip-icon" title="Kata sandi SNMP untuk membaca data (ReadOnly), standar pabrik biasanya 'public'">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                 </span></label>
@@ -310,22 +310,22 @@
               </div>
             </div>
 
-            <div class="form-row-2 mb-3">
-              <div class="form-group">
+            <div class="form-row-2 mb-4">
+              <div class="form-group-modern">
                 <label>Teknologi</label>
                 <select v-model="oltForm.technology" class="input-modern">
                   <option value="epon">EPON</option>
                   <option value="gpon">GPON</option>
                 </select>
               </div>
-              <div class="form-group">
+              <div class="form-group-modern">
                 <label>Jumlah Port PON</label>
                 <input v-model.number="oltForm.total_pons" type="number" min="1" max="64" class="input-modern" required />
               </div>
             </div>
 
             <div class="dstnat-info-box">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px; float:left; margin-top:2px"><line x1="9" x2="15" y1="18" y2="18"/><line x1="10" x2="14" y1="22" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; float:left; margin-top:2px"><line x1="9" x2="15" y1="18" y2="18"/><line x1="10" x2="14" y1="22" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>
               <strong>Petunjuk DST-NAT MikroTik (1 IP VPN):</strong><br/>
               <code>/ip firewall nat add chain=dstnat action=dst-nat protocol=udp dst-port={{ oltForm.snmp_port || 1610 }} to-addresses={{ oltForm.ip_address || '192.168.88.250' }} to-ports=161</code>
             </div>
@@ -811,7 +811,7 @@ onMounted(() => {
 }
 .search-input {
   width: 100%;
-  padding-left: 40px !important;
+  padding-left: 42px !important;
 }
 
 .table-container {
@@ -832,7 +832,7 @@ onMounted(() => {
   top: 0;
   background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(8px);
-  padding: 14px 16px;
+  padding: 16px;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -842,13 +842,14 @@ onMounted(() => {
   z-index: 10;
 }
 .premium-table td {
-  padding: 14px 16px;
+  padding: 16px;
   border-bottom: 1px solid rgba(255,255,255,0.03);
   font-size: 0.875rem;
   color: var(--text-primary);
+  vertical-align: middle;
 }
 .table-row-hover { transition: background 0.2s; }
-.table-row-hover:hover { background: rgba(255, 255, 255, 0.02); }
+.table-row-hover:hover { background: rgba(255, 255, 255, 0.03); }
 .table-row-hover:last-child td { border-bottom: none; }
 
 .cust-title { font-weight: 600; color: var(--text-primary); display: block; }
@@ -858,27 +859,32 @@ onMounted(() => {
 .status-badge-modern {
   font-size: 0.7rem;
   font-weight: 700;
-  padding: 4px 8px;
+  padding: 4px 10px;
   border-radius: 6px;
   letter-spacing: 0.05em;
+  display: inline-block;
 }
 .badge-success { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
 .badge-warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
 .badge-danger { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); }
 
 .dbm-pill {
-  display: inline-block;
-  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
   border-radius: 9999px;
   font-weight: 700;
   font-family: 'Fira Code', monospace;
   font-size: 0.8rem;
   letter-spacing: 0.02em;
+  min-width: 90px;
+  border: 1px solid transparent;
 }
-.dbm-good { background: rgba(16, 185, 129, 0.15); color: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.1); }
-.dbm-warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.1); }
-.dbm-critical { background: rgba(244, 63, 94, 0.15); color: #f43f5e; box-shadow: 0 0 15px rgba(244, 63, 94, 0.2); }
-.dbm-offline { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+.dbm-good { background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
+.dbm-warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); }
+.dbm-critical { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border-color: rgba(244, 63, 94, 0.3); }
+.dbm-offline { background: rgba(255,255,255,0.05); color: var(--text-muted); border-color: rgba(255,255,255,0.1); }
 
 /* Debugger Tool */
 .panel-header-custom { margin-bottom: 24px; }
@@ -886,9 +892,12 @@ onMounted(() => {
 .panel-header-custom p { color: var(--text-secondary); font-size: 0.875rem; }
 
 .form-grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
-.form-group-modern { display: flex; flex-direction: column; }
-.form-group-modern label { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500; }
+.form-group-modern { display: flex; flex-direction: column; width: 100%; }
+.form-group-modern label { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500; display: flex; align-items: center; }
 .input-modern {
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
   background: var(--surface-2);
   border: 1px solid var(--border-color);
   padding: 10px 14px;
@@ -896,6 +905,7 @@ onMounted(() => {
   color: var(--text-primary);
   font-family: inherit;
   transition: all 0.2s;
+  font-size: 0.9rem;
 }
 .input-modern:focus {
   outline: none;
@@ -904,11 +914,6 @@ onMounted(() => {
   background: var(--surface-3, rgba(255,255,255,0.05));
 }
 .form-select.filter-select {
-  background: var(--surface-2);
-  border: 1px solid var(--border-color);
-  padding: 10px 14px;
-  border-radius: 8px;
-  color: var(--text-primary);
   width: 220px;
 }
 
@@ -975,31 +980,36 @@ onMounted(() => {
 }
 .modal-content-box {
   width: 100%; max-width: 600px;
-  padding: 24px;
+  padding: 30px;
   max-height: 90vh;
   display: flex; flex-direction: column;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  border-radius: 16px;
 }
 .modal-header-row {
   display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
-.modal-header-row h3 { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0; }
+.modal-header-row h3 { font-size: 1.35rem; font-weight: 700; color: var(--text-primary); margin: 0; }
 .btn-close {
   background: transparent; border: none; color: var(--text-secondary); cursor: pointer;
-  padding: 4px; border-radius: 6px; transition: all 0.2s;
+  padding: 6px; border-radius: 8px; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
 }
 .btn-close:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
 .modal-body-scroll {
-  overflow-y: auto; padding-right: 8px; flex: 1;
+  overflow-y: auto; padding-right: 12px; flex: 1; margin-right: -12px;
 }
 
 /* Tooltip Icon */
 .tooltip-icon {
-  display: inline-block;
-  margin-left: 4px;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
   color: var(--text-muted);
   cursor: help;
-  vertical-align: middle;
   transition: color 0.2s;
 }
 .tooltip-icon:hover { color: var(--accent-cyan); }
@@ -1007,7 +1017,7 @@ onMounted(() => {
 /* Buttons */
 .btn {
   display: inline-flex; align-items: center; justify-content: center;
-  padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.875rem;
+  padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.9rem;
   cursor: pointer; border: none; transition: all 0.2s; font-family: inherit;
 }
 .btn-primary { background: var(--accent-cyan, #0ea5e9); color: #fff; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2); }
@@ -1015,10 +1025,30 @@ onMounted(() => {
 .btn-secondary { background: var(--surface-2); border: 1px solid var(--border-color); color: var(--text-primary); }
 .btn-secondary:hover { background: var(--surface-3); border-color: rgba(255,255,255,0.2); }
 .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); }
-.btn-outline:hover { background: rgba(255,255,255,0.03); color: var(--text-primary); border-color: rgba(255,255,255,0.2); }
-.btn-sm { padding: 6px 12px; font-size: 0.8rem; }
-.btn-lg { padding: 12px 24px; font-size: 1rem; }
+.btn-outline:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); border-color: rgba(255,255,255,0.2); }
+.btn-sm { padding: 8px 14px; font-size: 0.85rem; }
+.btn-lg { padding: 14px 28px; font-size: 1rem; }
 
 .spinning { display: inline-block; animation: spin 1s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
+
+.mb-4 { margin-bottom: 1.5rem; }
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.hint-txt { font-size: 0.75rem; color: var(--text-secondary); margin-top: 6px; display: block; }
+.dstnat-info-box {
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: var(--accent-cyan);
+  margin-top: 24px;
+  line-height: 1.5;
+}
+.dstnat-info-box code { font-family: 'Fira Code', monospace; display: block; margin-top: 6px; color: #a5b4fc; }
+
+.modal-footer-row {
+  display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;
+  padding-top: 20px; border-top: 1px solid var(--border-color);
+}
 </style>
