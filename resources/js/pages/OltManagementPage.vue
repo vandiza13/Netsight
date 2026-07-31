@@ -19,30 +19,32 @@
 
           <div class="header-action-buttons">
             <button class="btn btn-secondary" @click="activeTab = 'debugger'">
-              🛠️ OID Debugger Tool
+              OID Debugger
             </button>
             <button class="btn btn-primary" @click="openAddOltModal">
-              ➕ Tambah OLT
+              + Tambah OLT
             </button>
           </div>
         </section>
 
-        <!-- Navigation Tabs -->
+        <!-- Navigation Tabs (Segmented Control) -->
         <section class="stagger">
-          <div class="tabs-header-bar">
-            <button :class="['tab-btn-pill', { active: activeTab === 'olts' }]" @click="activeTab = 'olts'">
-              📡 Master OLT ({{ oltStore.olts.length }})
-            </button>
-            <button :class="['tab-btn-pill', { active: activeTab === 'onus' }]" @click="activeTab = 'onus'">
-              📊 Redaman ONU ({{ totalOnus }})
-            </button>
-            <button :class="['tab-btn-pill', { active: activeTab === 'debugger' }]" @click="activeTab = 'debugger'">
-              🛠️ OID Debugger Live
-            </button>
+          <div class="segmented-control-wrapper">
+            <div class="segmented-control">
+              <button :class="['segmented-btn', { active: activeTab === 'olts' }]" @click="activeTab = 'olts'">
+                Master OLT ({{ oltStore.olts.length }})
+              </button>
+              <button :class="['segmented-btn', { active: activeTab === 'onus' }]" @click="activeTab = 'onus'">
+                Redaman ONU ({{ totalOnus }})
+              </button>
+              <button :class="['segmented-btn', { active: activeTab === 'debugger' }]" @click="activeTab = 'debugger'">
+                OID Debugger Live
+              </button>
+            </div>
           </div>
 
           <!-- TAB 1: MASTER OLT LIST -->
-          <div v-if="activeTab === 'olts'" class="tab-pane">
+          <div v-if="activeTab === 'olts'" class="tab-pane fade-in">
             <div v-if="oltStore.loading" class="loading-state">
               <span class="spinning">🔄</span> Memuat data OLT...
             </div>
@@ -51,55 +53,64 @@
               <div class="empty-icon-wrap">⚡</div>
               <h3>Belum Ada Perangkat OLT</h3>
               <p>Tambahkan OLT (HiOSO, V-SOL, HSan, ZTE, Huawei) untuk mulai memantau jaringan optik FTTH.</p>
-              <button class="btn btn-primary mt-3" @click="openAddOltModal">➕ Tambah OLT Sekarang</button>
+              <button class="btn btn-primary mt-3" @click="openAddOltModal">+ Tambah OLT Sekarang</button>
             </div>
 
             <div v-else class="olts-grid-container">
-              <div v-for="olt in oltStore.olts" :key="olt.id" class="glass-card olt-card-item">
+              <div v-for="olt in oltStore.olts" :key="olt.id" class="premium-card olt-card-item">
                 <div class="olt-card-header">
                   <div>
                     <div class="olt-title-row">
-                      <span :class="['status-indicator', olt.status]"></span>
+                      <span :class="['status-glow', olt.status]"></span>
                       <h4 class="olt-card-name">{{ olt.name }}</h4>
                     </div>
                     <span class="vendor-badge">{{ getVendorName(olt.vendor_code) }}</span>
                   </div>
                   <div class="olt-card-actions">
-                    <button class="btn btn-sm btn-icon" title="Sync Redaman Sekarang" @click="syncOlt(olt)">🔄</button>
-                    <button class="btn btn-sm btn-icon" title="Inspect ONUs" @click="inspectOlt(olt)">🔍</button>
-                    <button class="btn btn-sm btn-icon" title="Edit OLT" @click="editOlt(olt)">✏️</button>
-                    <button class="btn btn-sm btn-icon btn-danger" title="Hapus OLT" @click="deleteOlt(olt)">🗑️</button>
+                    <button class="btn-action-icon" title="Sync Redaman" @click="syncOlt(olt)">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+                    </button>
+                    <button class="btn-action-icon" title="Inspect ONUs" @click="inspectOlt(olt)">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </button>
+                    <button class="btn-action-icon" title="Edit OLT" @click="editOlt(olt)">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                    </button>
+                    <button class="btn-action-icon danger" title="Hapus OLT" @click="deleteOlt(olt)">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                    </button>
                   </div>
                 </div>
 
                 <div class="olt-info-body">
                   <div class="info-line">
                     <span class="lbl">IP & Port:</span>
-                    <code class="val-code">{{ olt.ip_address }}:{{ olt.snmp_port }}</code>
+                    <span class="val-code">{{ olt.ip_address }}:{{ olt.snmp_port }}</span>
                   </div>
                   <div class="info-line">
                     <span class="lbl">Teknologi:</span>
-                    <span class="val uppercase">{{ olt.technology }} ({{ olt.total_pons }} PON Port)</span>
+                    <span class="val uppercase">{{ olt.technology }} ({{ olt.total_pons }} PON)</span>
                   </div>
                   <div class="info-line">
                     <span class="lbl">Community:</span>
-                    <code class="val-code">{{ olt.snmp_community }}</code>
+                    <span class="val-code">{{ olt.snmp_community }}</span>
                   </div>
                   <div v-if="olt.notes" class="notes-box">
-                    📌 {{ olt.notes }}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; opacity:0.7"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                    {{ olt.notes }}
                   </div>
                 </div>
 
                 <div class="onu-summary-row">
-                  <div class="summary-pill green">
+                  <div class="summary-stat green-glow">
                     <span class="num">{{ olt.onus_online || 0 }}</span>
                     <span class="label">Online</span>
                   </div>
-                  <div class="summary-pill yellow">
+                  <div class="summary-stat yellow-glow">
                     <span class="num">{{ olt.onus_offline || 0 }}</span>
                     <span class="label">Offline</span>
                   </div>
-                  <div class="summary-pill red">
+                  <div class="summary-stat red-glow">
                     <span class="num">{{ olt.onus_los || 0 }}</span>
                     <span class="label">LOS</span>
                   </div>
@@ -109,24 +120,27 @@
           </div>
 
           <!-- TAB 2: ONU REDAMAN MONITORING -->
-          <div v-if="activeTab === 'onus'" class="tab-pane">
-            <div class="glass-card panel">
+          <div v-if="activeTab === 'onus'" class="tab-pane fade-in">
+            <div class="premium-card panel-full">
               <div class="filter-flex-bar">
-                <input v-model="onuSearch" type="text" placeholder="🔍 Cari User PPPoE, Nama, SN, atau MAC..." class="form-input search-input" />
+                <div class="search-wrap">
+                  <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  <input v-model="onuSearch" type="text" placeholder="Cari User PPPoE, Nama, SN, atau MAC..." class="form-input search-input" />
+                </div>
                 <select v-model="onuStatusFilter" class="form-select filter-select">
                   <option value="all">Semua Status ONU</option>
-                  <option value="online">Online 🟢</option>
-                  <option value="offline">Offline 🟡</option>
-                  <option value="los">LOS (Kabel Putus) 🔴</option>
+                  <option value="online">Online</option>
+                  <option value="offline">Offline</option>
+                  <option value="los">LOS (Kabel Putus)</option>
                 </select>
               </div>
 
-              <div class="table-responsive">
-                <table class="data-table" style="table-layout: fixed; width: 100%;">
+              <div class="table-container custom-scrollbar">
+                <table class="premium-table">
                   <thead>
                     <tr>
                       <th style="width: 15%;">PORT / INDEX</th>
-                      <th style="width: 25%;">PELANGGAN / USER PPPoE</th>
+                      <th style="width: 25%;">PELANGGAN / PPPoE</th>
                       <th style="width: 20%;">SN / MAC</th>
                       <th style="width: 10%;">STATUS</th>
                       <th style="width: 15%;">REDAMAN (RX)</th>
@@ -135,10 +149,10 @@
                   </thead>
                   <tbody>
                     <tr v-if="filteredOnus.length === 0">
-                      <td colspan="6" class="text-center text-gray-500 py-4">Tidak ada data ONU yang cocok dengan filter.</td>
+                      <td colspan="6" class="text-center text-gray-500 py-4">Tidak ada data ONU yang cocok.</td>
                     </tr>
-                    <tr v-for="onu in filteredOnus" :key="onu.id">
-                      <td class="font-bold text-1">{{ onu.pon_port }} / ONU {{ onu.onu_index }}</td>
+                    <tr v-for="onu in filteredOnus" :key="onu.id" class="table-row-hover">
+                      <td class="font-bold text-primary">{{ onu.pon_port }} / ONU {{ onu.onu_index }}</td>
                       <td>
                         <div class="user-info-col">
                           <span class="cust-title">{{ onu.customer_name || onu.onu_description || 'Unlinked' }}</span>
@@ -149,18 +163,20 @@
                         <code class="val-code-xs">{{ onu.serial_number || onu.mac_address || '-' }}</code>
                       </td>
                       <td>
-                        <span :class="['badge', statusBadgeClass(onu.status)]">
+                        <span :class="['status-badge-modern', statusBadgeClass(onu.status)]">
                           {{ onu.status.toUpperCase() }}
                         </span>
                       </td>
                       <td>
-                        <div :class="['dbm-box', getDbmClass(onu.rx_power_dbm)]">
-                          <span class="val">{{ onu.rx_power_dbm ? onu.rx_power_dbm + ' dBm' : '-' }}</span>
-                          <span class="lbl">{{ getDbmStatusText(onu.rx_power_dbm) }}</span>
+                        <div :class="['dbm-pill', getDbmClass(onu.rx_power_dbm)]">
+                          <span class="val">{{ onu.rx_power_dbm ? onu.rx_power_dbm.toFixed(2) + ' dBm' : '-' }}</span>
                         </div>
                       </td>
                       <td class="text-right">
-                        <button class="btn btn-sm btn-secondary" @click="linkCustomer(onu)">🔗 Link User</button>
+                        <button class="btn btn-sm btn-outline" @click="linkCustomer(onu)">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                          Link User
+                        </button>
                       </td>
                     </tr>
                   </tbody>
@@ -170,61 +186,68 @@
           </div>
 
           <!-- TAB 3: OID DEBUGGER TOOL LIVE -->
-          <div v-if="activeTab === 'debugger'" class="tab-pane">
-            <div class="glass-card panel">
+          <div v-if="activeTab === 'debugger'" class="tab-pane fade-in">
+            <div class="premium-card panel-full">
               <div class="panel-header-custom">
-                <h3>🛠️ OID Debugger Tool Live</h3>
-                <p>Uji koneksi SNMP Walk ke IP OLT untuk menganalisa respon OID mentah secara langsung dari browser.</p>
+                <h3>OID Debugger Tool Live</h3>
+                <p>Uji koneksi SNMP Walk ke IP OLT untuk menganalisa respon OID mentah secara langsung.</p>
               </div>
 
               <form @submit.prevent="runOidDebugger" class="debugger-form-body">
                 <div class="form-grid-4">
-                  <div class="form-group">
+                  <div class="form-group-modern">
                     <label>IP Address OLT</label>
-                    <input v-model="debugForm.ip_address" type="text" class="form-input" placeholder="10.200.0.5 atau 192.168.88.250" required />
+                    <input v-model="debugForm.ip_address" type="text" class="input-modern" placeholder="Contoh: 10.200.0.5" required />
                   </div>
-                  <div class="form-group">
+                  <div class="form-group-modern">
                     <label>SNMP Port (UDP)</label>
-                    <input v-model.number="debugForm.snmp_port" type="number" class="form-input" placeholder="161 atau 1610 (DST-NAT)" required />
+                    <input v-model.number="debugForm.snmp_port" type="number" class="input-modern" placeholder="161" required />
                   </div>
-                  <div class="form-group">
+                  <div class="form-group-modern">
                     <label>SNMP Community</label>
-                    <input v-model="debugForm.snmp_community" type="text" class="form-input" placeholder="public" required />
+                    <input v-model="debugForm.snmp_community" type="text" class="input-modern" placeholder="public" required />
                   </div>
-                  <div class="form-group">
+                  <div class="form-group-modern">
                     <label>Target OID Walk</label>
-                    <input v-model="debugForm.oid" type="text" class="form-input" placeholder="1.3.6.1.4.1.17409.2.3.4.1.1.8" required />
+                    <input v-model="debugForm.oid" type="text" class="input-modern" placeholder="1.3.6.1.4.1..." required />
                   </div>
                 </div>
 
                 <div class="preset-chips-row">
-                  <span class="lbl text-2">Preset OID Populer:</span>
-                  <button type="button" class="btn-chip" @click="debugForm.oid = '1.3.6.1.4.1.17409.2.3.4.1.1.8'">HiOSO Status (EPON)</button>
-                  <button type="button" class="btn-chip" @click="debugForm.oid = '1.3.6.1.4.1.17409.2.3.4.2.1.4'">HiOSO Rx Power</button>
-                  <button type="button" class="btn-chip" @click="debugForm.oid = '1.3.6.1.4.1.37950.2.1.5.1.1.4'">V-SOL Status (EPON)</button>
-                  <button type="button" class="btn-chip" @click="debugForm.oid = '1.3.6.1.4.1.3902.1012.3.28.2.1.4'">ZTE C320 Status</button>
-                  <button type="button" class="btn-chip" @click="debugForm.oid = '1.3.6.1.2.1.1'">System Info</button>
+                  <span class="lbl-chips text-secondary">Preset Populer:</span>
+                  <button type="button" class="chip-interactive" @click="debugForm.oid = '1.3.6.1.4.1.17409.2.3.4.1.1.8'">HiOSO Status (EPON)</button>
+                  <button type="button" class="chip-interactive" @click="debugForm.oid = '1.3.6.1.4.1.17409.2.3.4.2.1.4'">HiOSO Rx Power</button>
+                  <button type="button" class="chip-interactive" @click="debugForm.oid = '1.3.6.1.4.1.37950.2.1.5.1.1.4'">V-SOL Status (EPON)</button>
+                  <button type="button" class="chip-interactive" @click="debugForm.oid = '1.3.6.1.4.1.3902.1012.3.28.2.1.4'">ZTE C320 Status</button>
+                  <button type="button" class="chip-interactive" @click="debugForm.oid = '1.3.6.1.2.1.1'">System Info</button>
                 </div>
 
                 <div class="form-actions-row">
-                  <button type="submit" class="btn btn-primary" :disabled="debugging">
+                  <button type="submit" class="btn btn-primary btn-lg" :disabled="debugging">
                     <span v-if="debugging" class="spinning">🔄</span>
-                    {{ debugging ? 'Scanning SNMP Walk...' : '🚀 Uji OID Sekarang' }}
+                    <span v-else>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px; vertical-align:middle"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+                    </span>
+                    {{ debugging ? 'Scanning SNMP Walk...' : 'Uji OID Sekarang' }}
                   </button>
                 </div>
               </form>
 
-              <div v-if="debugResult" class="debug-result-panel">
-                <div :class="['result-banner', debugResult.success ? 'success' : 'error']">
-                  <span><strong>Status:</strong> {{ debugResult.success ? 'BERHASIL (200 OK)' : 'GAGAL / TIMEOUT' }}</span>
-                  <span><strong>Target:</strong> {{ debugResult.target }}</span>
+              <div v-if="debugResult" class="terminal-box">
+                <div class="terminal-header">
+                  <div class="window-controls">
+                    <span></span><span></span><span></span>
+                  </div>
+                  <div class="terminal-title">Status: <span :class="debugResult.success ? 'text-green' : 'text-red'">{{ debugResult.success ? '200 OK' : 'FAILED' }}</span> | Target: {{ debugResult.target }}</div>
                 </div>
-                <div v-if="debugResult.error" class="error-msg-box">
-                  ❌ {{ debugResult.error }}
-                </div>
-                <div v-else-if="debugResult.data" class="code-box font-mono">
-                  <div class="code-header">Ditemukan {{ debugResult.count }} OID entries:</div>
-                  <pre><code>{{ JSON.stringify(debugResult.data, null, 2) }}</code></pre>
+                <div class="terminal-body custom-scrollbar">
+                  <div v-if="debugResult.error" class="text-red">
+                    Error: {{ debugResult.error }}
+                  </div>
+                  <div v-else-if="debugResult.data">
+                    <div class="text-cyan mb-2"># Ditemukan {{ debugResult.count }} OID entries:</div>
+                    <pre><code>{{ JSON.stringify(debugResult.data, null, 2) }}</code></pre>
+                  </div>
                 </div>
               </div>
             </div>
@@ -235,62 +258,75 @@
 
     <!-- MODAL TAMBAH / EDIT OLT -->
     <div v-if="showOltModal" class="modal-backdrop" @click.self="closeOltModal">
-      <div class="glass-card modal-content-box">
+      <div class="glass-card modal-content-box fade-in-up">
         <div class="modal-header-row">
-          <h3>{{ editingOlt ? '✏️ Edit Perangkat OLT' : '➕ Tambah Perangkat OLT Baru' }}</h3>
-          <button class="btn-close" @click="closeOltModal">&times;</button>
+          <h3>{{ editingOlt ? 'Edit Perangkat OLT' : 'Tambah Perangkat OLT Baru' }}</h3>
+          <button class="btn-close" @click="closeOltModal">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
         </div>
 
         <form @submit.prevent="saveOlt">
-          <div class="modal-body-scroll">
+          <div class="modal-body-scroll custom-scrollbar">
             <div class="form-group mb-3">
-              <label>Nama OLT / POP <span class="tooltip-icon" title="Nama lokasi atau identitas perangkat OLT">ℹ️</span></label>
-              <input v-model="oltForm.name" type="text" class="form-input" placeholder="Contoh: OLT POP Utama Kasihan" required />
+              <label>Nama OLT / POP <span class="tooltip-icon" title="Nama lokasi atau identitas perangkat OLT">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+              </span></label>
+              <input v-model="oltForm.name" type="text" class="input-modern" placeholder="Contoh: OLT POP Utama Kasihan" required />
             </div>
 
             <div class="form-row-2 mb-3">
               <div class="form-group">
-                <label>IP Address OLT / VPN <span class="tooltip-icon" title="Alamat IP yang bisa dijangkau oleh Netsight (misal: IP VPN / Tailscale)">ℹ️</span></label>
-                <input v-model="oltForm.ip_address" type="text" class="form-input" placeholder="10.200.0.5" required />
+                <label>IP Address OLT / VPN <span class="tooltip-icon" title="Alamat IP yang bisa dijangkau oleh Netsight (misal: IP VPN / Tailscale)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </span></label>
+                <input v-model="oltForm.ip_address" type="text" class="input-modern" placeholder="10.200.0.5" required />
               </div>
               <div class="form-group">
-                <label>SNMP Port (UDP) <span class="tooltip-icon" title="Port SNMP, standarnya 161. Jika via VPN MikroTik bisa menggunakan port lain (contoh: 1610)">ℹ️</span></label>
-                <input v-model.number="oltForm.snmp_port" type="number" class="form-input" placeholder="161" required />
+                <label>SNMP Port (UDP) <span class="tooltip-icon" title="Port SNMP, standarnya 161. Jika via VPN MikroTik bisa menggunakan port lain (contoh: 1610)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </span></label>
+                <input v-model.number="oltForm.snmp_port" type="number" class="input-modern" placeholder="161" required />
                 <small class="hint-txt">Ubah ke 1610 / 16161 jika pakai DST-NAT MikroTik.</small>
               </div>
             </div>
 
             <div class="form-row-2 mb-3">
               <div class="form-group">
-                <label>Vendor OID Profile Preset <span class="tooltip-icon" title="Pilih merek OLT untuk menentukan cara sistem membaca data dari perangkat tersebut">ℹ️</span></label>
-                <select v-model="oltForm.vendor_code" class="form-select" required @change="onVendorChange">
+                <label>Vendor OID Profile Preset <span class="tooltip-icon" title="Pilih merek OLT untuk menentukan cara sistem membaca data dari perangkat tersebut">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </span></label>
+                <select v-model="oltForm.vendor_code" class="input-modern" required @change="onVendorChange">
                   <option v-for="p in oltStore.profiles" :key="p.code" :value="p.code">
                     {{ p.name }}
                   </option>
                 </select>
               </div>
               <div class="form-group">
-                <label>SNMP Community <span class="tooltip-icon" title="Kata sandi SNMP untuk membaca data (ReadOnly), standar pabrik biasanya 'public'">ℹ️</span></label>
-                <input v-model="oltForm.snmp_community" type="text" class="form-input" placeholder="public" required />
+                <label>SNMP Community <span class="tooltip-icon" title="Kata sandi SNMP untuk membaca data (ReadOnly), standar pabrik biasanya 'public'">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </span></label>
+                <input v-model="oltForm.snmp_community" type="text" class="input-modern" placeholder="public" required />
               </div>
             </div>
 
             <div class="form-row-2 mb-3">
               <div class="form-group">
                 <label>Teknologi</label>
-                <select v-model="oltForm.technology" class="form-select">
+                <select v-model="oltForm.technology" class="input-modern">
                   <option value="epon">EPON</option>
                   <option value="gpon">GPON</option>
                 </select>
               </div>
               <div class="form-group">
                 <label>Jumlah Port PON</label>
-                <input v-model.number="oltForm.total_pons" type="number" min="1" max="64" class="form-input" required />
+                <input v-model.number="oltForm.total_pons" type="number" min="1" max="64" class="input-modern" required />
               </div>
             </div>
 
             <div class="dstnat-info-box">
-              💡 <strong>Petunjuk DST-NAT MikroTik (1 IP VPN):</strong><br/>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px; float:left; margin-top:2px"><line x1="9" x2="15" y1="18" y2="18"/><line x1="10" x2="14" y1="22" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>
+              <strong>Petunjuk DST-NAT MikroTik (1 IP VPN):</strong><br/>
               <code>/ip firewall nat add chain=dstnat action=dst-nat protocol=udp dst-port={{ oltForm.snmp_port || 1610 }} to-addresses={{ oltForm.ip_address || '192.168.88.250' }} to-ports=161</code>
             </div>
           </div>
@@ -366,8 +402,6 @@ const filteredOnus = computed(() => {
 const fetchOlts = async () => {
   await oltStore.fetchOlts();
   if (oltStore.olts.length > 0 && !oltStore.selectedOlt) {
-    // Optionally preselect the first OLT or fetch ONUs for all? 
-    // The old code just loaded ONUs for the first OLT. Let's do that for now.
     oltStore.selectOlt(oltStore.olts[0].id);
   }
 };
@@ -478,13 +512,6 @@ const getDbmClass = (dbm: number) => {
   return 'dbm-critical';
 };
 
-const getDbmStatusText = (dbm: number) => {
-  if (!dbm || dbm === 0) return 'Offline';
-  if (dbm > -24.0) return 'Bagus 🟢';
-  if (dbm >= -27.0) return 'Waspada 🟡';
-  return 'Kritis/LOS 🔴';
-};
-
 const statusBadgeClass = (status: string) => {
   if (status === 'online') return 'badge-success';
   if (status === 'offline') return 'badge-warning';
@@ -494,7 +521,6 @@ const statusBadgeClass = (status: string) => {
 const linkCustomer = (onu: any) => {
   const name = prompt("Masukkan User PPPoE atau Nama Pelanggan untuk ONU ini:", onu.customer_name || onu.onu_description || '');
   if (name !== null) {
-    // Ideally we'd have a store method to persist this change
     onu.customer_name = name;
     toastStore.addToast('Customer name linked (Local preview only)', 'success');
   }
@@ -519,23 +545,26 @@ onMounted(() => {
 }
 .dashboard__content {
   flex: 1;
-  padding: 28px 32px;
+  padding: 32px 40px;
   overflow-y: auto;
 }
 .dashboard__heading {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
 }
 .dashboard__heading--accent {
-  color: var(--accent-cyan);
+  background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 .dashboard__heading-sub {
-  font-size: 0.82rem;
+  font-size: 0.875rem;
   color: var(--text-secondary);
 }
-.dashboard__welcome { margin-bottom: 28px; }
+.dashboard__welcome { margin-bottom: 32px; }
 
 .flex-header {
   display: flex;
@@ -550,104 +579,161 @@ onMounted(() => {
   gap: 0.75rem;
 }
 
-.tabs-header-bar {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
-  padding-bottom: 0.5rem;
-}
+/* Animations */
+.fade-in { animation: fadeIn 0.4s ease-out forwards; }
+.fade-in-up { animation: fadeInUp 0.4s ease-out forwards; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.stagger > * { opacity: 0; animation: fadeIn 0.4s ease-out forwards; }
+.stagger > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger > *:nth-child(3) { animation-delay: 0.3s; }
 
-.tab-btn-pill {
-  background: var(--surface-1);
-  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
-  color: var(--text-secondary);
-  padding: 0.5rem 1.25rem;
-  font-weight: 600;
-  border-radius: 9999px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.875rem;
-}
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
 
-.tab-btn-pill.active {
-  background: var(--accent-cyan, #0ea5e9);
-  color: #ffffff;
-  border-color: var(--accent-cyan, #0ea5e9);
-  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+/* Segmented Control (Tabs) */
+.segmented-control-wrapper {
+  margin-bottom: 24px;
 }
-
-.empty-panel {
-  text-align: center;
-  padding: 3rem 1.5rem;
-  background: var(--surface-1);
+.segmented-control {
+  display: inline-flex;
+  background: var(--surface-2);
+  padding: 4px;
+  border-radius: 12px;
   border: 1px solid var(--border-color);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.segmented-btn {
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+  padding: 8px 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.segmented-btn:hover {
   color: var(--text-primary);
 }
-.empty-icon-wrap {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+.segmented-btn.active {
+  background: var(--surface-1);
+  color: var(--accent-cyan);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-weight: 600;
 }
+
+/* Premium Card (Glassmorphism) */
+.premium-card {
+  background: var(--surface-1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.panel-full { padding: 24px; }
 
 .olts-grid-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
   gap: 1.5rem;
 }
-
 .olt-card-item {
-  padding: 1.25rem;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background: var(--surface-1);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.olt-card-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 .olt-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  position: relative;
 }
 
 .olt-title-row {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 10px;
 }
-
-.olt-card-name {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.status-indicator {
+.status-glow {
   width: 10px;
   height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
 }
-.status-indicator.online { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.5); }
-.status-indicator.offline { background: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.5); }
+.status-glow.online { background: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.6); }
+.status-glow.offline { background: #f43f5e; box-shadow: 0 0 10px rgba(244, 63, 94, 0.6); }
+
+.olt-card-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
 
 .vendor-badge {
   display: inline-block;
-  font-size: 0.75rem;
-  background: rgba(14, 165, 233, 0.15);
-  color: var(--accent-cyan);
-  border: 1px solid rgba(14, 165, 233, 0.3);
-  padding: 0.15rem 0.6rem;
-  border-radius: 0.25rem;
-  margin-top: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.1) 0%, rgba(59, 130, 246, 0.1) 100%);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  margin-top: 6px;
+  margin-left: 20px;
 }
 
 .olt-card-actions {
   display: flex;
-  gap: 0.25rem;
+  gap: 4px;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: all 0.3s;
+}
+.olt-card-item:hover .olt-card-actions {
+  opacity: 1;
+  transform: translateX(0);
+}
+.btn-action-icon {
+  background: var(--surface-2);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-action-icon:hover {
+  background: var(--surface-3, rgba(255,255,255,0.1));
+  color: var(--text-primary);
+  border-color: rgba(255,255,255,0.2);
+}
+.btn-action-icon.danger:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .olt-info-body {
@@ -655,263 +741,284 @@ onMounted(() => {
   color: var(--text-secondary);
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  margin-bottom: 1rem;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 0 10px;
 }
-
-.info-line {
-  display: flex;
-  justify-content: space-between;
-}
-.val-code {
-  font-family: monospace;
-  background: var(--surface-2);
-  padding: 0.1rem 0.4rem;
-  border-radius: 0.25rem;
-  color: var(--accent-cyan);
-}
+.info-line { display: flex; justify-content: space-between; align-items: center; }
+.val-code { font-family: 'Fira Code', monospace; color: var(--text-primary); font-size: 0.8rem; }
+.uppercase { text-transform: uppercase; font-weight: 500; color: var(--text-primary); }
 
 .notes-box {
-  background: var(--surface-2);
-  padding: 0.5rem;
-  border-radius: 0.375rem;
-  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--text-muted);
   font-size: 0.75rem;
-  margin-top: 0.25rem;
+  margin-top: 4px;
+  border-left: 2px solid rgba(255,255,255,0.1);
+  display: flex;
 }
 
 .onu-summary-row {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
+  gap: 12px;
+}
+.summary-stat {
+  flex: 1;
   background: var(--surface-2);
-  padding: 0.75rem;
-  border-radius: 0.5rem;
+  padding: 12px 0;
+  border-radius: 12px;
   text-align: center;
-}
-
-.summary-pill .num { font-size: 1.1rem; font-weight: 700; display: block; }
-.summary-pill .label { font-size: 0.7rem; color: var(--text-secondary); }
-.summary-pill.green .num { color: #34d399; }
-.summary-pill.yellow .num { color: #fbbf24; }
-.summary-pill.red .num { color: #f87171; }
-
-/* Filter & Tables */
-.panel {
-  background: var(--surface-1);
   border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
-  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
 }
+.summary-stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  opacity: 0.7;
+}
+.summary-stat.green-glow::before { background: #10b981; }
+.summary-stat.yellow-glow::before { background: #f59e0b; }
+.summary-stat.red-glow::before { background: #f43f5e; }
 
+.summary-stat .num { font-size: 1.25rem; font-weight: 800; display: block; color: var(--text-primary); }
+.summary-stat .label { font-size: 0.7rem; color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+.summary-stat.red-glow .num { color: #f43f5e; text-shadow: 0 0 10px rgba(244, 63, 94, 0.4); }
+
+/* Table Redaman ONU */
 .filter-flex-bar {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
+  gap: 16px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
 }
-
-.search-input { flex: 1; min-width: 250px; }
-.filter-select { width: 200px; }
-
-.user-info-col {
-  display: flex;
-  flex-direction: column;
+.search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 250px;
 }
-.cust-title { font-weight: 600; color: var(--text-primary); }
-.pppoe-tag { font-size: 0.75rem; color: var(--accent-cyan); font-family: monospace; }
-.val-code-xs { font-size: 0.75rem; color: var(--text-secondary); }
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+.search-input {
+  width: 100%;
+  padding-left: 40px !important;
+}
 
-.dbm-box { 
-  display: inline-flex; 
-  flex-direction: column;
-  padding: 0.35rem 0.6rem;
+.table-container {
+  max-height: 500px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--surface-1);
+}
+.premium-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+}
+.premium-table th {
+  position: sticky;
+  top: 0;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(8px);
+  padding: 14px 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+  z-index: 10;
+}
+.premium-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+.table-row-hover { transition: background 0.2s; }
+.table-row-hover:hover { background: rgba(255, 255, 255, 0.02); }
+.table-row-hover:last-child td { border-bottom: none; }
+
+.cust-title { font-weight: 600; color: var(--text-primary); display: block; }
+.pppoe-tag { font-size: 0.7rem; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+.val-code-xs { font-size: 0.75rem; color: var(--text-secondary); font-family: 'Fira Code', monospace; }
+
+.status-badge-modern {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 8px;
   border-radius: 6px;
+  letter-spacing: 0.05em;
+}
+.badge-success { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+.badge-warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+.badge-danger { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.3); }
+
+.dbm-pill {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+}
+.dbm-good { background: rgba(16, 185, 129, 0.15); color: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.1); }
+.dbm-warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.1); }
+.dbm-critical { background: rgba(244, 63, 94, 0.15); color: #f43f5e; box-shadow: 0 0 15px rgba(244, 63, 94, 0.2); }
+.dbm-offline { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+
+/* Debugger Tool */
+.panel-header-custom { margin-bottom: 24px; }
+.panel-header-custom h3 { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.panel-header-custom p { color: var(--text-secondary); font-size: 0.875rem; }
+
+.form-grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+.form-group-modern { display: flex; flex-direction: column; }
+.form-group-modern label { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px; font-weight: 500; }
+.input-modern {
   background: var(--surface-2);
   border: 1px solid var(--border-color);
-  align-items: center;
-  min-width: 80px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: inherit;
+  transition: all 0.2s;
 }
-.dbm-box .val { font-weight: 700; font-family: monospace; }
-.dbm-box .lbl { font-size: 0.7rem; }
-.dbm-good { color: #10b981; background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); }
-.dbm-warning { color: #f59e0b; background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); }
-.dbm-critical { color: #ef4444; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
-.dbm-offline { color: var(--text-secondary); }
+.input-modern:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+  background: var(--surface-3, rgba(255,255,255,0.05));
+}
+.form-select.filter-select {
+  background: var(--surface-2);
+  border: 1px solid var(--border-color);
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: var(--text-primary);
+  width: 220px;
+}
+
+.preset-chips-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+.lbl-chips { font-size: 0.8rem; font-weight: 500; margin-right: 4px; }
+.chip-interactive {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.chip-interactive:hover {
+  background: rgba(14, 165, 233, 0.1);
+  color: var(--accent-cyan);
+  border-color: rgba(14, 165, 233, 0.3);
+  transform: translateY(-1px);
+}
+
+.terminal-box {
+  margin-top: 24px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.terminal-header {
+  background: #1e293b;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(0,0,0,0.3);
+}
+.window-controls { display: flex; gap: 6px; margin-right: 16px; }
+.window-controls span { width: 12px; height: 12px; border-radius: 50%; }
+.window-controls span:nth-child(1) { background: #ff5f56; }
+.window-controls span:nth-child(2) { background: #ffbd2e; }
+.window-controls span:nth-child(3) { background: #27c93f; }
+.terminal-title { font-family: 'Fira Code', monospace; font-size: 0.75rem; color: #94a3b8; }
+.terminal-body {
+  background: #0f172a;
+  padding: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
+}
+.terminal-body pre { color: #a5b4fc; margin: 0; }
+.text-cyan { color: #38bdf8; }
+.text-green { color: #10b981; }
+.text-red { color: #f43f5e; }
+
+/* Modal */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex; justify-content: center; align-items: center;
+  z-index: 9999; padding: 1rem;
+}
+.modal-content-box {
+  width: 100%; max-width: 600px;
+  padding: 24px;
+  max-height: 90vh;
+  display: flex; flex-direction: column;
+}
+.modal-header-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 20px;
+}
+.modal-header-row h3 { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); margin: 0; }
+.btn-close {
+  background: transparent; border: none; color: var(--text-secondary); cursor: pointer;
+  padding: 4px; border-radius: 6px; transition: all 0.2s;
+}
+.btn-close:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+.modal-body-scroll {
+  overflow-y: auto; padding-right: 8px; flex: 1;
+}
 
 /* Tooltip Icon */
 .tooltip-icon {
   display: inline-block;
   margin-left: 4px;
-  font-size: 0.8rem;
+  color: var(--text-muted);
   cursor: help;
-  opacity: 0.7;
+  vertical-align: middle;
+  transition: color 0.2s;
 }
-.tooltip-icon:hover {
-  opacity: 1;
-}
+.tooltip-icon:hover { color: var(--accent-cyan); }
 
-/* Debugger Tool */
-.panel-header-custom { margin-bottom: 1.5rem; }
-.panel-header-custom h3 { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; }
-.panel-header-custom p { color: var(--text-secondary); font-size: 0.85rem; }
-
-.form-grid-4 {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.preset-chips-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 1.5rem;
-}
-
-.btn-chip {
-  background: var(--surface-2);
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
-  padding: 0.25rem 0.6rem;
-  border-radius: 0.375rem;
-  font-size: 0.75rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.btn-chip:hover { background: rgba(14, 165, 233, 0.1); color: var(--accent-cyan); border-color: var(--accent-cyan); }
-
-.debug-result-panel { margin-top: 1.5rem; }
-.result-banner {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-}
-.result-banner.success { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981; }
-.result-banner.error { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; }
-
-.code-box pre {
-  background: var(--surface-2);
-  padding: 1rem;
-  border-radius: 0.5rem;
-  max-height: 350px;
-  overflow-y: auto;
-  color: var(--accent-cyan);
-  font-size: 0.8rem;
-  border: 1px solid var(--border-color);
-}
-.code-header {
-  color: var(--text-primary);
-  margin-bottom: 8px;
-}
-
-/* Modals */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  padding: 1rem;
-}
-
-.modal-content-box {
-  width: 100%;
-  max-width: 580px;
-  padding: 1.5rem;
-  max-height: 90vh;
-  overflow-y: auto;
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  border-radius: var(--radius-lg, 12px);
-}
-
-.modal-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.25rem;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 0.75rem;
-}
-
-.modal-header-row h3 { font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin: 0; }
-.btn-close { background: transparent; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; }
-.btn-close:hover { color: var(--text-primary); }
-
-/* Buttons & Forms (Copied from base) */
+/* Buttons */
 .btn {
-  padding: 8px 16px;
-  border-radius: var(--radius-sm, 6px);
-  font-weight: 500;
-  font-size: 0.85rem;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s;
-  font-family: inherit;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.875rem;
+  cursor: pointer; border: none; transition: all 0.2s; font-family: inherit;
 }
-.btn-primary { background: var(--accent-cyan, #0ea5e9); color: #fff; }
-.btn-primary:hover { opacity: 0.9; }
+.btn-primary { background: var(--accent-cyan, #0ea5e9); color: #fff; box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2); }
+.btn-primary:hover:not(:disabled) { background: #0284c7; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(14, 165, 233, 0.3); }
 .btn-secondary { background: var(--surface-2); border: 1px solid var(--border-color); color: var(--text-primary); }
-.btn-secondary:hover { background: var(--surface-3, rgba(14, 165, 233, 0.1)); border-color: var(--accent-cyan); }
-.btn-danger { color: #ef4444 !important; background: rgba(239, 68, 68, 0.1); }
-.btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
-.btn-sm { padding: 4px 8px; font-size: 0.8rem; }
-.btn-icon { background: transparent; border: 1px solid var(--border-color); margin-right: 4px; color: var(--text-primary); }
-.btn-icon:hover { background: var(--surface-2); border-color: var(--accent-cyan); }
+.btn-secondary:hover { background: var(--surface-3); border-color: rgba(255,255,255,0.2); }
+.btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); }
+.btn-outline:hover { background: rgba(255,255,255,0.03); color: var(--text-primary); border-color: rgba(255,255,255,0.2); }
+.btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+.btn-lg { padding: 12px 24px; font-size: 1rem; }
 
-.form-group { margin-bottom: 0; display: flex; flex-direction: column; }
-.form-group label {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin-bottom: 6px;
-  font-weight: 500;
-}
-.form-input, .form-select {
-  width: 100%;
-  background: var(--surface-1);
-  border: 1px solid var(--border-color);
-  padding: 10px 12px;
-  border-radius: var(--radius-sm, 6px);
-  color: var(--text-primary);
-  font-family: inherit;
-}
-.form-input:focus, .form-select:focus {
-  outline: none;
-  border-color: var(--accent-cyan);
-}
-
-.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.hint-txt { font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.4rem; display: block; }
-.mb-3 { margin-bottom: 1rem; }
-.mt-3 { margin-top: 1rem; }
-
-.dstnat-info-box {
-  background: rgba(14, 165, 233, 0.1);
-  border: 1px solid rgba(14, 165, 233, 0.25);
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.75rem;
-  color: var(--accent-cyan);
-  margin-top: 1rem;
-}
-
-.modal-footer-row {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
-.uppercase { text-transform: uppercase; }
 .spinning { display: inline-block; animation: spin 1s linear infinite; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 </style>
