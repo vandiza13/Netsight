@@ -279,19 +279,40 @@ function formatTimeAgo(dateString: string | null) {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
+.router-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+[data-theme="dark"] .router-card:hover {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+}
+
 .router-card.border-green {
   border: 1px solid rgba(34, 197, 94, 0.3);
   box-shadow: 0 0 20px rgba(34, 197, 94, 0.05), inset 0 0 15px rgba(34, 197, 94, 0.03);
+}
+.router-card.border-green:hover {
+  border-color: rgba(34, 197, 94, 0.6);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 30px rgba(34, 197, 94, 0.15), inset 0 0 15px rgba(34, 197, 94, 0.05);
 }
 
 .router-card.border-yellow {
   border: 1px solid rgba(245, 158, 11, 0.3);
   box-shadow: 0 0 20px rgba(245, 158, 11, 0.05), inset 0 0 15px rgba(245, 158, 11, 0.03);
 }
+.router-card.border-yellow:hover {
+  border-color: rgba(245, 158, 11, 0.6);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 30px rgba(245, 158, 11, 0.15), inset 0 0 15px rgba(245, 158, 11, 0.05);
+}
 
 .router-card.border-red {
   border: 1px solid rgba(239, 68, 68, 0.3);
   box-shadow: 0 0 20px rgba(239, 68, 68, 0.05), inset 0 0 15px rgba(239, 68, 68, 0.03);
+}
+.router-card.border-red:hover {
+  border-color: rgba(239, 68, 68, 0.6);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 30px rgba(239, 68, 68, 0.15), inset 0 0 15px rgba(239, 68, 68, 0.05);
 }
 
 /* Header */
