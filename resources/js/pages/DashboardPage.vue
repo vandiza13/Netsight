@@ -139,7 +139,7 @@ const { fetchRouters } = routerStore
 // Computed stats
 const stats = computed(() => {
   const healthy = routers.value.filter(r => r.status === 'HEALTHY').length
-  const totalPppoe = routers.value.reduce((acc, r) => acc + (r.active_pppoe_count || 0), 0)
+  const totalPppoe = routers.value.reduce((acc, r) => acc + (r.total_pppoe_count || 0), 0)
 
   return {
     routersOnline: `${healthy} / ${routers.value.length}`,
