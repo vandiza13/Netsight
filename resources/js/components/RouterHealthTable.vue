@@ -266,8 +266,8 @@ function formatTimeAgo(dateString: string | null) {
 
 /* Card Design - NOC Slate Style */
 .router-card {
-  background: #0f172a;
-  border: 1px solid #1e293b;
+  background: #111827;
+  border: 1px solid #1f2937;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -276,8 +276,8 @@ function formatTimeAgo(dateString: string | null) {
 }
 
 .router-card:hover {
-  border-color: #334155;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  border-color: #374151;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .border-green { border-top: 2px solid #22c55e; }
@@ -289,9 +289,9 @@ function formatTimeAgo(dateString: string | null) {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 14px 16px;
-  border-bottom: 1px solid #1e293b;
-  background: #0f172a;
+  padding: 16px;
+  border-bottom: 1px solid #1f2937;
+  background: #111827;
 }
 
 .header-info {
@@ -315,26 +315,26 @@ function formatTimeAgo(dateString: string | null) {
 }
 
 .board-badge {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 600;
-  padding: 1px 6px;
+  padding: 2px 6px;
   border-radius: 4px;
-  background: rgba(6, 182, 212, 0.1);
-  border: 1px solid rgba(6, 182, 212, 0.25);
-  color: #22d3ee;
-  letter-spacing: 0.02em;
+  background: #1e3a8a;
+  border: 1px solid #1d4ed8;
+  color: #93c5fd;
+  letter-spacing: 0.03em;
 }
 
 .router-meta {
   font-size: 0.75rem;
-  color: #64748b;
+  color: #9ca3af;
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.meta-ip { color: #38bdf8; }
-.meta-divider { color: #334155; }
+.meta-ip { color: #60a5fa; }
+.meta-divider { color: #4b5563; }
 
 /* Body */
 .card-body {
@@ -364,10 +364,10 @@ function formatTimeAgo(dateString: string | null) {
 }
 
 .label-text {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  color: #64748b;
+  letter-spacing: 0.08em;
+  color: #9ca3af;
 }
 
 .metric-value {
@@ -377,8 +377,8 @@ function formatTimeAgo(dateString: string | null) {
 
 .progress-bar {
   width: 100%;
-  height: 5px;
-  background: #1e293b;
+  height: 6px;
+  background: #1f2937;
   border-radius: 3px;
   overflow: hidden;
 }
@@ -392,14 +392,19 @@ function formatTimeAgo(dateString: string | null) {
 /* Multi-core Spectrum */
 .cpu-cores-grid {
   display: flex;
-  gap: 2px;
+  gap: 3px;
   margin-top: 4px;
-  height: 10px;
+  height: 24px;
+  overflow-x: auto;
+  padding-bottom: 2px;
 }
+.cpu-cores-grid::-webkit-scrollbar { height: 2px; }
+.cpu-cores-grid::-webkit-scrollbar-thumb { background: #374151; }
 
 .core-item {
-  flex: 1;
-  background: #1e293b;
+  width: 6px;
+  flex-shrink: 0;
+  background: #1f2937;
   border-radius: 1px;
   display: flex;
   align-items: flex-end;
@@ -409,6 +414,7 @@ function formatTimeAgo(dateString: string | null) {
 .core-bar {
   width: 100%;
   transition: height 0.4s ease-out;
+  border-radius: 1px;
 }
 
 /* Telemetry Grid */
@@ -416,45 +422,45 @@ function formatTimeAgo(dateString: string | null) {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  padding-top: 4px;
+  padding-top: 8px;
 }
 
 .telemetry-card {
-  background: #182234;
-  border: 1px solid #1e293b;
+  background: #1f2937;
+  border: 1px solid #374151;
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .telemetry-title {
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.05em;
-  color: #64748b;
+  color: #9ca3af;
 }
 
 .telemetry-value {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  color: #f1f5f9;
+  color: #f3f4f6;
 }
 
 /* Footer */
 .card-footer {
-  padding: 10px 16px;
-  border-top: 1px solid #1e293b;
+  padding: 12px 16px;
+  border-top: 1px solid #1f2937;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #0b1120;
+  background: #111827;
 }
 
 .last-sync {
   font-size: 0.7rem;
-  color: #64748b;
+  color: #6b7280;
   letter-spacing: 0.02em;
 }
 
@@ -475,10 +481,10 @@ function formatTimeAgo(dateString: string | null) {
 
 /* Buttons & Badges */
 .btn-inspect {
-  padding: 4px 12px;
-  background: #1e293b;
-  border: 1px solid #334155;
-  color: #38bdf8;
+  padding: 4px 14px;
+  background: #1e3a8a;
+  border: 1px solid #1d4ed8;
+  color: #93c5fd;
   border-radius: 4px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -487,8 +493,8 @@ function formatTimeAgo(dateString: string | null) {
 }
 
 .btn-inspect:hover {
-  background: #334155;
-  color: #f8fafc;
+  background: #1d4ed8;
+  color: #ffffff;
 }
 
 .status-badge {
@@ -497,10 +503,10 @@ function formatTimeAgo(dateString: string | null) {
   gap: 6px;
   font-size: 0.65rem;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 4px 10px;
   border-radius: 4px;
   white-space: nowrap;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
 }
 
 .status-badge .dot {
@@ -515,15 +521,15 @@ function formatTimeAgo(dateString: string | null) {
 
 @keyframes status-ping {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(1.2); }
+  50% { opacity: 0.4; transform: scale(1.4); }
 }
 
-.status--healthy { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
-.status--healthy .dot { background: #22c55e; }
-.status--degraded { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
-.status--degraded .dot { background: #f59e0b; }
-.status--unreachable { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
-.status--unreachable .dot { background: #ef4444; }
+.status--healthy { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.2); }
+.status--healthy .dot { background: #4ade80; }
+.status--degraded { background: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.2); }
+.status--degraded .dot { background: #fbbf24; }
+.status--unreachable { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+.status--unreachable .dot { background: #f87171; }
 
 /* Skeleton */
 .skeleton-grid {
