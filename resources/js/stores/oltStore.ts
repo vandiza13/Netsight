@@ -133,6 +133,19 @@ export const useOltStore = defineStore('olts', () => {
     }
   }
 
+  async function updateOnu(id: number, data: { customer_name?: string, pppoe_username?: string }): Promise<void> {
+    try {
+      const response = await api.put(`/olts/onus/${id}`, data)
+      // Update local state
+      const onuIndex = onus.value.findIndex(o => o.id === id)
+      if (onuIndex !== -1) {
+        onus.value[onuIndex] = { ...onus.value[onuIndex], ...response.data.data }
+      }
+    } catch (err: any) {
+      throw new Error(err.response?.data?.message || 'Failed to update ONU.')
+    }
+  }
+
   return {
     olts,
     profiles,
@@ -148,6 +161,7 @@ export const useOltStore = defineStore('olts', () => {
     createOlt,
     updateOlt,
     deleteOlt,
-    syncOlt
+    syncOlt,
+    updateOnu
   }
 })

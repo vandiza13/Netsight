@@ -527,11 +527,18 @@ const statusBadgeClass = (status: string) => {
   return 'badge-danger';
 };
 
-const linkCustomer = (onu: any) => {
+const linkCustomer = async (onu: any) => {
   const name = prompt("Masukkan User PPPoE atau Nama Pelanggan untuk ONU ini:", onu.customer_name || onu.onu_description || '');
   if (name !== null) {
-    onu.customer_name = name;
-    toastStore.addToast('Customer name linked (Local preview only)', 'success');
+    const originalName = onu.customer_name;
+    try {
+      onu.customer_name = name; // Optimistic update
+      await oltStore.updateOnu(onu.id, { customer_name: name });
+      toastStore.addToast('Customer name linked successfully', 'success');
+    } catch (error: any) {
+      onu.customer_name = originalName; // Revert
+      toastStore.addToast(error.message, 'error');
+    }
   }
 };
 

@@ -48,6 +48,38 @@
           />
         </section>
 
+        <!-- OLT Stats Row -->
+        <section class="dashboard__stats stagger" style="margin-top: 16px;">
+          <StatCard
+            title="Master OLTs"
+            :value="oltStats.totalOlts"
+            icon="🏢"
+            :accent-color="'var(--accent-cyan)'"
+            subtitle="Total active OLT units"
+          />
+          <StatCard
+            title="ONU Online"
+            :value="oltStats.onlineOnus"
+            icon="⚡"
+            :accent-color="'var(--accent-green)'"
+            subtitle="Connected subscribers"
+          />
+          <StatCard
+            title="ONU LOS / Kabel Putus"
+            :value="oltStats.losOnus"
+            icon="❌"
+            :accent-color="'var(--accent-red)'"
+            subtitle="Require immediate attention"
+          />
+          <StatCard
+            title="Total ONUs"
+            :value="oltStats.totalOnus"
+            icon="🔌"
+            :accent-color="'var(--accent-amber)'"
+            subtitle="Total configured ports"
+          />
+        </section>
+
         <!-- Global Traffic Chart -->
         <section class="dashboard__traffic stagger" style="margin-top: 24px;">
           <GlobalTrafficChart />
@@ -89,9 +121,11 @@ import ActivityFeed from '../components/ActivityFeed.vue'
 import RouterHealthTable from '../components/RouterHealthTable.vue'
 import RecentTorchWidget from '../components/RecentTorchWidget.vue'
 import GlobalTrafficChart from '../components/GlobalTrafficChart.vue'
+import { useOltStore } from '../stores/oltStore'
 
 const auth = useAuthStore()
 const routerStore = useRouterStore()
+const oltStore = useOltStore()
 const sidebarOpen = ref(false)
 
 const { 
@@ -113,15 +147,38 @@ const stats = computed(() => {
   }
 })
 
+// OLT Computed stats
+const oltStats = computed(() => {
+  let totalOlts = oltStore.olts.length
+  let totalOnus = 0
+  let onlineOnus = 0
+  let losOnus = 0
+
+  oltStore.olts.forEach(olt => {
+    totalOnus += olt.onus_count || 0
+    onlineOnus += olt.onus_online || 0
+    losOnus += olt.onus_los || 0
+  })
+
+  return {
+    totalOlts,
+    totalOnus,
+    onlineOnus,
+    losOnus
+  }
+})
+
 // Lifecycle
 let autoRefreshInterval: ReturnType<typeof setInterval> | null = null
 
 onMounted(() => {
   fetchRouters()
+  oltStore.fetchOlts()
   
   // Polling data every 60 seconds to keep dashboard fresh
   autoRefreshInterval = setInterval(() => {
     fetchRouters()
+    oltStore.fetchOlts()
   }, 60000)
 })
 
