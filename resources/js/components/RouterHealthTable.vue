@@ -314,12 +314,18 @@ function formatTimeAgo(dateString: string | null) {
   font-size: 0.75rem;
   color: #94a3b8;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
 }
 
+.meta-os {
+  white-space: nowrap;
+}
+
 .board-badge {
   color: #94a3b8;
+  white-space: nowrap;
 }
 
 /* Status Badge - Mockup style */
@@ -396,6 +402,7 @@ function formatTimeAgo(dateString: string | null) {
   font-weight: 500;
   color: #e2e8f0;
   margin-bottom: 8px;
+  white-space: nowrap;
 }
 
 .progress-bar {
@@ -418,7 +425,7 @@ function formatTimeAgo(dateString: string | null) {
 /* Segmented Equalizer */
 .cpu-equalizer {
   display: flex;
-  gap: 4px;
+  gap: 3px;
   align-items: flex-end;
 }
 
@@ -429,8 +436,8 @@ function formatTimeAgo(dateString: string | null) {
 }
 
 .segment {
-  width: 16px;
-  height: 3px;
+  width: 14px;
+  height: 2px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 1px;
   transition: background 0.3s;
@@ -474,12 +481,14 @@ function formatTimeAgo(dateString: string | null) {
   font-weight: 600;
   letter-spacing: 0.05em;
   color: #94a3b8;
+  white-space: nowrap;
 }
 
 .telemetry-value {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: #ffffff;
+  white-space: nowrap;
 }
 
 /* Footer */
