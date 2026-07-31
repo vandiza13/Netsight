@@ -31,7 +31,7 @@
         <section class="stagger">
           <div class="tabs-header-bar">
             <button :class="['tab-btn-pill', { active: activeTab === 'olts' }]" @click="activeTab = 'olts'">
-              📡 Master OLT ({{ olts.length }})
+              📡 Master OLT ({{ oltStore.olts.length }})
             </button>
             <button :class="['tab-btn-pill', { active: activeTab === 'onus' }]" @click="activeTab = 'onus'">
               📊 Redaman ONU ({{ totalOnus }})
@@ -43,11 +43,11 @@
 
           <!-- TAB 1: MASTER OLT LIST -->
           <div v-if="activeTab === 'olts'" class="tab-pane">
-            <div v-if="loading" class="loading-state">
+            <div v-if="oltStore.loading" class="loading-state">
               <span class="spinning">🔄</span> Memuat data OLT...
             </div>
 
-            <div v-else-if="olts.length === 0" class="glass-card empty-panel">
+            <div v-else-if="oltStore.olts.length === 0" class="glass-card empty-panel">
               <div class="empty-icon-wrap">⚡</div>
               <h3>Belum Ada Perangkat OLT</h3>
               <p>Tambahkan OLT (HiOSO, V-SOL, HSan, ZTE, Huawei) untuk mulai memantau jaringan optik FTTH.</p>
@@ -55,7 +55,7 @@
             </div>
 
             <div v-else class="olts-grid-container">
-              <div v-for="olt in olts" :key="olt.id" class="glass-card olt-card-item">
+              <div v-for="olt in oltStore.olts" :key="olt.id" class="glass-card olt-card-item">
                 <div class="olt-card-header">
                   <div>
                     <div class="olt-title-row">
@@ -138,7 +138,7 @@
                       <td colspan="6" class="text-center text-gray-500 py-4">Tidak ada data ONU yang cocok dengan filter.</td>
                     </tr>
                     <tr v-for="onu in filteredOnus" :key="onu.id">
-                      <td class="font-bold">{{ onu.pon_port }} / ONU {{ onu.onu_index }}</td>
+                      <td class="font-bold text-1">{{ onu.pon_port }} / ONU {{ onu.onu_index }}</td>
                       <td>
                         <div class="user-info-col">
                           <span class="cust-title">{{ onu.customer_name || onu.onu_description || 'Unlinked' }}</span>
@@ -198,7 +198,7 @@
                 </div>
 
                 <div class="preset-chips-row">
-                  <span class="lbl">Preset OID Populer:</span>
+                  <span class="lbl text-2">Preset OID Populer:</span>
                   <button type="button" class="btn-chip" @click="debugForm.oid = '1.3.6.1.4.1.17409.2.3.4.1.1.8'">HiOSO Status (EPON)</button>
                   <button type="button" class="btn-chip" @click="debugForm.oid = '1.3.6.1.4.1.17409.2.3.4.2.1.4'">HiOSO Rx Power</button>
                   <button type="button" class="btn-chip" @click="debugForm.oid = '1.3.6.1.4.1.37950.2.1.5.1.1.4'">V-SOL Status (EPON)</button>
@@ -244,17 +244,17 @@
         <form @submit.prevent="saveOlt">
           <div class="modal-body-scroll">
             <div class="form-group mb-3">
-              <label>Nama OLT / POP</label>
+              <label>Nama OLT / POP <span class="tooltip-icon" title="Nama lokasi atau identitas perangkat OLT">ℹ️</span></label>
               <input v-model="oltForm.name" type="text" class="form-input" placeholder="Contoh: OLT POP Utama Kasihan" required />
             </div>
 
             <div class="form-row-2 mb-3">
               <div class="form-group">
-                <label>IP Address OLT / VPN</label>
+                <label>IP Address OLT / VPN <span class="tooltip-icon" title="Alamat IP yang bisa dijangkau oleh Netsight (misal: IP VPN / Tailscale)">ℹ️</span></label>
                 <input v-model="oltForm.ip_address" type="text" class="form-input" placeholder="10.200.0.5" required />
               </div>
               <div class="form-group">
-                <label>SNMP Port (UDP)</label>
+                <label>SNMP Port (UDP) <span class="tooltip-icon" title="Port SNMP, standarnya 161. Jika via VPN MikroTik bisa menggunakan port lain (contoh: 1610)">ℹ️</span></label>
                 <input v-model.number="oltForm.snmp_port" type="number" class="form-input" placeholder="161" required />
                 <small class="hint-txt">Ubah ke 1610 / 16161 jika pakai DST-NAT MikroTik.</small>
               </div>
@@ -262,15 +262,15 @@
 
             <div class="form-row-2 mb-3">
               <div class="form-group">
-                <label>Vendor OID Profile Preset</label>
+                <label>Vendor OID Profile Preset <span class="tooltip-icon" title="Pilih merek OLT untuk menentukan cara sistem membaca data dari perangkat tersebut">ℹ️</span></label>
                 <select v-model="oltForm.vendor_code" class="form-select" required @change="onVendorChange">
-                  <option v-for="p in profiles" :key="p.code" :value="p.code">
+                  <option v-for="p in oltStore.profiles" :key="p.code" :value="p.code">
                     {{ p.name }}
                   </option>
                 </select>
               </div>
               <div class="form-group">
-                <label>SNMP Community</label>
+                <label>SNMP Community <span class="tooltip-icon" title="Kata sandi SNMP untuk membaca data (ReadOnly), standar pabrik biasanya 'public'">ℹ️</span></label>
                 <input v-model="oltForm.snmp_community" type="text" class="form-input" placeholder="public" required />
               </div>
             </div>
@@ -312,13 +312,13 @@ import { ref, computed, onMounted } from 'vue';
 import SidebarNav from '../components/SidebarNav.vue';
 import TopBar from '../components/TopBar.vue';
 import api from '../utils/api';
+import { useOltStore } from '../stores/oltStore';
+import { useToastStore } from '../stores/toastStore';
 
 const sidebarOpen = ref(false);
 const activeTab = ref('olts');
-const loading = ref(true);
-const olts = ref<any[]>([]);
-const profiles = ref<any[]>([]);
-const onusList = ref<any[]>([]);
+const oltStore = useOltStore();
+const toastStore = useToastStore();
 
 const showOltModal = ref(false);
 const editingOlt = ref<any>(null);
@@ -348,10 +348,10 @@ const debugForm = ref({
 const debugging = ref(false);
 const debugResult = ref<any>(null);
 
-const totalOnus = computed(() => onusList.value.length);
+const totalOnus = computed(() => oltStore.onus.length);
 
 const filteredOnus = computed(() => {
-  return onusList.value.filter((onu: any) => {
+  return oltStore.onus.filter((onu: any) => {
     const matchStatus = onuStatusFilter.value === 'all' || onu.status === onuStatusFilter.value;
     const q = onuSearch.value.toLowerCase();
     const matchSearch = !q ||
@@ -364,28 +364,11 @@ const filteredOnus = computed(() => {
 });
 
 const fetchOlts = async () => {
-  try {
-    loading.value = true;
-    const response = await api.get('/olts');
-    olts.value = response.data.data || [];
-    profiles.value = response.data.profiles || [];
-
-    if (olts.value.length > 0) {
-      fetchOnus(olts.value[0].id);
-    }
-  } catch (err) {
-    console.error("Failed to fetch OLTs:", err);
-  } finally {
-    loading.value = false;
-  }
-};
-
-const fetchOnus = async (oltId: number) => {
-  try {
-    const response = await api.get(`/olts/${oltId}/onus`);
-    onusList.value = response.data.data || [];
-  } catch (err) {
-    console.error("Failed to fetch ONUs:", err);
+  await oltStore.fetchOlts();
+  if (oltStore.olts.length > 0 && !oltStore.selectedOlt) {
+    // Optionally preselect the first OLT or fetch ONUs for all? 
+    // The old code just loaded ONUs for the first OLT. Let's do that for now.
+    oltStore.selectOlt(oltStore.olts[0].id);
   }
 };
 
@@ -393,20 +376,15 @@ const syncOlt = async (olt: any) => {
   if (!confirm(`Tarik data redaman terbaru dari OLT ${olt.name} sekarang? (Membutuhkan waktu beberapa detik)`)) return;
   
   try {
-    const response = await api.post(`/olts/${olt.id}/sync`);
-    alert(response.data.message || 'Sync berhasil dikirim ke background.');
-    // Beri jeda sebentar sebelum me-refresh list OLT (biasanya background job butuh 1-3 detik)
-    setTimeout(() => {
-      fetchOlts();
-    }, 2000);
-  } catch (err) {
-    alert("Gagal melakukan sync OLT.");
-    console.error(err);
+    await oltStore.syncOlt(olt.id);
+    toastStore.addToast('Sync berhasil dikirim ke background.', 'success');
+  } catch (err: any) {
+    toastStore.addToast("Gagal melakukan sync OLT: " + err.message, 'error');
   }
 };
 
 const getVendorName = (code: string) => {
-  const p = profiles.value.find((x: any) => x.code === code);
+  const p = oltStore.profiles.find((x: any) => x.code === code);
   return p ? p.name : code;
 };
 
@@ -436,9 +414,9 @@ const closeOltModal = () => {
 };
 
 const onVendorChange = () => {
-  const p = profiles.value.find((x: any) => x.code === oltForm.value.vendor_code);
+  const p = oltStore.profiles.find((x: any) => x.code === oltForm.value.vendor_code);
   if (p) {
-    oltForm.value.technology = p.technology;
+    oltForm.value.technology = (p as any).technology || 'epon';
   }
 };
 
@@ -446,14 +424,15 @@ const saveOlt = async () => {
   try {
     savingOlt.value = true;
     if (editingOlt.value) {
-      await api.put(`/olts/${editingOlt.value.id}`, oltForm.value);
+      await oltStore.updateOlt(editingOlt.value.id, oltForm.value);
+      toastStore.addToast('OLT berhasil diperbarui.', 'success');
     } else {
-      await api.post('/olts', oltForm.value);
+      await oltStore.createOlt(oltForm.value);
+      toastStore.addToast('OLT berhasil ditambahkan.', 'success');
     }
     closeOltModal();
-    fetchOlts();
   } catch (err: any) {
-    alert("Gagal menyimpan OLT: " + (err.response?.data?.message || err.message));
+    toastStore.addToast("Gagal menyimpan OLT: " + err.message, 'error');
   } finally {
     savingOlt.value = false;
   }
@@ -462,16 +441,16 @@ const saveOlt = async () => {
 const deleteOlt = async (olt: any) => {
   if (confirm(`Apakah Anda yakin ingin menghapus OLT "${olt.name}"?`)) {
     try {
-      await api.delete(`/olts/${olt.id}`);
-      fetchOlts();
-    } catch (err) {
-      alert("Gagal menghapus OLT");
+      await oltStore.deleteOlt(olt.id);
+      toastStore.addToast('OLT berhasil dihapus.', 'success');
+    } catch (err: any) {
+      toastStore.addToast("Gagal menghapus OLT: " + err.message, 'error');
     }
   }
 };
 
 const inspectOlt = (olt: any) => {
-  fetchOnus(olt.id);
+  oltStore.selectOlt(olt.id);
   activeTab.value = 'onus';
 };
 
@@ -515,7 +494,9 @@ const statusBadgeClass = (status: string) => {
 const linkCustomer = (onu: any) => {
   const name = prompt("Masukkan User PPPoE atau Nama Pelanggan untuk ONU ini:", onu.customer_name || onu.onu_description || '');
   if (name !== null) {
+    // Ideally we'd have a store method to persist this change
     onu.customer_name = name;
+    toastStore.addToast('Customer name linked (Local preview only)', 'success');
   }
 };
 
@@ -552,7 +533,7 @@ onMounted(() => {
 }
 .dashboard__heading-sub {
   font-size: 0.82rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 .dashboard__welcome { margin-bottom: 28px; }
 
@@ -573,14 +554,14 @@ onMounted(() => {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
   padding-bottom: 0.5rem;
 }
 
 .tab-btn-pill {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #94a3b8;
+  background: var(--surface-1);
+  border: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
+  color: var(--text-secondary);
   padding: 0.5rem 1.25rem;
   font-weight: 600;
   border-radius: 9999px;
@@ -590,15 +571,18 @@ onMounted(() => {
 }
 
 .tab-btn-pill.active {
-  background: #3b82f6;
+  background: var(--accent-cyan, #0ea5e9);
   color: #ffffff;
-  border-color: #3b82f6;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  border-color: var(--accent-cyan, #0ea5e9);
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
 }
 
 .empty-panel {
   text-align: center;
   padding: 3rem 1.5rem;
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 .empty-icon-wrap {
   font-size: 3rem;
@@ -616,6 +600,9 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .olt-card-header {
@@ -634,7 +621,7 @@ onMounted(() => {
 .olt-card-name {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #f8fafc;
+  color: var(--text-primary);
   margin: 0;
 }
 
@@ -644,15 +631,15 @@ onMounted(() => {
   border-radius: 50%;
   flex-shrink: 0;
 }
-.status-indicator.online { background: #10b981; box-shadow: 0 0 8px #10b981; }
-.status-indicator.offline { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+.status-indicator.online { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.5); }
+.status-indicator.offline { background: #ef4444; box-shadow: 0 0 8px rgba(239, 68, 68, 0.5); }
 
 .vendor-badge {
   display: inline-block;
   font-size: 0.75rem;
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: rgba(14, 165, 233, 0.15);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(14, 165, 233, 0.3);
   padding: 0.15rem 0.6rem;
   border-radius: 0.25rem;
   margin-top: 0.35rem;
@@ -665,7 +652,7 @@ onMounted(() => {
 
 .olt-info-body {
   font-size: 0.85rem;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
@@ -678,17 +665,17 @@ onMounted(() => {
 }
 .val-code {
   font-family: monospace;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--surface-2);
   padding: 0.1rem 0.4rem;
   border-radius: 0.25rem;
-  color: #38bdf8;
+  color: var(--accent-cyan);
 }
 
 .notes-box {
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--surface-2);
   padding: 0.5rem;
   border-radius: 0.375rem;
-  color: #94a3b8;
+  color: var(--text-secondary);
   font-size: 0.75rem;
   margin-top: 0.25rem;
 }
@@ -696,19 +683,26 @@ onMounted(() => {
 .onu-summary-row {
   display: flex;
   justify-content: space-around;
-  background: rgba(15, 23, 42, 0.5);
+  background: var(--surface-2);
   padding: 0.75rem;
   border-radius: 0.5rem;
   text-align: center;
 }
 
 .summary-pill .num { font-size: 1.1rem; font-weight: 700; display: block; }
-.summary-pill .label { font-size: 0.7rem; color: #94a3b8; }
+.summary-pill .label { font-size: 0.7rem; color: var(--text-secondary); }
 .summary-pill.green .num { color: #34d399; }
 .summary-pill.yellow .num { color: #fbbf24; }
 .summary-pill.red .num { color: #f87171; }
 
 /* Filter & Tables */
+.panel {
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+}
+
 .filter-flex-bar {
   display: flex;
   gap: 1rem;
@@ -723,21 +717,43 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
 }
-.cust-title { font-weight: 600; color: #f1f5f9; }
-.pppoe-tag { font-size: 0.75rem; color: #38bdf8; font-family: monospace; }
-.val-code-xs { font-size: 0.75rem; color: #cbd5e1; }
+.cust-title { font-weight: 600; color: var(--text-primary); }
+.pppoe-tag { font-size: 0.75rem; color: var(--accent-cyan); font-family: monospace; }
+.val-code-xs { font-size: 0.75rem; color: var(--text-secondary); }
 
-.dbm-box { display: flex; flex-direction: column; }
+.dbm-box { 
+  display: inline-flex; 
+  flex-direction: column;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-color);
+  align-items: center;
+  min-width: 80px;
+}
 .dbm-box .val { font-weight: 700; font-family: monospace; }
 .dbm-box .lbl { font-size: 0.7rem; }
-.dbm-good { color: #34d399; }
-.dbm-warning { color: #fbbf24; }
-.dbm-critical { color: #f87171; }
+.dbm-good { color: #10b981; background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); }
+.dbm-warning { color: #f59e0b; background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); }
+.dbm-critical { color: #ef4444; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); }
+.dbm-offline { color: var(--text-secondary); }
+
+/* Tooltip Icon */
+.tooltip-icon {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 0.8rem;
+  cursor: help;
+  opacity: 0.7;
+}
+.tooltip-icon:hover {
+  opacity: 1;
+}
 
 /* Debugger Tool */
 .panel-header-custom { margin-bottom: 1.5rem; }
-.panel-header-custom h3 { font-size: 1.2rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.25rem; }
-.panel-header-custom p { color: #94a3b8; font-size: 0.85rem; }
+.panel-header-custom h3 { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem; }
+.panel-header-custom p { color: var(--text-secondary); font-size: 0.85rem; }
 
 .form-grid-4 {
   display: grid;
@@ -755,16 +771,16 @@ onMounted(() => {
 }
 
 .btn-chip {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #cbd5e1;
+  background: var(--surface-2);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   padding: 0.25rem 0.6rem;
   border-radius: 0.375rem;
   font-size: 0.75rem;
   cursor: pointer;
   transition: background 0.2s;
 }
-.btn-chip:hover { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+.btn-chip:hover { background: rgba(14, 165, 233, 0.1); color: var(--accent-cyan); border-color: var(--accent-cyan); }
 
 .debug-result-panel { margin-top: 1.5rem; }
 .result-banner {
@@ -775,25 +791,29 @@ onMounted(() => {
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
-.result-banner.success { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; }
-.result-banner.error { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; }
+.result-banner.success { background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #10b981; }
+.result-banner.error { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #ef4444; }
 
 .code-box pre {
-  background: #0f172a;
+  background: var(--surface-2);
   padding: 1rem;
   border-radius: 0.5rem;
   max-height: 350px;
   overflow-y: auto;
-  color: #38bdf8;
+  color: var(--accent-cyan);
   font-size: 0.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+}
+.code-header {
+  color: var(--text-primary);
+  margin-bottom: 8px;
 }
 
 /* Modals */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
@@ -808,6 +828,10 @@ onMounted(() => {
   padding: 1.5rem;
   max-height: 90vh;
   overflow-y: auto;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  border-radius: var(--radius-lg, 12px);
 }
 
 .modal-header-row {
@@ -815,12 +839,13 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.25rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 0.75rem;
 }
 
-.modal-header-row h3 { font-size: 1.15rem; font-weight: 700; color: #f8fafc; margin: 0; }
-.btn-close { background: transparent; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; }
+.modal-header-row h3 { font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin: 0; }
+.btn-close { background: transparent; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; }
+.btn-close:hover { color: var(--text-primary); }
 
 /* Buttons & Forms (Copied from base) */
 .btn {
@@ -835,46 +860,47 @@ onMounted(() => {
 }
 .btn-primary { background: var(--accent-cyan, #0ea5e9); color: #fff; }
 .btn-primary:hover { opacity: 0.9; }
-.btn-secondary { background: rgba(255,255,255,0.1); color: var(--text-primary, #f1f5f9); }
-.btn-secondary:hover { background: rgba(255,255,255,0.15); }
+.btn-secondary { background: var(--surface-2); border: 1px solid var(--border-color); color: var(--text-primary); }
+.btn-secondary:hover { background: var(--surface-3, rgba(14, 165, 233, 0.1)); border-color: var(--accent-cyan); }
 .btn-danger { color: #ef4444 !important; background: rgba(239, 68, 68, 0.1); }
 .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
 .btn-sm { padding: 4px 8px; font-size: 0.8rem; }
-.btn-icon { background: transparent; border: 1px solid rgba(255,255,255,0.1); margin-right: 4px; }
-.btn-icon:hover { background: rgba(255,255,255,0.05); }
+.btn-icon { background: transparent; border: 1px solid var(--border-color); margin-right: 4px; color: var(--text-primary); }
+.btn-icon:hover { background: var(--surface-2); border-color: var(--accent-cyan); }
 
 .form-group { margin-bottom: 0; display: flex; flex-direction: column; }
 .form-group label {
   font-size: 0.85rem;
-  color: var(--text-secondary, #94a3b8);
+  color: var(--text-secondary);
   margin-bottom: 6px;
+  font-weight: 500;
 }
 .form-input, .form-select {
   width: 100%;
-  background: rgba(0,0,0,0.2);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
   padding: 10px 12px;
   border-radius: var(--radius-sm, 6px);
-  color: var(--text-primary, #f8fafc);
+  color: var(--text-primary);
   font-family: inherit;
 }
 .form-input:focus, .form-select:focus {
   outline: none;
-  border-color: var(--accent-cyan, #0ea5e9);
+  border-color: var(--accent-cyan);
 }
 
 .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.hint-txt { font-size: 0.7rem; color: #94a3b8; margin-top: 0.4rem; display: block; }
+.hint-txt { font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.4rem; display: block; }
 .mb-3 { margin-bottom: 1rem; }
 .mt-3 { margin-top: 1rem; }
 
 .dstnat-info-box {
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.25);
+  background: rgba(14, 165, 233, 0.1);
+  border: 1px solid rgba(14, 165, 233, 0.25);
   padding: 0.75rem;
   border-radius: 0.5rem;
   font-size: 0.75rem;
-  color: #93c5fd;
+  color: var(--accent-cyan);
   margin-top: 1rem;
 }
 
