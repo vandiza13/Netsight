@@ -70,27 +70,42 @@
         <form @submit.prevent="submitForm" class="router-form">
           <div class="form-grid">
             <div class="form-group">
-              <label>Router Name</label>
+              <label>
+                Router Name
+                <span class="info-icon" title="Nama unik identitas router di dashboard Netsight (misal: BimaNet atau NOC Edge 01)">ℹ️</span>
+              </label>
               <input type="text" v-model="form.name" class="form-input" required placeholder="e.g. NOC Edge 01" />
             </div>
             
             <div class="form-group">
-              <label>IP Address / Host</label>
-              <input type="text" v-model="form.host" class="form-input" required placeholder="e.g. 192.168.1.1" />
+              <label>
+                IP Address / Host
+                <span class="info-icon" title="Alamat IP publik atau IP tunnel VPN/WireGuard yang dapat dijangkau oleh server Netsight">ℹ️</span>
+              </label>
+              <input type="text" v-model="form.host" class="form-input" required placeholder="e.g. 10.99.99.2" />
             </div>
 
             <div class="form-group">
-              <label>API Username</label>
+              <label>
+                API Username
+                <span class="info-icon" title="Username akun user API MikroTik (default: admin atau user khusus API)">ℹ️</span>
+              </label>
               <input type="text" v-model="form.api_user" class="form-input" placeholder="admin" />
             </div>
             
             <div class="form-group">
-              <label>API Port</label>
+              <label>
+                API Port
+                <span class="info-icon" title="Port API MikroTik (default: 8728 untuk API standar, 8729 untuk API-SSL)">ℹ️</span>
+              </label>
               <input type="number" v-model="form.api_port" class="form-input" required placeholder="8728 or 8729" />
             </div>
             
             <div class="form-group full-width">
-              <label>SNMP Community (Optional)</label>
+              <label>
+                SNMP Community (Optional)
+                <span class="info-icon" title="Community string SNMP MikroTik untuk monitoring grafik trafik & sensor fisik">ℹ️</span>
+              </label>
               <input type="text" v-model="form.snmp_community" class="form-input" placeholder="e.g. public or BimaNet-SNMP" />
               
               <!-- Smart SNMP Quick Setup Helper -->
@@ -107,7 +122,10 @@
             </div>
 
             <div class="form-group">
-              <label>Monitored Interface (Optional)</label>
+              <label>
+                Monitored Interface (Optional)
+                <span class="info-icon" title="Pilih interface utama (misal: sfp-sfpplus1 / ether1) yang ingin dipantau grafik trafiknya">ℹ️</span>
+              </label>
               <div v-if="isEditing">
                 <select v-if="!loadingInterfaces && availableInterfaces.length > 0" v-model="form.monitored_interface" class="form-input">
                   <option value="">-- Select Interface --</option>
@@ -121,13 +139,19 @@
             </div>
 
             <div class="form-group">
-              <label>API Password</label>
+              <label>
+                API Password
+                <span class="info-icon" title="Password akun user API MikroTik">ℹ️</span>
+              </label>
               <input type="password" v-model="form.credential" class="form-input" :required="!isEditing" placeholder="API Password" />
               <small v-if="isEditing" class="form-help">Leave blank to keep current password</small>
             </div>
             
             <div class="form-group">
-              <label>Sync Offset (minutes)</label>
+              <label>
+                Sync Offset (minutes)
+                <span class="info-icon" title="Interval waktu (menit) untuk otomatisasi sinkronisasi data cache pengguna PPPoE">ℹ️</span>
+              </label>
               <input type="number" v-model="form.sync_offset_minutes" class="form-input" min="1" placeholder="15" />
             </div>
           </div>
@@ -525,10 +549,18 @@ async function testConnection(router: MikroTikRouter) {
   border: 1px solid var(--border);
 }
 
-.helper-note {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  margin-top: 6px;
-  display: block;
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  margin-left: 4px;
+  cursor: help;
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.info-icon:hover {
+  opacity: 1;
+  transform: scale(1.15);
 }
 </style>
