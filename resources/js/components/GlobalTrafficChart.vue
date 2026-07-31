@@ -41,7 +41,7 @@
             </h4>
             <span class="interface-badge">{{ chart.interface }}</span>
           </div>
-          <div class="current-speed">
+          <div v-if="selectedRange === 'live'" class="current-speed">
             <span style="font-size: 10px; color: gray; margin-right: 10px;">{{ chart.chartData.labels.length }} pts</span>
             <div class="speed-rx">
               <span class="label">RX (In)</span>
@@ -51,6 +51,42 @@
             <div class="speed-tx">
               <span class="label">TX (Out)</span>
               <span class="value">{{ formatSpeed(chart.latest_tx) }}</span>
+            </div>
+          </div>
+          
+          <div v-else-if="chart.stats" class="historical-stats">
+            <div class="stats-grid">
+              <div class="stat-cell">
+                <span class="stat-title">MAX</span>
+                <span class="val-rx">↓{{ formatSpeedShort(chart.stats.maxRx) }}</span>
+                <span class="val-tx">↑{{ formatSpeedShort(chart.stats.maxTx) }}</span>
+              </div>
+              <div class="stat-cell">
+                <span class="stat-title">MIN</span>
+                <span class="val-rx">↓{{ formatSpeedShort(chart.stats.minRx) }}</span>
+                <span class="val-tx">↑{{ formatSpeedShort(chart.stats.minTx) }}</span>
+              </div>
+              <div class="stat-cell">
+                <span class="stat-title">AVG</span>
+                <span class="val-rx">↓{{ formatSpeedShort(chart.stats.avgRx) }}</span>
+                <span class="val-tx">↑{{ formatSpeedShort(chart.stats.avgTx) }}</span>
+              </div>
+              <div class="stat-cell">
+                <span class="stat-title">P95</span>
+                <span class="val-rx">↓{{ formatSpeedShort(chart.stats.p95Rx) }}</span>
+                <span class="val-tx">↑{{ formatSpeedShort(chart.stats.p95Tx) }}</span>
+              </div>
+            </div>
+            
+            <div class="stat-divider"></div>
+            
+            <div class="stat-column volume-col">
+                <span class="stat-title">Volume ({{ chart.range.toUpperCase() }})</span>
+                <div class="volume-total">{{ formatVolume(chart.stats.totalRxBytes + chart.stats.totalTxBytes) }}</div>
+                <div class="volume-details">
+                    <span class="val-rx">↓{{ formatVolume(chart.stats.totalRxBytes) }}</span>
+                    <span class="val-tx">↑{{ formatVolume(chart.stats.totalTxBytes) }}</span>
+                </div>
             </div>
           </div>
         </div>
@@ -177,6 +213,25 @@ const formatSpeed = (bps) => {
   return parseFloat((bps / Math.pow(k, sizeIndex)).toFixed(1)) + ' ' + sizes[sizeIndex];
 };
 
+const formatSpeedShort = (bps) => {
+  if (bps === 0 || !bps) return '0b';
+  if (bps < 1000) return Math.round(bps) + 'b';
+  const k = 1000;
+  const sizes = ['b', 'Kb', 'Mb', 'Gb', 'Tb'];
+  const i = Math.floor(Math.log(bps) / Math.log(k));
+  const sizeIndex = Math.min(Math.max(i, 0), sizes.length - 1);
+  return parseFloat((bps / Math.pow(k, sizeIndex)).toFixed(1)) + sizes[sizeIndex];
+};
+
+const formatVolume = (bytes) => {
+  if (bytes === 0 || !bytes) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  const sizeIndex = Math.min(Math.max(i, 0), sizes.length - 1);
+  return parseFloat((bytes / Math.pow(k, sizeIndex)).toFixed(2)) + ' ' + sizes[sizeIndex];
+};
+
 const formatTime = (timestamp, range = 'live') => {
   if (!timestamp) return '';
   const date = new Date(timestamp * 1000);
@@ -197,6 +252,46 @@ const formatTime = (timestamp, range = 'live') => {
 
 const createChartObject = (routerData, labels, rxData, txData, range) => {
   const isLive = range === 'live';
+  
+  let stats = null;
+  if (!isLive && rxData.length > 0 && txData.length > 0) {
+    const sortedRx = [...rxData].sort((a, b) => a - b);
+    const sortedTx = [...txData].sort((a, b) => a - b);
+    
+    const maxRx = sortedRx[sortedRx.length - 1];
+    const maxTx = sortedTx[sortedTx.length - 1];
+    const minRx = sortedRx[0];
+    const minTx = sortedTx[0];
+    
+    const avgRx = rxData.reduce((a, b) => a + b, 0) / rxData.length;
+    const avgTx = txData.reduce((a, b) => a + b, 0) / txData.length;
+    
+    const p95Idx = Math.floor(rxData.length * 0.95);
+    const p95Rx = sortedRx[p95Idx];
+    const p95Tx = sortedTx[p95Idx];
+
+    let totalRxBytes = 0;
+    let totalTxBytes = 0;
+    const points = routerData.points || [];
+    
+    for (let i = 1; i < points.length; i++) {
+        const p0 = points[i-1];
+        const p1 = points[i];
+        let deltaSeconds = p1.timestamp - p0.timestamp;
+        
+        // Cap max interval to 10 mins (600s) to avoid massive jumps if data was missing
+        if (deltaSeconds > 600) deltaSeconds = 600;
+        if (deltaSeconds < 0) deltaSeconds = 0;
+
+        totalRxBytes += (p0.rx / 8) * deltaSeconds;
+        totalTxBytes += (p0.tx / 8) * deltaSeconds;
+    }
+
+    stats = {
+        maxRx, maxTx, minRx, minTx, avgRx, avgTx, p95Rx, p95Tx, totalRxBytes, totalTxBytes
+    };
+  }
+
   return {
     router_id: routerData.router_id,
     router_name: routerData.router_name,
@@ -205,6 +300,7 @@ const createChartObject = (routerData, labels, rxData, txData, range) => {
     latest_tx: routerData.tx,
     status: routerData.status,
     range: range,
+    stats: stats,
     chartData: {
       labels: labels,
       datasets: [
@@ -540,5 +636,70 @@ onUnmounted(() => {
 .chart-body {
   height: 200px;
   position: relative;
+}
+
+.historical-stats {
+  display: flex;
+  gap: 1.25rem;
+  align-items: stretch;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+}
+
+.stat-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.15rem;
+  font-size: 0.75rem;
+  font-family: monospace;
+}
+
+.stat-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.15rem;
+}
+
+.stat-title {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 0.1rem;
+}
+
+.stat-divider {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.volume-col {
+  align-items: flex-end;
+}
+
+.volume-total {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #f8fafc;
+  line-height: 1;
+}
+
+.volume-details {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.7rem;
+  font-family: monospace;
+  margin-top: 0.1rem;
 }
 </style>
