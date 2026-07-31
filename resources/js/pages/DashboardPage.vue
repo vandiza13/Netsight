@@ -136,12 +136,14 @@ const {
 
 const { fetchRouters } = routerStore
 
-// Computed stats (stubbed totals combined with real data)
+// Computed stats
 const stats = computed(() => {
   const healthy = routers.value.filter(r => r.status === 'HEALTHY').length
+  const totalPppoe = routers.value.reduce((acc, r) => acc + (r.active_pppoe_count || 0), 0)
+
   return {
     routersOnline: `${healthy} / ${routers.value.length}`,
-    pppoeSessions: selectedRouter.value ? pppoePagination.value.total : '---', // Showing total for selected for now
+    pppoeSessions: routers.value.length > 0 ? totalPppoe.toString() : '---',
     torchSessions: 0,
     systemStatus: healthy === routers.value.length && healthy > 0 ? 'Healthy' : 'Degraded',
   }

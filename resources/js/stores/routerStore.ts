@@ -14,6 +14,8 @@ export interface MikroTikRouter {
   consecutive_sync_failures: number
   snmp_community?: string | null
   monitored_interface?: string | null
+  active_pppoe_count?: number
+  total_pppoe_count?: number
   health?: {
     board_name?: string | null
     cpu_load: number
