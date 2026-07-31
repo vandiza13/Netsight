@@ -17,9 +17,23 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`
     }
     const demoSchema = localStorage.getItem('netsight_demo_schema')
-    if (demoSchema && config.headers) {
-      config.headers['X-Demo-Schema'] = demoSchema
+    const userRaw = localStorage.getItem('netsight_user')
+    let isDemoUser = false
+    if (userRaw) {
+      try {
+        const user = JSON.parse(userRaw)
+        isDemoUser = user.email && user.email.startsWith('demo@')
+      } catch (e) {}
     }
+
+    // Only attach demo schema if they are actually logged in as demo
+    if (demoSchema && isDemoUser && config.headers) {
+      config.headers['X-Demo-Schema'] = demoSchema
+    } else if (demoSchema && !isDemoUser) {
+      // Clean up stale demo schema if they are not a demo user
+      localStorage.removeItem('netsight_demo_schema')
+    }
+    
     return config
   },
   (error: AxiosError) => Promise.reject(error)
