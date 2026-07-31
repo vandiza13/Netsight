@@ -404,8 +404,7 @@ function formatTimeAgo(dateString: string | null) {
 .core-item {
   width: 6px;
   flex-shrink: 0;
-  background: #1f2937;
-  border-radius: 1px;
+  background: transparent;
   display: flex;
   align-items: flex-end;
   overflow: hidden;
@@ -414,7 +413,7 @@ function formatTimeAgo(dateString: string | null) {
 .core-bar {
   width: 100%;
   transition: height 0.4s ease-out;
-  border-radius: 1px;
+  border-radius: 1px 1px 0 0;
 }
 
 /* Telemetry Grid */
