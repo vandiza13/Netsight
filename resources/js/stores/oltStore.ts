@@ -57,10 +57,7 @@ export const useOltStore = defineStore('olts', () => {
     error.value = null
 
     try {
-      // Pass the demo header in case backend relies on it for demo
-      const { data } = await api.get<{ data: Olt[], profiles: OltProfile[] }>('/olts', {
-        headers: { 'X-Demo-Schema': '1' }
-      })
+      const { data } = await api.get<{ data: Olt[], profiles: OltProfile[] }>('/olts')
       olts.value = data.data
       profiles.value = data.profiles
     } catch (err: any) {
@@ -73,9 +70,7 @@ export const useOltStore = defineStore('olts', () => {
   async function fetchOnus(oltId: number): Promise<void> {
     loadingOnus.value = true
     try {
-      const { data } = await api.get<{ data: OltOnu[] }>(`/olts/${oltId}/onus`, {
-        headers: { 'X-Demo-Schema': '1' }
-      })
+      const { data } = await api.get<{ data: OltOnu[] }>(`/olts/${oltId}/onus`)
       onus.value = data.data
     } catch (err: any) {
       error.value = err.response?.data?.message || 'Failed to fetch ONUs.'
