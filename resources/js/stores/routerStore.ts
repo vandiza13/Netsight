@@ -14,6 +14,15 @@ export interface MikroTikRouter {
   consecutive_sync_failures: number
   snmp_community?: string | null
   monitored_interface?: string | null
+  health?: {
+    cpu_load: number
+    ram_total: number
+    ram_used: number
+    uptime: string
+    voltage: number | null
+    temperature: number | null
+    timestamp: number
+  } | null
 }
 
 export interface PppoeUser {
