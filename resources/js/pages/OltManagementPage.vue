@@ -420,9 +420,9 @@ const syncOlt = async (olt: any) => {
   
   try {
     await oltStore.syncOlt(olt.id);
-    toastStore.addToast('Sync berhasil dikirim ke background.', 'success');
+    toastStore.success('Sync berhasil dikirim ke background.');
   } catch (err: any) {
-    toastStore.addToast("Gagal melakukan sync OLT: " + err.message, 'error');
+    toastStore.error("Gagal melakukan sync OLT: " + err.message);
   }
 };
 
@@ -468,14 +468,14 @@ const saveOlt = async () => {
     savingOlt.value = true;
     if (editingOlt.value) {
       await oltStore.updateOlt(editingOlt.value.id, oltForm.value);
-      toastStore.addToast('OLT berhasil diperbarui.', 'success');
+      toastStore.success('OLT berhasil diperbarui.');
     } else {
       await oltStore.createOlt(oltForm.value);
-      toastStore.addToast('OLT berhasil ditambahkan.', 'success');
+      toastStore.success('OLT berhasil ditambahkan.');
     }
     closeOltModal();
   } catch (err: any) {
-    toastStore.addToast("Gagal menyimpan OLT: " + err.message, 'error');
+    toastStore.error("Gagal menyimpan OLT: " + err.message);
   } finally {
     savingOlt.value = false;
   }
@@ -485,9 +485,9 @@ const deleteOlt = async (olt: any) => {
   if (confirm(`Apakah Anda yakin ingin menghapus OLT "${olt.name}"?`)) {
     try {
       await oltStore.deleteOlt(olt.id);
-      toastStore.addToast('OLT berhasil dihapus.', 'success');
+      toastStore.success('OLT berhasil dihapus.');
     } catch (err: any) {
-      toastStore.addToast("Gagal menghapus OLT: " + err.message, 'error');
+      toastStore.error("Gagal menghapus OLT: " + err.message);
     }
   }
 };
@@ -534,10 +534,10 @@ const linkCustomer = async (onu: any) => {
     try {
       onu.customer_name = name; // Optimistic update
       await oltStore.updateOnu(onu.id, { customer_name: name });
-      toastStore.addToast('Customer name linked successfully', 'success');
+      toastStore.success('Customer name linked successfully');
     } catch (error: any) {
       onu.customer_name = originalName; // Revert
-      toastStore.addToast(error.message, 'error');
+      toastStore.error(error.message);
     }
   }
 };
