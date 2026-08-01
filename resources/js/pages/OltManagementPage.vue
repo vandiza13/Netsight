@@ -128,20 +128,22 @@
                   <input v-model="onuSearch" type="text" placeholder="Cari User PPPoE, Nama, SN, atau MAC..." class="input-modern search-input" />
                 </div>
                 
-                <!-- OLT Selector -->
-                <select :value="oltStore.selectedOlt?.id" @change="onOltFilterChange" class="input-modern filter-select" style="max-width: 250px;">
-                  <option v-for="olt in oltStore.olts" :key="olt.id" :value="olt.id">
-                    {{ olt.name }}
-                  </option>
-                  <option v-if="oltStore.olts.length === 0" value="" disabled>Belum ada OLT</option>
-                </select>
+                <div class="filter-controls">
+                  <!-- OLT Selector -->
+                  <select :value="oltStore.selectedOlt?.id" @change="onOltFilterChange" class="input-modern filter-select">
+                    <option v-for="olt in oltStore.olts" :key="olt.id" :value="olt.id">
+                      {{ olt.name }}
+                    </option>
+                    <option v-if="oltStore.olts.length === 0" value="" disabled>Belum ada OLT</option>
+                  </select>
 
-                <select v-model="onuStatusFilter" class="input-modern filter-select">
-                  <option value="all">Semua Status ONU</option>
-                  <option value="online">Online</option>
-                  <option value="offline">Offline</option>
-                  <option value="los">LOS (Kabel Putus)</option>
-                </select>
+                  <select v-model="onuStatusFilter" class="input-modern filter-select">
+                    <option value="all">Semua Status ONU</option>
+                    <option value="online">Online</option>
+                    <option value="offline">Offline</option>
+                    <option value="los">LOS (Kabel Putus)</option>
+                  </select>
+                </div>
               </div>
 
               <div class="table-container custom-scrollbar">
@@ -182,14 +184,16 @@
                         </div>
                       </td>
                       <td class="text-right">
-                        <button class="btn btn-sm btn-outline" @click="openHistoryModal(onu)" style="margin-right: 4px;">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-                          Histori
-                        </button>
-                        <button class="btn btn-sm btn-outline" @click="linkCustomer(onu)">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                          Link User
-                        </button>
+                        <div class="action-buttons-row">
+                          <button class="btn btn-sm btn-outline btn-icon-text" @click="openHistoryModal(onu)" title="Grafik Histori">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                            <span>Histori</span>
+                          </button>
+                          <button class="btn btn-sm btn-outline btn-icon-text" @click="linkCustomer(onu)" title="Link User PPPoE">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                            <span>Link User</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   </tbody>
@@ -798,14 +802,29 @@ onMounted(() => {
   transition: all 0.2s;
 }
 .btn-action-icon:hover {
-  background: var(--surface-3, rgba(255,255,255,0.1));
+  background: var(--surface-3);
   color: var(--text-primary);
-  border-color: rgba(255,255,255,0.2);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 .btn-action-icon.danger:hover {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(244, 63, 94, 0.1);
+  color: #f43f5e;
+  border-color: rgba(244, 63, 94, 0.3);
+}
+
+.action-buttons-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.btn-icon-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+}
+.btn-icon-text svg {
+  flex-shrink: 0;
 }
 
 .olt-info-body {
@@ -867,6 +886,12 @@ onMounted(() => {
   display: flex;
   gap: 16px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter-controls {
+  display: flex;
+  gap: 12px;
   flex-wrap: wrap;
 }
 .search-wrap {
@@ -985,8 +1010,8 @@ onMounted(() => {
   box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
   background: var(--surface-3, rgba(255,255,255,0.05));
 }
-.form-select.filter-select {
-  width: 220px;
+.filter-select {
+  min-width: 180px;
 }
 
 .preset-chips-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
