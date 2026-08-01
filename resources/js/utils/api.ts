@@ -26,11 +26,21 @@ api.interceptors.request.use(
       } catch (e) {}
     }
 
-    // Only attach demo schema if they are actually logged in as demo
-    if (demoSchema && isDemoUser && config.headers) {
+    let isLoginWithDemoEmail = false
+    if (config.data) {
+      try {
+        const body = typeof config.data === 'string' ? JSON.parse(config.data) : config.data
+        if (body?.email && typeof body.email === 'string' && body.email.startsWith('demo@')) {
+          isLoginWithDemoEmail = true
+        }
+      } catch (e) {}
+    }
+
+    // Only attach demo schema if they are logged in as demo user or attempting demo login
+    if (demoSchema && (isDemoUser || isLoginWithDemoEmail) && config.headers) {
       config.headers['X-Demo-Schema'] = demoSchema
-    } else if (demoSchema && !isDemoUser) {
-      // Clean up stale demo schema if they are not a demo user
+    } else if (demoSchema && !isDemoUser && !isLoginWithDemoEmail) {
+      // Clean up stale demo schema if they are not a demo user and not performing demo login
       localStorage.removeItem('netsight_demo_schema')
     }
     

@@ -2,6 +2,14 @@
 
 Semua pembaruan pada aplikasi Netsight akan dicatat di file ini agar terstruktur dan mudah dilacak sebelum di-deploy ke Production.
 
+## [Unreleased / Ready to Deploy] - 2026-08-01
+
+### UI/UX & Data Tampilan
+- **[FIXED]** Memperbaiki properti *Uptime* OLT yang sebelumnya gagal terkirim (hanya tampil `--d --h`). Menambahkan fungsi *Accessor* (`getUptimeAttribute`) dan mengatur array `$appends` pada Model `Olt.php` (di repositori `Netsight-core`) agar selalu terserialisasi ke JSON API.
+- **[CHANGED]** Merombak tata letak CSS pada tombol *action* (View Chart & Delete) di komponen `TorchHistoryTable.vue`. Mematenkan dimensi dan menerapkan `flex-direction: row` untuk memastikan tombol tidak *stretch* secara vertikal.
+- **[CHANGED]** Membersihkan aplikasi dari ikon *emoji* standar OS (seperti 👈, 🗑️, 📊) dan menggantinya dengan ikon *Outline SVG* modern (`lucide-icons` kompatibel) di seluruh halaman `InspectPage.vue`, `TorchViewer.vue`, dan tabel riwayat agar desain tampak premium dan seragam.
+- **[ADDED]** Dokumentasi struktur proyek `PROJECT_STRUCTURE.md` untuk mengklarifikasi alur pemisahan dan penggabungan sistem repositori (`Netsight` dan `Netsight-core`), serta instruksi penanganan GitHub Actions.
+
 ## [Unreleased / Ready to Deploy] - 2026-07-25
 
 ### UI/UX & Tampilan Utama (Dashboard NOC)
