@@ -62,7 +62,7 @@
                 :class="{ 'panel-tab-btn--active': activeTab === 'interfaces' }"
                 @click="activeTab = 'interfaces'"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Interfaces
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><path d="M6 18h.01"/><path d="M10 18h.01"/><path d="M14 18h.01"/><path d="M18 18h.01"/><path d="M12 14V2"/></svg> Interfaces
               </button>
               <button 
                 class="panel-tab-btn" 
@@ -308,6 +308,9 @@ function startTorch(username: string) {
 }
 
 .panel-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   background: transparent;
   border: none;
   color: var(--text-secondary);

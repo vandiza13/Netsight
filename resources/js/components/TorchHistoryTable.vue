@@ -235,6 +235,10 @@ watch(() => props.routerId, () => {
 }
 
 .btn-refresh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--glass-border);
   color: var(--text-secondary);
@@ -313,6 +317,10 @@ watch(() => props.routerId, () => {
 }
 
 .btn-view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   background: rgba(6, 182, 212, 0.1);
   color: var(--accent-cyan);
   border: 1px solid rgba(6, 182, 212, 0.3);
@@ -329,6 +337,9 @@ watch(() => props.routerId, () => {
 }
 
 .btn-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: rgba(239, 68, 68, 0.1);
   color: var(--accent-red);
   border: 1px solid rgba(239, 68, 68, 0.3);
