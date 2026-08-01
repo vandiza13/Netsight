@@ -141,7 +141,7 @@
                     <option value="all">Semua Status ONU</option>
                     <option value="online">Online</option>
                     <option value="offline">Offline</option>
-                    <option value="los">LOS (Kabel Putus)</option>
+                    <option value="los">LOS</option>
                   </select>
                 </div>
               </div>

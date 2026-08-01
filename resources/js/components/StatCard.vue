@@ -4,7 +4,7 @@
     <div class="stat-card__glow" :style="{ background: accentColor }" />
 
     <div class="stat-card__header">
-      <span class="stat-card__icon">{{ icon }}</span>
+      <span class="stat-card__icon" v-html="icon"></span>
       <span class="stat-card__title">{{ title }}</span>
     </div>
 

@@ -21,28 +21,28 @@
           <StatCard
             title="Routers Online"
             :value="stats.routersOnline"
-            icon="🖧"
+            icon='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>'
             :accent-color="'var(--accent-green)'"
             subtitle="All regions"
           />
           <StatCard
             title="Active PPPoE Sessions"
             :value="stats.pppoeSessions"
-            icon="📡"
+            icon='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2.25 -4.5 4.5 9 4.5 -9 2.25 4.5h4"/></svg>'
             :accent-color="'var(--accent-cyan)'"
             subtitle="Across all routers"
           />
           <StatCard
             title="Active Torch Sessions"
             :value="stats.torchSessions"
-            icon="🔦"
+            icon='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>'
             :accent-color="'var(--accent-amber)'"
             subtitle="Live inspections"
           />
           <StatCard
             title="System Status"
             :value="stats.systemStatus"
-            icon="💚"
+            icon='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
             :accent-color="stats.systemStatus === 'Healthy' ? 'var(--accent-green)' : 'var(--accent-red)'"
             subtitle="All services operational"
           />
@@ -53,28 +53,28 @@
           <StatCard
             title="Master OLTs"
             :value="oltStats.totalOlts"
-            icon="🏢"
+            icon='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>'
             :accent-color="'var(--accent-cyan)'"
             subtitle="Total active OLT units"
           />
           <StatCard
             title="ONU Online"
             :value="oltStats.onlineOnus"
-            icon="⚡"
+            icon='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>'
             :accent-color="'var(--accent-green)'"
             subtitle="Connected subscribers"
           />
           <StatCard
-            title="ONU LOS / Kabel Putus"
+            title="ONU LOS"
             :value="oltStats.losOnus"
-            icon="❌"
+            icon='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 9-6 6"/><path d="m9 9 6 6"/><circle cx="12" cy="12" r="10"/></svg>'
             :accent-color="'var(--accent-red)'"
             subtitle="Require immediate attention"
           />
           <StatCard
             title="Total ONUs"
             :value="oltStats.totalOnus"
-            icon="🔌"
+            icon='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8v1a2 2 0 0 1 -2 2h-4a2 2 0 0 1 -2 -2V8a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2z"/><path d="M12 13v9"/></svg>'
             :accent-color="'var(--accent-amber)'"
             subtitle="Total configured ports"
           />
