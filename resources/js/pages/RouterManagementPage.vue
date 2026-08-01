@@ -72,7 +72,7 @@
             <div class="form-group">
               <label>
                 Router Name
-                <span class="info-icon" title="Nama unik identitas router di dashboard Netsight (misal: BimaNet atau NOC Edge 01)">ℹ️</span>
+                <span class="info-icon" title="Nama unik identitas router di dashboard Netsight (misal: NOC Edge 01)">ℹ️</span>
               </label>
               <input type="text" v-model="form.name" class="form-input" required placeholder="e.g. NOC Edge 01" />
             </div>
@@ -106,7 +106,7 @@
                 SNMP Community (Optional)
                 <span class="info-icon" title="Community string SNMP MikroTik untuk monitoring grafik trafik & sensor fisik">ℹ️</span>
               </label>
-              <input type="text" v-model="form.snmp_community" class="form-input" placeholder="e.g. public or BimaNet-SNMP" />
+              <input type="text" v-model="form.snmp_community" class="form-input" placeholder="e.g. public" />
               
               <!-- Smart SNMP Quick Setup Helper -->
               <div class="snmp-helper-box mt-2">

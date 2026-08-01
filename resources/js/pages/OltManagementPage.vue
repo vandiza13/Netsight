@@ -182,6 +182,10 @@
                         </div>
                       </td>
                       <td class="text-right">
+                        <button class="btn btn-sm btn-outline" @click="openHistoryModal(onu)" style="margin-right: 4px;">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                          Histori
+                        </button>
                         <button class="btn btn-sm btn-outline" @click="linkCustomer(onu)">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                           Link User
@@ -349,6 +353,12 @@
         </form>
       </div>
     </div>
+    <!-- MODAL HISTORI ONU -->
+    <OnuHistoryModal 
+      v-if="showHistoryModal && selectedOnuForHistory"
+      :onu="selectedOnuForHistory"
+      @close="closeHistoryModal"
+    />
   </div>
 </template>
 
@@ -356,6 +366,7 @@
 import { ref, computed, onMounted } from 'vue';
 import SidebarNav from '../components/SidebarNav.vue';
 import TopBar from '../components/TopBar.vue';
+import OnuHistoryModal from '../components/OnuHistoryModal.vue';
 import api from '../utils/api';
 import { useOltStore } from '../stores/oltStore';
 import { useToastStore } from '../stores/toastStore';
@@ -368,6 +379,9 @@ const toastStore = useToastStore();
 const showOltModal = ref(false);
 const editingOlt = ref<any>(null);
 const savingOlt = ref(false);
+
+const showHistoryModal = ref(false);
+const selectedOnuForHistory = ref<any>(null);
 
 const oltForm = ref({
   name: '',
@@ -495,6 +509,16 @@ const deleteOlt = async (olt: any) => {
 const inspectOlt = (olt: any) => {
   oltStore.selectOlt(olt.id);
   activeTab.value = 'onus';
+};
+
+const openHistoryModal = (onu: any) => {
+  selectedOnuForHistory.value = onu;
+  showHistoryModal.value = true;
+};
+
+const closeHistoryModal = () => {
+  showHistoryModal.value = false;
+  selectedOnuForHistory.value = null;
 };
 
 const runOidDebugger = async () => {
