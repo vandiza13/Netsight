@@ -24,9 +24,9 @@
           <!-- Left Panel: Router Selection -->
           <div class="glass-card dashboard__panel dashboard__sidebar-panel">
             <div class="dashboard__panel-header">
-              <h3 class="dashboard__panel-title">🖧 Routers</h3>
+              <h3 class="dashboard__panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"><path d="M4 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm16 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm-8 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0-16a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="12" y1="6" x2="12" y2="18"/></svg>Routers</h3>
               <button class="btn-refresh" @click="fetchRouters" :disabled="loadingRouters" title="Refresh list">
-                <span :class="{'spinning': loadingRouters}">🔄</span>
+                <span :class="{'spinning': loadingRouters}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;display:inline-block;"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg></span>
               </button>
             </div>
             
@@ -55,25 +55,25 @@
                 :class="{ 'panel-tab-btn--active': activeTab === 'users' }"
                 @click="activeTab = 'users'"
               >
-                📡 Active Users
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242M12 12v9"/><path d="m8 17 4 4 4-4"/></svg> Active Users
               </button>
               <button 
                 class="panel-tab-btn" 
                 :class="{ 'panel-tab-btn--active': activeTab === 'interfaces' }"
                 @click="activeTab = 'interfaces'"
               >
-                🔌 Interfaces
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Interfaces
               </button>
               <button 
                 class="panel-tab-btn" 
                 :class="{ 'panel-tab-btn--active': activeTab === 'history' }"
                 @click="activeTab = 'history'"
               >
-                📋 Diagnostic History
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> Diagnostic History
               </button>
             </div>
             <div class="dashboard__panel-header" v-else>
-              <h3 class="dashboard__panel-title">📡 User Details</h3>
+              <h3 class="dashboard__panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242M12 12v9"/><path d="m8 17 4 4 4-4"/></svg> User Details</h3>
             </div>
             
             <div class="panel-content" v-if="selectedRouter">

@@ -86,7 +86,7 @@
             <div class="telemetry-card">
               <svg class="tele-icon text-dim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
               <span class="telemetry-title">UPTIME</span>
-              <span class="telemetry-value font-mono">--d --h</span>
+              <span class="telemetry-value font-mono">{{ olt.uptime || '--d --h' }}</span>
             </div>
             <div class="telemetry-card">
               <svg class="tele-icon text-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>

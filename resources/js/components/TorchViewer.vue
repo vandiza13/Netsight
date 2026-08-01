@@ -5,20 +5,20 @@
       <!-- HEADER -->
       <div class="header">
         <div class="header-left">
-          <span style="color:var(--text-dimmer); font-size: 1.2rem;">🔍</span>
+          <span style="color:var(--text-dimmer); font-size: 1.2rem;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;vertical-align:middle;margin-top:-2px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
           <div class="header-title-block">
             <div class="title">Live Inspection: <span class="muted">{{ username }}</span></div>
-            <div class="device-chip">📶 {{ vendorName || 'Router Pelanggan' }}</div>
+            <div class="device-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>{{ vendorName || 'Router Pelanggan' }}</div>
           </div>
           <span class="live-badge"><i class="live-dot"></i>{{ statusText }}</span>
         </div>
         <div class="actions">
-          <button class="btn blue" @click="runTraceroute" :disabled="status !== 'ACTIVE' || isTracerouting">📍 Trace</button>
-          <button class="btn green" @click="handlePingOnt" :disabled="status !== 'ACTIVE' || isPingingOnt">📶 Ping</button>
-          <button class="btn amber" @click="handleFetchUserLogs" :disabled="status !== 'ACTIVE' || isLoadingUserLogs">📄 Logs</button>
-          <button class="btn red" @click="handleKickSession" :disabled="status !== 'ACTIVE' || isKicking">⚡ Kick</button>
-          <button class="btn" @click="winboxMode = !winboxMode">🖥 {{ winboxMode ? 'Modern' : 'Winbox' }}</button>
-          <button class="btn danger-solid" @click="stopTorch" :disabled="status === 'STOPPING'">✕ Stop</button>
+          <button class="btn blue" @click="runTraceroute" :disabled="status !== 'ACTIVE' || isTracerouting"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Trace</button>
+          <button class="btn green" @click="handlePingOnt" :disabled="status !== 'ACTIVE' || isPingingOnt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>Ping</button>
+          <button class="btn amber" @click="handleFetchUserLogs" :disabled="status !== 'ACTIVE' || isLoadingUserLogs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>Logs</button>
+          <button class="btn red" @click="handleKickSession" :disabled="status !== 'ACTIVE' || isKicking"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Kick</button>
+          <button class="btn" @click="winboxMode = !winboxMode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>{{ winboxMode ? 'Modern' : 'Winbox' }}</button>
+          <button class="btn danger-solid" @click="stopTorch" :disabled="status === 'STOPPING'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Stop</button>
         </div>
       </div>
 
@@ -136,7 +136,7 @@
 
           <!-- ONT Ping Test Result -->
           <div v-if="ontPingResult" class="panel" style="border-color: rgba(74, 222, 128, 0.4);">
-            <div style="font-weight: 700; color: #4ade80; font-size: 11px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">🏓 ONT Ping Test ({{ ontPingResult.ip }}):</div>
+            <div style="font-weight: 700; color: #4ade80; font-size: 11px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;vertical-align:middle;margin-top:-2px;margin-right:4px;"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg> ONT Ping Test ({{ ontPingResult.ip }}):</div>
             <div class="metric-row"><span class="k">Loss</span><span class="v" :class="ontPingResult.packet_loss === '0%' ? 'green' : 'text-red-500'">{{ ontPingResult.packet_loss }}</span></div>
             <div class="metric-row" v-if="ontPingResult.avg_rtt"><span class="k">Min/Avg/Max</span><span class="v" style="color: #7dd3fc;">{{ formatPingMs(ontPingResult.min_rtt) }} / {{ formatPingMs(ontPingResult.avg_rtt) }} / {{ formatPingMs(ontPingResult.max_rtt) }}</span></div>
           </div>
@@ -191,12 +191,12 @@
     <div v-if="showTraceroute" class="torch-viewer-overlay" style="z-index: 1000; display: flex; align-items: center; justify-content: center;">
       <div class="glass-card" style="padding: 1.5rem; border-radius: 0.75rem; border: 1px solid #374151; max-width: 42rem; width: 100%; background: #0f172a;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <h3 style="font-size: 1.125rem; font-weight: 600; color: #e5e7eb; margin: 0;">📍 Path Analysis (Traceroute)</h3>
+          <h3 style="font-size: 1.125rem; font-weight: 600; color: #e5e7eb; margin: 0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;vertical-align:middle;margin-right:6px;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Path Analysis (Traceroute)</h3>
           <button @click="showTraceroute = false" style="background: none; border: none; color: #9ca3af; font-size: 1.5rem; cursor: pointer;">&times;</button>
         </div>
         
         <div v-if="isTracerouting" style="text-align: center; padding: 2rem; color: #9ca3af;">
-          <div class="icon spin" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: inline-block;">🔄</div>
+          <div class="icon spin" style="display: inline-block; margin-bottom: 0.5rem;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px;"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg></div>
           <div style="margin-top: 8px;">Menganalisis rute ke pelanggan...</div>
         </div>
         
@@ -242,13 +242,13 @@
       <div class="glass-card" style="padding: 1.5rem; border-radius: 0.75rem; border: 1px solid rgba(255, 255, 255, 0.1); max-width: 44rem; width: 100%; background: #0f172a; max-height: 80vh; display: flex; flex-direction: column;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
           <h3 style="font-size: 1.125rem; font-weight: 600; color: #e5e7eb; margin: 0; display: flex; align-items: center; gap: 8px;">
-            📜 Riwayat Log Sesi: <span style="color: #38bdf8;">{{ username }}</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Riwayat Log Sesi: <span style="color: #38bdf8;">{{ username }}</span>
           </h3>
           <button @click="showUserLogsModal = false" style="background: none; border: none; color: #9ca3af; font-size: 1.5rem; cursor: pointer;">&times;</button>
         </div>
         
         <div v-if="isLoadingUserLogs" style="text-align: center; padding: 2rem; color: #9ca3af;">
-          <div class="icon spin" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: inline-block;">🔄</div>
+          <div class="icon spin" style="display: inline-block; margin-bottom: 0.5rem;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px;"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg></div>
           <div style="margin-top: 8px;">Membaca log kejadian pengguna dari router...</div>
         </div>
         
@@ -264,7 +264,7 @@
                 <span style="font-size: 0.75rem; font-family: monospace; color: #94a3b8;">{{ log.time }}</span>
               </div>
               <div style="font-size: 0.78rem; color: #cbd5e1; font-family: monospace; margin-bottom: 2px;">{{ log.message }}</div>
-              <div style="font-size: 0.75rem; color: #38bdf8; font-style: italic;">💡 {{ log.detail }}</div>
+              <div style="font-size: 0.75rem; color: #38bdf8; font-style: italic;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;vertical-align:middle;margin-right:4px;margin-top:-2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>{{ log.detail }}</div>
             </div>
           </div>
         </div>
@@ -393,7 +393,7 @@ const categoryStats = computed(() => {
     batchPackets.forEach(p => {
       const name = p._enriched?.app_name || p._enriched?.port_service || 'Unknown'
       const category = p._enriched?.app_category || p._enriched?.port_category || 'Other'
-      const icon = p._enriched?.app_icon || '📦'
+      const icon = p._enriched?.app_icon || '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>'
       
       const tx = Number(p.tx || 0)
       const rx = Number(p.rx || 0)
@@ -467,7 +467,7 @@ function getAppClass(category: string): string {
 const diagnosticResult = computed(() => {
   if (status.value !== 'ACTIVE' && packets.value.length === 0) {
     return {
-      icon: '🔍',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
       message: 'Menganalisis pola trafik & kualitas koneksi pelanggan...',
       class: 'diag-info',
       pulseColor: '#38bdf8',
@@ -508,7 +508,7 @@ const diagnosticResult = computed(() => {
   // 1. CRITICAL / DANGER (Red 🔴)
   if (isRto) {
     return {
-      icon: '🔴',
+      icon: '<svg viewBox="0 0 24 24" fill="#ef4444" stroke="none" style="width:12px;height:12px;"><circle cx="12" cy="12" r="10"/></svg>',
       message: 'Gagal melakukan Ping ke pelanggan (RTO / Request Timed Out). Cek modem/kabel optik.',
       class: 'diag-danger',
       pulseColor: 'var(--red)',
@@ -520,7 +520,7 @@ const diagnosticResult = computed(() => {
 
   if (limitPercent >= 90 || isQueueFull.value) {
     return {
-      icon: '🔴',
+      icon: '<svg viewBox="0 0 24 24" fill="#ef4444" stroke="none" style="width:12px;height:12px;"><circle cx="12" cy="12" r="10"/></svg>',
       message: `Bandwidth Jenuh (100% Full Limit). Pelanggan mengalami pemadatan kecepatan.` + dominantAppText,
       class: 'diag-danger',
       pulseColor: 'var(--red)',
@@ -532,7 +532,7 @@ const diagnosticResult = computed(() => {
 
   if (lossPct > 5 || pingMs > 120) {
     return {
-      icon: '🔴',
+      icon: '<svg viewBox="0 0 24 24" fill="#ef4444" stroke="none" style="width:12px;height:12px;"><circle cx="12" cy="12" r="10"/></svg>',
       message: `Kualitas sinyal/latensi terdegradasi parah (${pingMs > 0 ? 'Ping ' + pingMs + 'ms' : ''}${hasLoss ? ', Loss ' + lossPct + '%' : ''}).` + dominantAppText,
       class: 'diag-danger',
       pulseColor: 'var(--red)',
@@ -545,7 +545,7 @@ const diagnosticResult = computed(() => {
   // 2. WARNING / PERHATIAN (Yellow/Amber 🟡)
   if (limitPercent >= 75) {
     return {
-      icon: '🟡',
+      icon: '<svg viewBox="0 0 24 24" fill="#f59e0b" stroke="none" style="width:12px;height:12px;"><circle cx="12" cy="12" r="10"/></svg>',
       message: `Bandwidth mendekati batas paket (${limitPercent}% Full).` + dominantAppText,
       class: 'diag-warning',
       pulseColor: 'var(--amber)',
@@ -557,7 +557,7 @@ const diagnosticResult = computed(() => {
 
   if (hasLoss || pingMs > 50) {
     return {
-      icon: '🟡',
+      icon: '<svg viewBox="0 0 24 24" fill="#f59e0b" stroke="none" style="width:12px;height:12px;"><circle cx="12" cy="12" r="10"/></svg>',
       message: `Terdeteksi latensi tinggi/loss (${pingMs > 0 ? 'Ping ' + pingMs + 'ms' : ''}${hasLoss ? ' Loss ' + lossPct + '%' : ''}).` + dominantAppText,
       class: 'diag-warning',
       pulseColor: 'var(--amber)',
@@ -569,7 +569,7 @@ const diagnosticResult = computed(() => {
 
   // 3. GOOD / NORMAL (Green 🟢)
   return {
-    icon: '🟢',
+    icon: '<svg viewBox="0 0 24 24" fill="#10b981" stroke="none" style="width:12px;height:12px;"><circle cx="12" cy="12" r="10"/></svg>',
     message: `Koneksi sangat lancar & stabil. Pemakaian ${limitPercent}% dari limit paket.` + (pingMs > 0 ? ` Latensi ${pingMs}ms.` : ''),
     class: 'diag-good',
     pulseColor: 'var(--green)',
@@ -580,7 +580,8 @@ const diagnosticResult = computed(() => {
 })
 
 function getAppLogoHtml(appName?: string, defaultIcon?: string): string {
-  if (!appName) return defaultIcon || '📦'
+  const genericBox = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>'
+  if (!appName) return defaultIcon || genericBox
   const name = appName.toLowerCase()
 
   if (name.includes('youtube')) {
@@ -623,7 +624,7 @@ function getAppLogoHtml(appName?: string, defaultIcon?: string): string {
     return `<svg class="app-logo-svg" viewBox="0 0 24 24" width="15" height="15" fill="#25D366" style="display:inline-block; vertical-align:-2px; margin-right:4px;"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.705 1.758zm6.654-4.225l.48.285c1.46.867 3.14 1.324 4.863 1.325 5.277 0 9.571-4.294 9.574-9.573.001-2.557-.996-4.96-2.809-6.772-1.813-1.813-4.216-2.812-6.775-2.812-5.278 0-9.572 4.294-9.575 9.573-.001 1.77.469 3.498 1.36 5.016l.313.528-1.005 3.673 3.759-.986z"/></svg>`
   }
 
-  return defaultIcon || '📦'
+  return defaultIcon || genericBox
 }
 
 function pingColor(timeStr: string) {

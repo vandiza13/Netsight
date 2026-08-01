@@ -22,6 +22,7 @@ export interface Olt {
   onus_online?: number
   onus_offline?: number
   onus_los?: number
+  uptime?: string
 }
 
 export interface OltOnu {
