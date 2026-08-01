@@ -2,7 +2,8 @@
   <div class="activity-feed-container">
     <div class="feed-header">
       <h3 class="feed-title">
-        <span class="icon">📜</span> System Activity
+        <svg class="icon title-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-right:6px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        System Activity
       </h3>
       <div v-if="loading" class="spinner"></div>
     </div>
@@ -11,8 +12,7 @@
     
     <div class="feed-list" v-else>
       <div class="feed-item fade-in" v-for="log in logs" :key="log.id">
-        <div class="feed-icon" :class="getIconClass(log.action)">
-          {{ getActionIcon(log.action) }}
+        <div class="feed-icon" :class="getIconClass(log.action)" v-html="getActionIcon(log.action)">
         </div>
         <div class="feed-content">
           <div class="feed-desc">
@@ -69,13 +69,13 @@ onMounted(() => {
 
 function getActionIcon(action: string) {
   const a = action.toLowerCase()
-  if (a.includes('login')) return '🔑'
-  if (a.includes('sync')) return '🔄'
-  if (a.includes('create') || a.includes('add')) return '✨'
-  if (a.includes('update') || a.includes('edit')) return '✏️'
-  if (a.includes('delete') || a.includes('remove')) return '🗑️'
-  if (a.includes('torch')) return '🔦'
-  return '⚡'
+  if (a.includes('login')) return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>'
+  if (a.includes('sync')) return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>'
+  if (a.includes('create') || a.includes('add')) return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+  if (a.includes('update') || a.includes('edit')) return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>'
+  if (a.includes('delete') || a.includes('remove')) return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>'
+  if (a.includes('torch')) return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
 }
 
 function getIconClass(action: string) {
@@ -196,7 +196,14 @@ function formatTimeAgo(dateString: string) {
   flex-shrink: 0;
 }
 
-.feed-icon.is-success { background: rgba(34, 197, 94, 0.15); }
+.feed-icon :deep(svg) {
+  width: 16px;
+  height: 16px;
+}
+.feed-icon.is-success {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
 .feed-icon.is-warning { background: rgba(245, 166, 35, 0.15); }
 .feed-icon.is-danger { background: rgba(239, 68, 68, 0.15); }
 .feed-icon.is-info { background: rgba(34, 211, 238, 0.15); }

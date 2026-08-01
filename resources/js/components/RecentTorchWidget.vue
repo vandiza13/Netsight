@@ -2,7 +2,7 @@
   <div class="torch-widget-container">
     <div class="widget-header">
       <h3 class="widget-title">
-        <span class="icon">📋</span> Recent Torch Inspections
+        <svg class="icon title-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;margin-right:6px;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> Recent Torch Inspections
       </h3>
       <div v-if="loading" class="spinner"></div>
     </div>
@@ -11,7 +11,9 @@
 
     <div class="widget-list" v-else-if="items.length > 0">
       <div class="widget-item" v-for="item in items" :key="item.id">
-        <div class="item-icon">🔦</div>
+        <div class="item-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
         <div class="item-info">
           <div class="item-target">
             User <span class="username">{{ item.username }}</span>

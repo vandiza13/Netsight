@@ -3,7 +3,7 @@
     <!-- HEADER -->
     <div class="panel-top">
       <div>
-        <div class="panel-title">⚡ Hardware Interfaces &amp; Port Status</div>
+        <div class="panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle;margin-right:6px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Hardware Interfaces &amp; Port Status</div>
         <div class="panel-sub">Real-time port link speed &amp; traffic monitoring</div>
       </div>
       <div class="top-actions">
@@ -17,7 +17,7 @@
           {{ isLivePaused ? 'PAUSED' : 'LIVE (3s)' }}
         </button>
         <div class="icon-btn" @click="fetchInterfaces(true)" :disabled="loading" title="Refresh list">
-          <span :class="{ 'spinning': loading }">⟳</span>
+          <span :class="{ 'spinning': loading }"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;display:inline-block;"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg></span>
         </div>
       </div>
     </div>
@@ -36,7 +36,7 @@
 
       <!-- ================= PHYSICAL INTERFACES ================= -->
       <div class="super-group-label" v-if="groupedInterfaces.rj45.length || groupedInterfaces.sfp.length">
-        <span class="icon">🔌</span> PHYSICAL INTERFACES
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> PHYSICAL INTERFACES
       </div>
 
       <div class="super-group-content">
@@ -100,7 +100,7 @@
 
       <!-- ================= VIRTUAL INTERFACES ================= -->
       <div class="super-group-label virtual-label" v-if="groupedInterfaces.vlan.length || groupedInterfaces.vpn.length">
-        <span class="icon">☁</span> VIRTUAL INTERFACES
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M17.5 19c2.485 0 4.5-2.015 4.5-4.5 0-2.39-1.854-4.34-4.218-4.484C17.062 6.642 14.28 4 11 4c-3.59 0-6.5 2.91-6.5 6.5 0 .237.012.47.036.7C2.012 11.458 0 13.522 0 16c0 2.761 2.239 5 5 5h12.5z"/></svg></span> VIRTUAL INTERFACES
       </div>
 
       <div class="super-group-content">
@@ -166,8 +166,8 @@
       <div class="monitor-panel" :class="{ 'is-open': selectedInterface }">
         <div v-if="selectedInterface" class="monitor-panel-content">
           <div class="monitor-head">
-            <div class="monitor-title">⚡ Live Monitor: <span class="name">{{ selectedInterface.name }}</span></div>
-            <button class="btn-close-monitor" @click="selectedInterface = null" title="Close Panel">✕</button>
+            <div class="monitor-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Live Monitor: <span class="name">{{ selectedInterface.name }}</span></div>
+            <button class="btn-close-monitor" @click="selectedInterface = null" title="Close Panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
           </div>
           <div class="monitor-subhead">
             <span class="link-up" :class="selectedInterface.is_running ? 'link-up--active' : 'link-up--down'">

@@ -150,12 +150,12 @@
                 <table class="premium-table">
                   <thead>
                     <tr>
-                      <th style="width: 15%;">PORT / INDEX</th>
-                      <th style="width: 25%;">PELANGGAN / PPPoE</th>
-                      <th style="width: 20%;">SN / MAC</th>
+                      <th style="width: 14%;">PORT / INDEX</th>
+                      <th style="width: 26%;">PELANGGAN / PPPoE</th>
+                      <th style="width: 18%;">SN / MAC</th>
                       <th style="width: 10%;">STATUS</th>
-                      <th style="width: 15%;">REDAMAN (RX)</th>
-                      <th style="width: 15%; text-align: right;">AKSI</th>
+                      <th style="width: 14%;">REDAMAN (RX)</th>
+                      <th style="width: 18%; text-align: right;">AKSI</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -816,6 +816,7 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+  flex-wrap: nowrap;
 }
 .btn-icon-text {
   display: inline-flex;
@@ -944,6 +945,9 @@ onMounted(() => {
   font-size: 0.875rem;
   color: var(--text-primary);
   vertical-align: middle;
+}
+.premium-table th:last-child, .premium-table td:last-child {
+  padding-right: 24px;
 }
 .table-row-hover { transition: background 0.2s; }
 .table-row-hover:hover { background: rgba(255, 255, 255, 0.03); }

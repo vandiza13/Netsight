@@ -117,7 +117,7 @@ watch(() => route.path, (newPath) => {
 const navItems: NavItem[] = [
   { key: 'dashboard', label: 'Dashboard', svgIcon: icons.dashboard },
   { key: 'routers', label: 'Routers', svgIcon: icons.routers },
-  { key: 'olts', label: 'OLT Manager', svgIcon: icons.olts, requiresAdmin: true, badge: 'ADM', badgeClass: 'sidebar__link-badge--danger' },
+  { key: 'olts', label: 'OLT Management', svgIcon: icons.olts, requiresTier2: true, badge: 'T2+', badgeClass: 'sidebar__link-badge--warning' },
   { key: 'inspect', label: 'Inspect', svgIcon: icons.inspect, requiresTier2: true, badge: 'T2+', badgeClass: 'sidebar__link-badge--warning' },
   { key: 'staff', label: 'Staff Management', svgIcon: icons.staff, requiresAdmin: true, badge: 'ADM', badgeClass: 'sidebar__link-badge--danger' },
   { key: 'audit', label: 'Audit Log', svgIcon: icons.audit, requiresAdmin: true, badge: 'ADM', badgeClass: 'sidebar__link-badge--danger' },

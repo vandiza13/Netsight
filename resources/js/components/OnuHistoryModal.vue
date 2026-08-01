@@ -11,7 +11,7 @@
       <div class="modal-body-scroll custom-scrollbar" style="min-height: 400px; display: flex; flex-direction: column;">
         
         <div v-if="loading" class="loading-state" style="margin: auto;">
-          <span class="spinning">🔄</span> Memuat data histori...
+          <svg class="spinning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:6px;display:inline-block;vertical-align:middle;"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg> Memuat data histori...
         </div>
         
         <div v-else-if="histories.length === 0" class="empty-state" style="margin: auto; text-align: center; color: var(--text-secondary);">

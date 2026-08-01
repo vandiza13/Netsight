@@ -92,6 +92,10 @@
             <div class="glass-card table-panel">
               <RouterHealthTable />
             </div>
+            
+            <div class="glass-card table-panel" style="margin-top: 24px;">
+              <OltOverviewWidget />
+            </div>
           </div>
 
           <!-- Right Column (Sidebar/Feeds) -->
@@ -119,6 +123,7 @@ import TopBar from '../components/TopBar.vue'
 import StatCard from '../components/StatCard.vue'
 import ActivityFeed from '../components/ActivityFeed.vue'
 import RouterHealthTable from '../components/RouterHealthTable.vue'
+import OltOverviewWidget from '../components/OltOverviewWidget.vue'
 import RecentTorchWidget from '../components/RecentTorchWidget.vue'
 import GlobalTrafficChart from '../components/GlobalTrafficChart.vue'
 import { useOltStore } from '../stores/oltStore'

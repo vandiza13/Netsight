@@ -2,7 +2,7 @@
   <div class="user-table-container">
     <div class="user-table-header">
       <div class="search-box">
-        <span class="search-icon">🔍</span>
+        <span class="search-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;vertical-align:middle;margin-top:-2px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
         <input 
           type="text" 
           v-model="searchQuery" 
@@ -19,7 +19,7 @@
           :disabled="isSyncing"
           title="Force Sync (TIER_2+)"
         >
-          <span class="sync-icon" :class="{'spinning': isSyncing}">🔄</span>
+          <span class="sync-icon" :class="{'spinning': isSyncing}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;display:inline-block;"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg></span>
           Force Sync
         </button>
       </div>
@@ -67,7 +67,7 @@
             <td class="col-sync text-muted">{{ formatTime(user.synced_at) }}</td>
             <td class="col-actions">
               <button class="btn-action btn-torch" @click="$emit('inspect', user.username)" title="Inspect Traffic (Torch)">
-                🔦 Inspect
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Inspect
               </button>
             </td>
           </tr>
