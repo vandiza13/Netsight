@@ -109,7 +109,9 @@
             </div>
             
             <div class="panel-content empty-selection" v-else>
-              <div class="empty-icon">👈</div>
+              <div class="empty-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:48px;height:48px;opacity:0.5;margin-bottom:16px;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+              </div>
               <p>Select a router from the left panel to view PPPoE users and perform Torch inspection.</p>
             </div>
           </div>
