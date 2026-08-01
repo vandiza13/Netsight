@@ -1,233 +1,229 @@
 <?php
 /**
- * SNMP Diagnostic Tool for OLT 1 (HA7304)
+ * SNMP Diagnostic Tool v2 - OLT 1 (HA7304)
  * 
- * Jalankan di server dengan: php test_olt1_diag.php
- * 
- * Script ini akan menguji berbagai metode SNMP walk untuk menentukan
- * metode mana yang bisa menarik SEMUA data dari OLT tanpa terpotong.
+ * Jalankan: php test_olt1_diag.php
  */
 
-// === KONFIGURASI OLT 1 ===
 $host = '10.99.99.2:1161';
 $community = 'public';
-$statusOid = '1.3.6.1.4.1.25355.3.2.6.3.2.1.39'; // New Firmware Status OID
-$rxPowerOid = '1.3.6.1.4.1.25355.3.2.6.14.2.1.8'; // New Firmware Rx Power OID
-$macOid = '1.3.6.1.4.1.25355.3.2.6.3.2.1.11';     // New Firmware MAC OID
+
+// New Firmware (25355) OIDs
+$statusOid = '1.3.6.1.4.1.25355.3.2.6.3.2.1.39';
+$rxPowerOid = '1.3.6.1.4.1.25355.3.2.6.14.2.1.8';
+$macOid = '1.3.6.1.4.1.25355.3.2.6.3.2.1.11';
 
 echo "=============================================================\n";
-echo "  SNMP Diagnostic Tool - OLT 1 (HA7304) @ {$host}\n";
+echo "  SNMP Diagnostic v2 - OLT 1 (HA7304) @ {$host}\n";
+echo "  PHP " . phpversion() . "\n";
 echo "=============================================================\n\n";
 
-// --- Test 1: Check PHP SNMP capabilities ---
-echo "--- TEST 1: PHP SNMP Extension Check ---\n";
-echo "  snmp2_real_walk() exists: " . (function_exists('snmp2_real_walk') ? 'YES' : 'NO') . "\n";
-echo "  snmprealwalk() exists:    " . (function_exists('snmprealwalk') ? 'YES' : 'NO') . "\n";
-echo "  SNMP class exists:        " . (class_exists('SNMP') ? 'YES' : 'NO') . "\n";
-echo "  PHP Version:              " . phpversion() . "\n";
-if (class_exists('SNMP')) {
-    $testSession = new SNMP(SNMP::VERSION_2c, '127.0.0.1', 'public');
-    echo "  SNMP::max_oids property:  " . (property_exists($testSession, 'max_oids') ? 'YES' : 'NO') . "\n";
-    $testSession->close();
-}
-echo "\n";
-
-// --- Test 2: snmp2_real_walk (the OLD method) ---
-echo "--- TEST 2: snmp2_real_walk() [Old Method - GETBULK default] ---\n";
 snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 snmp_set_oid_output_format(SNMP_OID_OUTPUT_NUMERIC);
 
-$start = microtime(true);
-$oldResult = @snmp2_real_walk($host, $community, $statusOid, 15000000, 3);
-$elapsed = round(microtime(true) - $start, 2);
-
-if ($oldResult === false) {
-    echo "  RESULT: FAILED (returned false)\n";
-    echo "  Time: {$elapsed}s\n";
+// --- Test 1: Full walk Status OID ---
+echo "--- TEST 1: Full walk Status OID ---\n";
+$statusResult = @snmp2_real_walk($host, $community, $statusOid, 15000000, 3);
+if ($statusResult === false) {
+    echo "  FAILED\n";
 } else {
-    $count = count($oldResult);
-    echo "  RESULT: {$count} entries returned\n";
-    echo "  Time: {$elapsed}s\n";
-    // Show first and last 3 entries
-    $keys = array_keys($oldResult);
-    echo "  First 3:\n";
-    for ($i = 0; $i < min(3, $count); $i++) {
-        echo "    {$keys[$i]} => {$oldResult[$keys[$i]]}\n";
+    echo "  Total: " . count($statusResult) . " entries\n";
+    
+    // Count per PON
+    $ponCounts = [];
+    foreach ($statusResult as $oid => $val) {
+        $suffix = str_replace(".{$statusOid}.", '', $oid);
+        $suffix = ltrim($suffix, '.');
+        $parts = explode('.', $suffix);
+        if (count($parts) >= 3) {
+            $ponKey = "{$parts[0]}.{$parts[1]}"; // board.pon
+            $ponCounts[$ponKey] = ($ponCounts[$ponKey] ?? 0) + 1;
+        } elseif (count($parts) >= 2) {
+            $ponKey = "{$parts[0]}";
+            $ponCounts[$ponKey] = ($ponCounts[$ponKey] ?? 0) + 1;
+        }
     }
-    echo "  Last 3:\n";
-    for ($i = max(0, $count - 3); $i < $count; $i++) {
-        echo "    {$keys[$i]} => {$oldResult[$keys[$i]]}\n";
+    echo "  Distribution per PON:\n";
+    ksort($ponCounts);
+    foreach ($ponCounts as $pon => $cnt) {
+        echo "    PON {$pon}: {$cnt} ONUs\n";
     }
 }
 echo "\n";
 
-// --- Test 3: SNMP OOP class with max_oids=15 ---
-if (class_exists('SNMP')) {
-    echo "--- TEST 3: SNMP OOP class with max_oids=15 ---\n";
-    $start = microtime(true);
-    
-    $session = new SNMP(SNMP::VERSION_2c, $host, $community, 15000000, 3);
-    $session->valueretrieval = SNMP_VALUE_PLAIN;
-    $session->oid_output_format = SNMP_OID_OUTPUT_NUMERIC;
-    $session->max_oids = 15;
-    $session->exceptions_enabled = 0;
-    
-    $oopResult = @$session->walk($statusOid, false, 15);
-    $elapsed = round(microtime(true) - $start, 2);
-    $session->close();
-    
-    if ($oopResult === false) {
-        echo "  RESULT: FAILED (returned false)\n";
-        echo "  Time: {$elapsed}s\n";
-    } else {
-        $count = count($oopResult);
-        echo "  RESULT: {$count} entries returned\n";
-        echo "  Time: {$elapsed}s\n";
-        $keys = array_keys($oopResult);
-        echo "  First 3:\n";
-        for ($i = 0; $i < min(3, $count); $i++) {
-            echo "    {$keys[$i]} => {$oopResult[$keys[$i]]}\n";
-        }
-        echo "  Last 3:\n";
-        for ($i = max(0, $count - 3); $i < $count; $i++) {
-            echo "    {$keys[$i]} => {$oopResult[$keys[$i]]}\n";
-        }
-    }
-    echo "\n";
+// --- Test 2: Per-PON walk with CORRECT 2-level prefix ---
+echo "--- TEST 2: Per-PON walk (CORRECT prefix: board.pon) ---\n";
+$correctPrefixes = ['1.1', '1.2', '1.3', '1.4'];
+$totalPerPon = 0;
 
-    // --- Test 4: SNMP OOP class with max_oids=5 (even smaller) ---
-    echo "--- TEST 4: SNMP OOP class with max_oids=5 [Ultra slow but ultra safe] ---\n";
-    $start = microtime(true);
-    
-    $session = new SNMP(SNMP::VERSION_2c, $host, $community, 15000000, 3);
-    $session->valueretrieval = SNMP_VALUE_PLAIN;
-    $session->oid_output_format = SNMP_OID_OUTPUT_NUMERIC;
-    $session->max_oids = 5;
-    $session->exceptions_enabled = 0;
-    
-    $smallResult = @$session->walk($statusOid, false, 5);
-    $elapsed = round(microtime(true) - $start, 2);
-    $session->close();
-    
-    if ($smallResult === false) {
-        echo "  RESULT: FAILED (returned false)\n";
-        echo "  Time: {$elapsed}s\n";
-    } else {
-        $count = count($smallResult);
-        echo "  RESULT: {$count} entries returned\n";
-        echo "  Time: {$elapsed}s\n";
-    }
-    echo "\n";
-} else {
-    echo "--- TEST 3 & 4: SKIPPED (SNMP class not available) ---\n\n";
-}
-
-// --- Test 5: Manual GETNEXT walk (guaranteed complete, v2c) ---
-echo "--- TEST 5: Manual GETNEXT walk [Guaranteed complete] ---\n";
-$start = microtime(true);
-$manualResults = [];
-$currentOid = $statusOid;
-$baseOidDotted = '.' . ltrim($statusOid, '.');
-$maxIterations = 500; // Safety limit
-$iteration = 0;
-
-while ($iteration < $maxIterations) {
-    $iteration++;
-    $nextVal = @snmp2_getnext($host, $community, $currentOid, 5000000, 2);
-    
-    if ($nextVal === false) {
-        echo "  [GETNEXT stopped at iteration {$iteration}: returned false]\n";
-        break;
-    }
-    
-    // snmp2_getnext returns the value, but we need the OID too.
-    // Unfortunately snmp2_getnext doesn't return the OID directly.
-    // We need to use snmp2_get to verify, or use the SNMP class.
-    // Let's use a different approach - use snmp2_real_walk on small sub-OIDs
-    break; // Can't do manual getnext easily with procedural API
-}
-
-// Instead, try walking per-PON (chunked approach)
-echo "  [Manual GETNEXT not feasible with procedural API, trying per-PON walk...]\n\n";
-
-// --- Test 6: Per-PON chunked walk ---
-echo "--- TEST 6: Per-PON Chunked Walk (Status OID) ---\n";
-$totalChunked = 0;
-$ponPrefixes = ['1.1.1', '1.1.2', '1.1.3', '1.1.4']; // HA7304 has 4 PON ports
-
-foreach ($ponPrefixes as $prefix) {
+foreach ($correctPrefixes as $prefix) {
     $chunkOid = "{$statusOid}.{$prefix}";
-    $start2 = microtime(true);
-    $chunkResult = @snmp2_real_walk($host, $community, $chunkOid, 15000000, 3);
-    $elapsed2 = round(microtime(true) - $start2, 2);
-    
-    if ($chunkResult === false) {
-        echo "  PON {$prefix}: FAILED ({$elapsed2}s)\n";
+    $result = @snmp2_real_walk($host, $community, $chunkOid, 15000000, 3);
+    if ($result === false) {
+        echo "  PON {$prefix}: FAILED\n";
     } else {
-        $chunkCount = count($chunkResult);
-        $totalChunked += $chunkCount;
-        echo "  PON {$prefix}: {$chunkCount} entries ({$elapsed2}s)\n";
+        $cnt = count($result);
+        $totalPerPon += $cnt;
+        echo "  PON {$prefix}: {$cnt} ONUs\n";
     }
-    sleep(1); // Delay between chunks
+    usleep(500000);
 }
-echo "  TOTAL from chunked: {$totalChunked} entries\n\n";
+echo "  TOTAL: {$totalPerPon}\n\n";
 
-// --- Test 7: Per-PON chunked walk for Rx Power ---
-echo "--- TEST 7: Per-PON Chunked Walk (Rx Power OID) ---\n";
-$totalRxChunked = 0;
-
-foreach ($ponPrefixes as $prefix) {
-    $chunkOid = "{$rxPowerOid}.{$prefix}";
-    $start2 = microtime(true);
-    $chunkResult = @snmp2_real_walk($host, $community, $chunkOid, 15000000, 3);
-    $elapsed2 = round(microtime(true) - $start2, 2);
+// --- Test 3: Walk the PARENT table to see all available columns ---
+echo "--- TEST 3: Walk parent table 1.3.6.1.4.1.25355.3.2.6.3.2.1 (first 500 entries) ---\n";
+$parentOid = '1.3.6.1.4.1.25355.3.2.6.3.2.1';
+$parentResult = @snmp2_real_walk($host, $community, $parentOid, 30000000, 2);
+if ($parentResult === false) {
+    echo "  FAILED\n";
+} else {
+    echo "  Total entries in parent table: " . count($parentResult) . "\n";
     
-    if ($chunkResult === false) {
-        echo "  PON {$prefix}: FAILED ({$elapsed2}s)\n";
-    } else {
-        $chunkCount = count($chunkResult);
-        $totalRxChunked += $chunkCount;
-        echo "  PON {$prefix}: {$chunkCount} entries ({$elapsed2}s)\n";
+    // Extract unique column numbers
+    $columns = [];
+    foreach ($parentResult as $oid => $val) {
+        $relative = str_replace(".{$parentOid}.", '', $oid);
+        $relative = ltrim($relative, '.');
+        $parts = explode('.', $relative);
+        if (!empty($parts[0])) {
+            $col = $parts[0];
+            $columns[$col] = ($columns[$col] ?? 0) + 1;
+        }
     }
-    sleep(1);
-}
-echo "  TOTAL Rx Power from chunked: {$totalRxChunked} entries\n\n";
-
-// --- Test 8: Per-PON chunked walk for MAC ---
-echo "--- TEST 8: Per-PON Chunked Walk (MAC OID) ---\n";
-$totalMacChunked = 0;
-
-foreach ($ponPrefixes as $prefix) {
-    $chunkOid = "{$macOid}.{$prefix}";
-    $start2 = microtime(true);
-    $chunkResult = @snmp2_real_walk($host, $community, $chunkOid, 15000000, 3);
-    $elapsed2 = round(microtime(true) - $start2, 2);
-    
-    if ($chunkResult === false) {
-        echo "  PON {$prefix}: FAILED ({$elapsed2}s)\n";
-    } else {
-        $chunkCount = count($chunkResult);
-        $totalMacChunked += $chunkCount;
-        echo "  PON {$prefix}: {$chunkCount} entries ({$elapsed2}s)\n";
+    ksort($columns, SORT_NUMERIC);
+    echo "  Columns found (column_number => entry_count):\n";
+    foreach ($columns as $col => $cnt) {
+        $label = match($col) {
+            '1' => 'onu-id?',
+            '11' => 'mac_addr',
+            '25' => 'distance',
+            '37' => 'description',
+            '39' => 'status',
+            default => '',
+        };
+        echo "    Column {$col}: {$cnt} entries {$label}\n";
     }
-    sleep(1);
 }
-echo "  TOTAL MAC from chunked: {$totalMacChunked} entries\n\n";
+echo "\n";
+
+// --- Test 4: Try alternative status OIDs that some C-Data firmware versions use ---
+echo "--- TEST 4: Alternative Status OIDs ---\n";
+$altOids = [
+    'Col 1 (onu-index)'  => '1.3.6.1.4.1.25355.3.2.6.3.2.1.1',
+    'Col 2'              => '1.3.6.1.4.1.25355.3.2.6.3.2.1.2',
+    'Col 3'              => '1.3.6.1.4.1.25355.3.2.6.3.2.1.3',
+    'Col 4'              => '1.3.6.1.4.1.25355.3.2.6.3.2.1.4',
+    'Col 5'              => '1.3.6.1.4.1.25355.3.2.6.3.2.1.5',
+    'Table 2 status'     => '1.3.6.1.4.1.25355.3.2.6.3.3.1.39',
+    'Table 3 status'     => '1.3.6.1.4.1.25355.3.2.6.3.1.1.39',
+    'Olt-pon-onu table'  => '1.3.6.1.4.1.25355.3.2.6.4.2.1.1',
+    'Olt-pon table'      => '1.3.6.1.4.1.25355.3.2.6.4.1.1.1',
+];
+
+foreach ($altOids as $name => $oid) {
+    $result = @snmp2_real_walk($host, $community, $oid, 10000000, 2);
+    if ($result === false) {
+        echo "  {$name} ({$oid}): FAILED\n";
+    } else {
+        $cnt = count($result);
+        echo "  {$name} ({$oid}): {$cnt} entries\n";
+        if ($cnt > 0 && $cnt <= 5) {
+            foreach ($result as $k => $v) {
+                echo "    {$k} => {$v}\n";
+            }
+        } elseif ($cnt > 5) {
+            $keys = array_keys($result);
+            echo "    First: {$keys[0]} => {$result[$keys[0]]}\n";
+            echo "    Last:  {$keys[$cnt-1]} => {$result[$keys[$cnt-1]]}\n";
+        }
+    }
+    usleep(300000);
+}
+echo "\n";
+
+// --- Test 5: Walk Rx Power table to see if it also returns only 93 ---
+echo "--- TEST 5: Full walk Rx Power OID ---\n";
+$rxResult = @snmp2_real_walk($host, $community, $rxPowerOid, 15000000, 3);
+if ($rxResult === false) {
+    echo "  FAILED\n";
+} else {
+    echo "  Total: " . count($rxResult) . " entries\n";
+    // Distribution per PON
+    $ponCounts = [];
+    foreach ($rxResult as $oid => $val) {
+        $suffix = str_replace(".{$rxPowerOid}.", '', $oid);
+        $suffix = ltrim($suffix, '.');
+        $parts = explode('.', $suffix);
+        if (count($parts) >= 3) {
+            $ponKey = "{$parts[0]}.{$parts[1]}";
+            $ponCounts[$ponKey] = ($ponCounts[$ponKey] ?? 0) + 1;
+        }
+    }
+    echo "  Distribution per PON:\n";
+    ksort($ponCounts);
+    foreach ($ponCounts as $pon => $cnt) {
+        echo "    PON {$pon}: {$cnt} entries\n";
+    }
+}
+echo "\n";
+
+// --- Test 6: Walk MAC Address to see distribution ---
+echo "--- TEST 6: Full walk MAC OID ---\n";
+$macResult = @snmp2_real_walk($host, $community, $macOid, 15000000, 3);
+if ($macResult === false) {
+    echo "  FAILED\n";
+} else {
+    echo "  Total: " . count($macResult) . " entries\n";
+    $ponCounts = [];
+    foreach ($macResult as $oid => $val) {
+        $suffix = str_replace(".{$macOid}.", '', $oid);
+        $suffix = ltrim($suffix, '.');
+        $parts = explode('.', $suffix);
+        if (count($parts) >= 3) {
+            $ponKey = "{$parts[0]}.{$parts[1]}";
+            $ponCounts[$ponKey] = ($ponCounts[$ponKey] ?? 0) + 1;
+        }
+    }
+    echo "  Distribution per PON:\n";
+    ksort($ponCounts);
+    foreach ($ponCounts as $pon => $cnt) {
+        echo "    PON {$pon}: {$cnt} entries\n";
+    }
+}
+echo "\n";
+
+// --- Test 7: Broadest possible walk on 25355 enterprise tree ---
+echo "--- TEST 7: Walk top-level 25355.3.2.6 subtrees ---\n";
+$topOids = [
+    '25355.3.2.6.1' => 'System/Global',
+    '25355.3.2.6.2' => 'PON Interface',
+    '25355.3.2.6.3' => 'ONU Info (current)',
+    '25355.3.2.6.4' => 'ONU Config',
+    '25355.3.2.6.5' => 'ONU Stats',
+    '25355.3.2.6.6' => 'VLAN',
+    '25355.3.2.6.7' => 'Bandwidth',
+    '25355.3.2.6.8' => 'Multicast',
+    '25355.3.2.6.9' => 'ACL',
+    '25355.3.2.6.10' => 'QoS',
+    '25355.3.2.6.11' => 'STP',
+    '25355.3.2.6.12' => 'IGMP',
+    '25355.3.2.6.13' => 'Port',
+    '25355.3.2.6.14' => 'Optical (Rx/Tx Power)',
+    '25355.3.2.6.15' => 'Diagnostics',
+];
+
+foreach ($topOids as $suffix => $label) {
+    $oid = "1.3.6.1.4.1.{$suffix}";
+    $result = @snmp2_real_walk($host, $community, $oid, 10000000, 1);
+    if ($result === false) {
+        echo "  {$label} (.{$suffix}): FAILED/EMPTY\n";
+    } else {
+        echo "  {$label} (.{$suffix}): " . count($result) . " entries\n";
+    }
+    usleep(300000);
+}
+echo "\n";
 
 echo "=============================================================\n";
-echo "  DIAGNOSIS SUMMARY\n";
-echo "=============================================================\n";
-echo "  Expected ONUs (from OLT web UI): 158\n";
-if ($oldResult !== false) {
-    echo "  snmp2_real_walk (full):          " . count($oldResult) . "\n";
-}
-if (isset($oopResult) && $oopResult !== false) {
-    echo "  SNMP OOP max_oids=15:            " . count($oopResult) . "\n";
-}
-if (isset($smallResult) && $smallResult !== false) {
-    echo "  SNMP OOP max_oids=5:             " . count($smallResult) . "\n";
-}
-echo "  Per-PON chunked (Status):        {$totalChunked}\n";
-echo "  Per-PON chunked (Rx Power):      {$totalRxChunked}\n";
-echo "  Per-PON chunked (MAC):           {$totalMacChunked}\n";
+echo "  DIAGNOSIS COMPLETE\n";
 echo "=============================================================\n";
