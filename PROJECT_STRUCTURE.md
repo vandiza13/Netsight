@@ -49,3 +49,12 @@ Jika Anda (Developer atau AI Assistant) diminta untuk membuat fitur *Full-Stack*
    ```
 
 **JANGAN** menggabungkan kedua *push* tersebut dengan harapan root direktori akan mendeteksi perubahan pada `packages/`. Selalu periksa `git status` secara terpisah di kedua direktori tersebut!
+
+---
+
+## 🚀 Deployment (GitHub Actions)
+
+**PENTING:** Proyek ini menggunakan **GitHub Actions** untuk proses *Deployment* secara otomatis.
+- Setiap kali ada kode yang di-*push* ke repositori ini (dan/atau ke *core* repositori jika dikonfigurasikan), proses CI/CD dari GitHub Actions akan berjalan dengan sendirinya untuk memperbarui *server/production*.
+- **Oleh karena itu, JANGAN PERNAH menyuruh *User* untuk melakukan `git pull` secara manual di server mereka.**
+- Biarkan *User* hanya me-refresh browser mereka begitu GitHub Actions selesai melakukan *build* dan *deploy*.
