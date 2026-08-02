@@ -28,7 +28,7 @@
         <button 
           @click="fetchData(1)" 
           :disabled="store.loading"
-          class="btn bg-slate-800 border-slate-700 hover:bg-slate-700 text-slate-300 transition-colors flex items-center"
+          class="ns-btn ns-btn--primary bg-slate-800 border-slate-700 hover:bg-slate-700 text-slate-300 transition-colors flex items-center"
         >
           <svg :class="{'animate-spin': store.loading}" class="w-4 h-4 fill-current text-slate-500 shrink-0 mr-2" viewBox="0 0 16 16">
             <path d="M7.95 2A5.95 5.95 0 1013.9 7.95a5.95 5.95 0 00-5.95-5.95zm0 10A4.05 4.05 0 1112 7.95 4.05 4.05 0 017.95 12z" />
