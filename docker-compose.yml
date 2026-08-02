@@ -86,7 +86,7 @@ services:
   # MongoDB Database (For GenieACS)
   # ---------------------------------------------------------------------------
   mongodb:
-    image: mongo:6-alpine
+    image: mongo:6
     container_name: netsight-mongodb
     restart: unless-stopped
     command: --wiredTigerCacheSizeGB 0.25

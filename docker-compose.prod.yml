@@ -83,7 +83,7 @@ services:
           memory: 512M
 
   mongodb:
-    image: mongo:6-alpine
+    image: mongo:6
     restart: always
     command: --wiredTigerCacheSizeGB 0.25
     volumes:
