@@ -36,8 +36,9 @@
             <div class="router-meta mt-1">
               <span class="meta-ip font-mono">{{ olt.ip_address }}</span>
               <span class="meta-divider">•</span>
-              <span class="meta-os" style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: bottom;" :title="olt.hardware_version || getVendorName(olt.vendor_code)">
-                {{ olt.hardware_version || getVendorName(olt.vendor_code) }}
+              <span class="meta-os" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: bottom;" :title="olt.hardware_version ? `${getVendorName(olt.vendor_code)} - ${olt.hardware_version}` : getVendorName(olt.vendor_code)">
+                {{ getVendorName(olt.vendor_code) }} 
+                <span v-if="olt.hardware_version" style="opacity: 0.7; font-size: 0.85em;">({{ olt.hardware_version }})</span>
               </span>
               <span class="meta-divider">•</span>
               <span class="board-badge font-mono">{{ olt.technology ? olt.technology.toUpperCase() : 'EPON' }} ({{ olt.total_pons || 4 }} PON)</span>
@@ -132,7 +133,7 @@ onMounted(() => {
 
 function getVendorName(code: string) {
   const profile = profiles.value.find(p => p.code === code)
-  return profile ? profile.vendor : code.toUpperCase()
+  return profile ? profile.name : code.toUpperCase()
 }
 
 function getOnlineRate(olt: Olt) {
