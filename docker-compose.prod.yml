@@ -82,12 +82,52 @@ services:
           cpus: '0.5'
           memory: 512M
 
+  mongodb:
+    image: mongo:6-alpine
+    restart: always
+    command: --wiredTigerCacheSizeGB 0.25
+    volumes:
+      - mongodata:/data/db
+    networks:
+      - netsight
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  genieacs:
+    image: drumsergio/genieacs:1.2.9
+    restart: always
+    depends_on:
+      - mongodb
+    expose:
+      - "7547"
+      - "7557"
+      - "7548"
+    environment:
+      - GENIEACS_MONGODB_CONNECTION_URL=mongodb://mongodb:27017/genieacs
+      - GENIEACS_EXT_DIR=/opt/genieacs/ext
+      - GENIEACS_UI_JWT_SECRET=netsight_genieacs_secret_key
+      - GENIEACS_CWMP_ACCESS_LOG_FILE=/var/log/genieacs/genieacs-cwmp-access.log
+      - GENIEACS_NBI_ACCESS_LOG_FILE=/var/log/genieacs/genieacs-nbi-access.log
+      - GENIEACS_FS_ACCESS_LOG_FILE=/var/log/genieacs/genieacs-fs-access.log
+    volumes:
+      - genieacs_ext:/opt/genieacs/ext
+      - genieacs_logs:/var/log/genieacs
+    networks:
+      - netsight
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
   caddy:
     image: caddy:2-alpine
     restart: always
     ports:
       - "80:80"
       - "443:443"
+      - "9090:9090"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
@@ -140,6 +180,9 @@ volumes:
   caddy_config:
   prometheus_data:
   grafana_data:
+  mongodata:
+  genieacs_ext:
+  genieacs_logs:
 
 networks:
   netsight:

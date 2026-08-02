@@ -49,6 +49,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, requiresAdmin: true, transition: 'slide' },
   },
   {
+    path: '/acs',
+    name: 'ACS Devices',
+    component: () => import('../pages/AcsManagementPage.vue'),
+    meta: { requiresAuth: true, transition: 'slide' },
+  },
+  {
     path: '/audit',
     name: 'Audit',
     component: () => import('../pages/AuditLogPage.vue'),

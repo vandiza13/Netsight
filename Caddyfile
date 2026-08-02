@@ -31,3 +31,10 @@
         format json
     }
 }
+
+:9090 {
+    # ACS CWMP SaaS Tenant Routing
+    reverse_proxy genieacs:7547 {
+        header_up X-Forwarded-Host {host}
+    }
+}

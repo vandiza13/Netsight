@@ -68,6 +68,7 @@ const icons = {
   dashboard: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
   routers: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="12" x2="6" y2="12.01"/><line x1="10" y1="12" x2="10" y2="12.01"/><path d="M6 6V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2"/></svg>',
   olts: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>',
+  acs: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>',
   inspect: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
   staff: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   audit: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>',
@@ -103,6 +104,8 @@ watch(() => route.path, (newPath) => {
     activeItem.value = 'routers'
   } else if (newPath === '/olts') {
     activeItem.value = 'olts'
+  } else if (newPath === '/acs') {
+    activeItem.value = 'acs'
   } else if (newPath === '/dashboard') {
     activeItem.value = 'dashboard'
   } else if (newPath === '/inspect') {
@@ -118,6 +121,7 @@ const navItems: NavItem[] = [
   { key: 'dashboard', label: 'Dashboard', svgIcon: icons.dashboard },
   { key: 'routers', label: 'Routers', svgIcon: icons.routers },
   { key: 'olts', label: 'OLT Management', svgIcon: icons.olts, requiresTier2: true, badge: 'T2+', badgeClass: 'sidebar__link-badge--warning' },
+  { key: 'acs', label: 'Modem / ACS', svgIcon: icons.acs },
   { key: 'inspect', label: 'Inspect', svgIcon: icons.inspect, requiresTier2: true, badge: 'T2+', badgeClass: 'sidebar__link-badge--warning' },
   { key: 'staff', label: 'Staff Management', svgIcon: icons.staff, requiresAdmin: true, badge: 'ADM', badgeClass: 'sidebar__link-badge--danger' },
   { key: 'audit', label: 'Audit Log', svgIcon: icons.audit, requiresAdmin: true, badge: 'ADM', badgeClass: 'sidebar__link-badge--danger' },
@@ -140,6 +144,8 @@ function handleNav(key: string) {
     router.push('/routers')
   } else if (key === 'olts') {
     router.push('/olts')
+  } else if (key === 'acs') {
+    router.push('/acs')
   } else if (key === 'staff') {
     router.push('/staff')
   } else if (key === 'audit') {

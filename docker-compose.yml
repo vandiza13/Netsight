@@ -83,6 +83,55 @@ services:
           memory: 128M
 
   # ---------------------------------------------------------------------------
+  # MongoDB Database (For GenieACS)
+  # ---------------------------------------------------------------------------
+  mongodb:
+    image: mongo:6-alpine
+    container_name: netsight-mongodb
+    restart: unless-stopped
+    command: --wiredTigerCacheSizeGB 0.25
+    volumes:
+      - mongodata:/data/db
+    networks:
+      - netsight
+    # 🔒 Batasi RAM MongoDB
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ---------------------------------------------------------------------------
+  # GenieACS Engine
+  # ---------------------------------------------------------------------------
+  genieacs:
+    image: drumsergio/genieacs:1.2.9
+    container_name: netsight-genieacs
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    expose:
+      - "7547"
+      - "7557"
+      - "7548"
+    environment:
+      - GENIEACS_MONGODB_CONNECTION_URL=mongodb://mongodb:27017/genieacs
+      - GENIEACS_EXT_DIR=/opt/genieacs/ext
+      - GENIEACS_UI_JWT_SECRET=netsight_genieacs_secret_key
+      - GENIEACS_CWMP_ACCESS_LOG_FILE=/var/log/genieacs/genieacs-cwmp-access.log
+      - GENIEACS_NBI_ACCESS_LOG_FILE=/var/log/genieacs/genieacs-nbi-access.log
+      - GENIEACS_FS_ACCESS_LOG_FILE=/var/log/genieacs/genieacs-fs-access.log
+    volumes:
+      - genieacs_ext:/opt/genieacs/ext
+      - genieacs_logs:/var/log/genieacs
+    networks:
+      - netsight
+    # 🔒 Batasi RAM GenieACS
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ---------------------------------------------------------------------------
   # Caddy Reverse Proxy / Web Server
   # ---------------------------------------------------------------------------
   caddy:
@@ -91,6 +140,7 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:8080:80"
+      - "9090:9090" # CWMP Public Port (SaaS ACS URL)
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - ./public:/var/www/html/public:ro
@@ -128,6 +178,9 @@ volumes:
   caddy_data:
   caddy_config:
   geoip_data:
+  mongodata:
+  genieacs_ext:
+  genieacs_logs:
 
 # =============================================================================
 # Networks
