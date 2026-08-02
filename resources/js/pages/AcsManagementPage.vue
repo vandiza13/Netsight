@@ -1,202 +1,186 @@
 <template>
-  <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
-    <!-- Header -->
-    <div class="sm:flex sm:justify-between sm:items-center mb-8">
-      <div class="mb-4 sm:mb-0">
-        <h1 class="text-2xl md:text-3xl text-white font-bold tracking-tight">ACS Management 🌐</h1>
-        <p class="text-slate-400 mt-1">Manage TR-069 enabled modems across all your OLTs.</p>
-      </div>
+  <div class="dashboard">
+    <SidebarNav :is-open="sidebarOpen" @close="sidebarOpen = false" />
 
-      <!-- Right Side Actions -->
-      <div class="grid grid-flow-col sm:auto-cols-max justify-start sm:justify-end gap-3">
-        <!-- Search -->
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+    <div class="dashboard__main">
+      <TopBar @toggle-sidebar="sidebarOpen = !sidebarOpen" />
+
+      <main class="dashboard__content">
+        <!-- Page Header -->
+        <section class="dashboard__welcome fade-in flex-header">
+          <div>
+            <h2 class="dashboard__heading">
+              TR-069 <span class="dashboard__heading--accent">ACS Management</span>
+            </h2>
+            <p class="dashboard__heading-sub">
+              Remote management modem pelanggan via Auto Configuration Server (GenieACS)
+            </p>
           </div>
-          <input 
-            v-model="searchQuery" 
-            @keyup.enter="handleSearch"
-            type="text" 
-            placeholder="Search by SN, MAC, PPPoE..." 
-            class="block w-full pl-10 pr-3 py-2 border border-slate-700 rounded-lg leading-5 bg-slate-900/50 text-slate-200 placeholder-slate-500 focus:outline-none focus:bg-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm transition-colors"
-          >
+
+          <div class="header-action-buttons">
+            <div class="search-wrap search-wrap--header">
+              <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <input
+                v-model="searchQuery"
+                @keyup.enter="handleSearch"
+                type="text"
+                placeholder="Cari SN, MAC, PPPoE..."
+                class="input-modern search-input"
+              >
+            </div>
+            <button class="btn btn-secondary" @click="fetchData(1)" :disabled="store.loading">
+              <svg :class="{ spinning: store.loading }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+              Refresh
+            </button>
+          </div>
+        </section>
+
+        <!-- Error Alert -->
+        <div v-if="store.error" class="alert-box alert-box--danger fade-in">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div>
+            <strong>Sync Error</strong>
+            <p>{{ store.error }}</p>
+          </div>
         </div>
-        
-        <button 
-          @click="fetchData(1)" 
-          :disabled="store.loading"
-          class="ns-btn ns-btn--primary bg-slate-800 border-slate-700 hover:bg-slate-700 text-slate-300 transition-colors flex items-center"
-        >
-          <svg :class="{'animate-spin': store.loading}" class="w-4 h-4 fill-current text-slate-500 shrink-0 mr-2" viewBox="0 0 16 16">
-            <path d="M7.95 2A5.95 5.95 0 1013.9 7.95a5.95 5.95 0 00-5.95-5.95zm0 10A4.05 4.05 0 1112 7.95 4.05 4.05 0 017.95 12z" />
-            <path d="M12.95 3L11.5 4.45 13 6h3V3l-1.55 1.55z" />
-          </svg>
-          Refresh
-        </button>
-      </div>
-    </div>
 
-    <!-- Error Alert -->
-    <div v-if="store.error" class="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-lg flex items-start space-x-3">
-      <svg class="w-5 h-5 text-rose-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-      <div>
-        <h4 class="text-sm font-medium text-rose-300">Sync Error</h4>
-        <p class="text-sm text-rose-400/80 mt-1">{{ store.error }}</p>
-      </div>
-    </div>
-
-    <!-- Feedback Notification -->
-    <div v-if="notification" class="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center space-x-3 transition-all duration-300">
-      <svg class="w-5 h-5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-      </svg>
-      <span class="text-sm font-medium text-emerald-300">{{ notification }}</span>
-    </div>
-
-    <!-- Main Table -->
-    <div class="bg-slate-800/80 backdrop-blur-sm shadow-lg rounded-xl border border-slate-700/50 mb-8 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <!-- Table header -->
-          <thead class="text-xs font-semibold uppercase text-slate-500 bg-slate-900/50 border-b border-slate-700/50">
-            <tr>
-              <th class="px-5 py-4 text-left"><div class="font-semibold text-slate-300">Status</div></th>
-              <th class="px-5 py-4 text-left"><div class="font-semibold text-slate-300">Device Info</div></th>
-              <th class="px-5 py-4 text-left"><div class="font-semibold text-slate-300">PPPoE</div></th>
-              <th class="px-5 py-4 text-left"><div class="font-semibold text-slate-300">Optical Power</div></th>
-              <th class="px-5 py-4 text-left"><div class="font-semibold text-slate-300">Wi-Fi SSID</div></th>
-              <th class="px-5 py-4 text-center"><div class="font-semibold text-slate-300">Actions</div></th>
-            </tr>
-          </thead>
-          <!-- Table body -->
-          <tbody class="text-sm divide-y divide-slate-700/50">
-            <tr v-if="store.loading && store.devices.length === 0">
-              <td colspan="6" class="px-5 py-12 text-center text-slate-500">
-                <svg class="animate-spin w-8 h-8 mx-auto mb-3 text-blue-500" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Fetching TR-069 Devices...
-              </td>
-            </tr>
-            <tr v-else-if="store.devices.length === 0">
-              <td colspan="6" class="px-5 py-8 text-center text-slate-500">
-                No ACS devices found.
-              </td>
-            </tr>
-            <tr v-for="device in store.devices" :key="device.id" class="hover:bg-slate-700/30 transition-colors group">
-              <!-- Status -->
-              <td class="px-5 py-4 whitespace-nowrap">
-                <div class="flex items-center space-x-2">
-                  <span class="relative flex h-2.5 w-2.5">
-                    <span :class="device.status === 'online' ? 'bg-emerald-400' : 'bg-slate-400'" class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"></span>
-                    <span :class="device.status === 'online' ? 'bg-emerald-500' : 'bg-slate-500'" class="relative inline-flex rounded-full h-2.5 w-2.5"></span>
-                  </span>
-                  <span class="text-slate-300">{{ device.status === 'online' ? 'Online' : 'Offline' }}</span>
-                </div>
-              </td>
-              <!-- Device Info -->
-              <td class="px-5 py-4 whitespace-nowrap">
-                <div class="text-white font-medium mb-0.5">{{ device.serial_number || 'Unknown SN' }}</div>
-                <div class="text-xs text-slate-400 font-mono">{{ device.mac_address || 'No MAC' }}</div>
-                <div class="text-xs text-slate-500 mt-0.5">{{ device.vendor }} / {{ device.model }}</div>
-              </td>
-              <!-- PPPoE -->
-              <td class="px-5 py-4 whitespace-nowrap">
-                <div class="text-blue-400 font-medium">{{ device.pppoe_username || '-' }}</div>
-                <div class="text-xs text-slate-500 mt-1">{{ device.ip_address || '-' }}</div>
-              </td>
-              <!-- Optical Power -->
-              <td class="px-5 py-4 whitespace-nowrap">
-                <div class="flex items-baseline space-x-1">
-                  <span :class="getRxPowerColor(device.rx_power_dbm)" class="font-bold">{{ device.rx_power_dbm ?? '-' }}</span>
-                  <span v-if="device.rx_power_dbm" class="text-xs text-slate-500">dBm</span>
-                </div>
-              </td>
-              <!-- WiFi -->
-              <td class="px-5 py-4 whitespace-nowrap">
-                <div class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-slate-900/50 border border-slate-700">
-                  <svg class="w-3.5 h-3.5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
-                  </svg>
-                  <span class="text-slate-300 font-medium max-w-[120px] truncate" :title="device.wifi_ssid">{{ device.wifi_ssid || 'Hidden/None' }}</span>
-                </div>
-              </td>
-              <!-- Actions -->
-              <td class="px-5 py-4 whitespace-nowrap text-center">
-                <div class="flex items-center justify-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button 
-                    @click="refreshParams(device.id)"
-                    class="p-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded transition-colors"
-                    title="Refresh Data"
-                  >
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                  </button>
-                  <button 
-                    @click="openModal(device)"
-                    class="p-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded transition-colors"
-                    title="Manage Device"
-                  >
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      
-      <!-- Pagination -->
-      <div class="px-5 py-3 border-t border-slate-700/50 bg-slate-900/30 flex items-center justify-between">
-        <span class="text-sm text-slate-400">
-          Showing page <span class="font-medium text-slate-300">{{ store.pagination.current_page }}</span> of <span class="font-medium text-slate-300">{{ store.pagination.last_page }}</span>
-          (Total: {{ store.pagination.total }})
-        </span>
-        <div class="flex space-x-2">
-          <button 
-            @click="fetchData(store.pagination.current_page - 1)" 
-            :disabled="store.pagination.current_page <= 1"
-            class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded disabled:opacity-50 transition-colors text-sm font-medium border border-slate-700"
-          >
-            Prev
-          </button>
-          <button 
-            @click="fetchData(store.pagination.current_page + 1)" 
-            :disabled="store.pagination.current_page >= store.pagination.last_page"
-            class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded disabled:opacity-50 transition-colors text-sm font-medium border border-slate-700"
-          >
-            Next
-          </button>
+        <!-- Success Notification -->
+        <div v-if="notification" class="alert-box alert-box--success fade-in">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>{{ notification }}</span>
         </div>
-      </div>
+
+        <!-- Main Table -->
+        <section class="stagger">
+          <div class="premium-card panel-full">
+            <div class="table-container custom-scrollbar">
+              <table class="premium-table">
+                <thead>
+                  <tr>
+                    <th style="width: 10%;">STATUS</th>
+                    <th style="width: 22%;">DEVICE INFO</th>
+                    <th style="width: 18%;">PPPoE</th>
+                    <th style="width: 14%;">REDAMAN (RX)</th>
+                    <th style="width: 18%;">Wi-Fi SSID</th>
+                    <th style="width: 18%; text-align: right;">AKSI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Loading State -->
+                  <tr v-if="store.loading && store.devices.length === 0">
+                    <td colspan="6" class="loading-state">
+                      <span class="spinning">🔄</span> Fetching TR-069 Devices...
+                    </td>
+                  </tr>
+                  <!-- Empty State -->
+                  <tr v-else-if="store.devices.length === 0">
+                    <td colspan="6" class="empty-state">
+                      Belum ada perangkat ACS yang tersinkronisasi.
+                    </td>
+                  </tr>
+                  <!-- Data Rows -->
+                  <tr v-for="device in store.devices" :key="device.id" class="table-row-hover">
+                    <!-- Status -->
+                    <td>
+                      <div class="status-cell">
+                        <span :class="['status-glow', device.status === 'online' ? 'online' : 'offline']"></span>
+                        <span>{{ device.status === 'online' ? 'Online' : 'Offline' }}</span>
+                      </div>
+                    </td>
+                    <!-- Device Info -->
+                    <td>
+                      <div class="device-info-col">
+                        <span class="cust-title">{{ device.serial_number || 'Unknown SN' }}</span>
+                        <code class="val-code-xs">{{ device.mac_address || 'No MAC' }}</code>
+                        <span class="device-vendor-text">{{ device.vendor }} / {{ device.model }}</span>
+                      </div>
+                    </td>
+                    <!-- PPPoE -->
+                    <td>
+                      <div class="device-info-col">
+                        <span class="pppoe-tag" v-if="device.pppoe_username">{{ device.pppoe_username }}</span>
+                        <span v-else class="text-muted">-</span>
+                        <span class="val-code-xs">{{ device.ip_address || '-' }}</span>
+                      </div>
+                    </td>
+                    <!-- Optical Power -->
+                    <td>
+                      <div :class="['dbm-pill', getDbmClass(device.rx_power_dbm)]">
+                        <span class="val">{{ device.rx_power_dbm !== null ? device.rx_power_dbm + ' dBm' : '-' }}</span>
+                      </div>
+                    </td>
+                    <!-- WiFi SSID -->
+                    <td>
+                      <div class="wifi-badge" v-if="device.wifi_ssid">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+                        <span class="wifi-name">{{ device.wifi_ssid }}</span>
+                      </div>
+                      <span v-else class="text-muted">Hidden/None</span>
+                    </td>
+                    <!-- Actions -->
+                    <td class="text-right">
+                      <div class="action-buttons-row">
+                        <button class="btn-action-icon" @click="refreshParams(device.id)" title="Refresh Data">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+                        </button>
+                        <button class="btn btn-sm btn-primary btn-icon-text" @click="openModal(device)" title="Manage Device">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                          <span>Kelola</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-bar">
+              <span class="pagination-info">
+                Halaman <strong>{{ store.pagination.current_page }}</strong> dari <strong>{{ store.pagination.last_page }}</strong>
+                (Total: {{ store.pagination.total }})
+              </span>
+              <div class="pagination-actions">
+                <button
+                  class="btn btn-sm btn-outline"
+                  @click="fetchData(store.pagination.current_page - 1)"
+                  :disabled="store.pagination.current_page <= 1"
+                >
+                  Prev
+                </button>
+                <button
+                  class="btn btn-sm btn-outline"
+                  @click="fetchData(store.pagination.current_page + 1)"
+                  :disabled="store.pagination.current_page >= store.pagination.last_page"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Modal -->
+        <AcsDeviceModal
+          :show="isModalOpen"
+          :device="selectedDevice"
+          @close="isModalOpen = false"
+          @updated="onDeviceUpdated"
+        />
+      </main>
     </div>
-    
-    <!-- Modal -->
-    <AcsDeviceModal 
-      :show="isModalOpen" 
-      :device="selectedDevice" 
-      @close="isModalOpen = false"
-      @updated="onDeviceUpdated"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useAcsStore } from '../stores/acsStore'
+import SidebarNav from '../components/SidebarNav.vue'
+import TopBar from '../components/TopBar.vue'
 import AcsDeviceModal from '../components/AcsDeviceModal.vue'
 
 const store = useAcsStore()
+const sidebarOpen = ref(false)
 const searchQuery = ref('')
 const notification = ref('')
 const isModalOpen = ref(false)
@@ -228,7 +212,6 @@ const showNotification = (msg: string) => {
 
 const onDeviceUpdated = (msg: string) => {
   showNotification(msg)
-  // Optionally refresh data after a delay
   setTimeout(() => fetchData(store.pagination.current_page), 2000)
 }
 
@@ -241,10 +224,431 @@ const refreshParams = async (deviceId: number) => {
   }
 }
 
-const getRxPowerColor = (power: number | null) => {
-  if (power === null) return 'text-slate-500'
-  if (power >= -25 && power <= -8) return 'text-emerald-400'
-  if ((power < -25 && power >= -28) || (power > -8 && power <= -3)) return 'text-amber-400'
-  return 'text-rose-400'
+const getDbmClass = (power: number | null) => {
+  if (power === null || power === undefined) return 'dbm-offline'
+  if (power >= -25 && power <= -8) return 'dbm-good'
+  if ((power < -25 && power >= -28) || (power > -8 && power <= -3)) return 'dbm-warning'
+  return 'dbm-critical'
 }
 </script>
+
+<style scoped>
+/* ── Layout (same as OltManagementPage) ─────────────────── */
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+  background: var(--surface-0);
+}
+.dashboard__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.dashboard__content {
+  flex: 1;
+  padding: 32px 40px;
+  overflow-y: auto;
+}
+.dashboard__heading {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-1);
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+.dashboard__heading--accent {
+  background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.dashboard__heading-sub {
+  font-size: 0.875rem;
+  color: var(--text-2);
+}
+.dashboard__welcome { margin-bottom: 32px; }
+
+.flex-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header-action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+/* ── Animations ─────────────────────────────────────────── */
+.fade-in { animation: fadeIn 0.4s ease-out forwards; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.stagger > * { opacity: 0; animation: fadeIn 0.4s ease-out forwards; }
+.stagger > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger > *:nth-child(2) { animation-delay: 0.2s; }
+
+.spinning {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Scrollbar ──────────────────────────────────────────── */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
+
+/* ── Search ─────────────────────────────────────────────── */
+.search-wrap {
+  position: relative;
+  min-width: 250px;
+}
+.search-wrap--header {
+  flex: 0 1 300px;
+}
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-2);
+}
+.search-input {
+  width: 100%;
+  padding-left: 42px !important;
+}
+.input-modern {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  color: var(--text-1);
+  transition: all 0.2s;
+}
+.input-modern:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+.input-modern::placeholder {
+  color: var(--text-3);
+}
+
+/* ── Buttons ────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+.btn-secondary {
+  background: var(--surface-2);
+  color: var(--text-2);
+  border-color: var(--border);
+}
+.btn-secondary:hover:not(:disabled) {
+  background: var(--surface-3);
+  color: var(--text-1);
+  border-color: var(--border-hover);
+}
+.btn-outline {
+  background: transparent;
+  color: var(--text-2);
+  border: 1px solid var(--border);
+}
+.btn-outline:hover:not(:disabled) {
+  background: var(--surface-2);
+  color: var(--text-1);
+  border-color: var(--border-hover);
+}
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+.btn-icon-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-icon-text svg {
+  flex-shrink: 0;
+}
+
+.btn-action-icon {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-action-icon:hover {
+  background: var(--surface-3);
+  color: var(--text-1);
+  border-color: var(--border-hover);
+}
+
+/* ── Alert Boxes ────────────────────────────────────────── */
+.alert-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-size: 0.875rem;
+}
+.alert-box strong {
+  display: block;
+  margin-bottom: 2px;
+}
+.alert-box p {
+  margin: 0;
+  opacity: 0.85;
+}
+.alert-box--danger {
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+  color: #f43f5e;
+}
+.alert-box--success {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+.alert-box svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* ── Table Card ─────────────────────────────────────────── */
+.premium-card {
+  background: var(--surface-1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.panel-full { padding: 24px; }
+
+.table-container {
+  max-height: 550px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-1);
+}
+.premium-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+}
+.premium-table th {
+  position: sticky;
+  top: 0;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(8px);
+  padding: 16px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-2);
+  border-bottom: 1px solid var(--border);
+  z-index: 10;
+}
+.premium-table td {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  font-size: 0.875rem;
+  color: var(--text-1);
+  vertical-align: middle;
+}
+.premium-table th:last-child, .premium-table td:last-child {
+  padding-right: 24px;
+}
+.table-row-hover { transition: background 0.2s; }
+.table-row-hover:hover { background: rgba(255, 255, 255, 0.03); }
+.table-row-hover:last-child td { border-bottom: none; }
+
+/* ── Table Cell Content ─────────────────────────────────── */
+.status-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.status-glow {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-glow.online { background: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.6); }
+.status-glow.offline { background: #6b7280; box-shadow: 0 0 10px rgba(107, 114, 128, 0.4); }
+
+.device-info-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.cust-title { font-weight: 600; color: var(--text-1); }
+.val-code-xs { font-size: 0.75rem; color: var(--text-2); font-family: var(--font-mono); }
+.device-vendor-text { font-size: 0.75rem; color: var(--text-3); }
+
+.pppoe-tag {
+  font-size: 0.8rem;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  font-weight: 500;
+}
+
+.text-muted { color: var(--text-3); }
+.text-right { text-align: right; }
+
+/* ── dBm Pill ───────────────────────────────────────────── */
+.dbm-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  min-width: 90px;
+  border: 1px solid transparent;
+}
+.dbm-good { background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
+.dbm-warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); }
+.dbm-critical { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border-color: rgba(244, 63, 94, 0.3); }
+.dbm-offline { background: rgba(255,255,255,0.05); color: var(--text-3); border-color: rgba(255,255,255,0.1); }
+
+/* ── WiFi Badge ─────────────────────────────────────────── */
+.wifi-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+  border-radius: 8px;
+  max-width: 180px;
+}
+.wifi-badge svg {
+  flex-shrink: 0;
+  color: var(--text-3);
+}
+.wifi-name {
+  font-weight: 500;
+  color: var(--text-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Action Buttons ─────────────────────────────────────── */
+.action-buttons-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+/* ── Pagination ─────────────────────────────────────────── */
+.pagination-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.pagination-info {
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+.pagination-info strong {
+  color: var(--text-1);
+}
+.pagination-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ── Loading / Empty ────────────────────────────────────── */
+.loading-state {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-2);
+  font-size: 0.9rem;
+}
+.empty-state {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--text-3);
+}
+
+/* ── Mobile ─────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .dashboard__content {
+    padding: 16px;
+  }
+  .flex-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .header-action-buttons {
+    width: 100%;
+  }
+  .search-wrap--header {
+    flex: 1;
+  }
+  .premium-table th,
+  .premium-table td {
+    padding: 10px 8px;
+    font-size: 0.8rem;
+  }
+  .pagination-bar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+}
+</style>
