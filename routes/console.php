@@ -85,3 +85,11 @@ Schedule::command('netsight:poll-olts')
     ->everyFiveMinutes()
     ->name('olt-poller')
     ->withoutOverlapping();
+
+// ==========================================
+// 6. Traffic History Aggregator
+// ==========================================
+Schedule::command('netsight:aggregate-traffic')
+    ->everyFiveMinutes()
+    ->name('traffic-aggregator')
+    ->withoutOverlapping();
