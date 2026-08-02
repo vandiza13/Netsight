@@ -274,13 +274,28 @@ const createChartObject = (routerData, labels, rxData, txData, range) => {
     let totalTxBytes = 0;
     const points = routerData.points || [];
     
+    const getMaxDeltaForRange = (r) => {
+        const deltas = {
+            'live': 60,
+            '1h': 120,    // 1-min buckets
+            '3h': 360,    // 3-min buckets
+            '6h': 600,    // 5-min buckets
+            '12h': 1200,  // 10-min buckets
+            '24h': 1800,  // 15-min buckets
+            '7d': 7200,   // 1-hour buckets
+            '30d': 21600  // 3-hour buckets
+        };
+        return deltas[r] || 600;
+    };
+    const maxDelta = getMaxDeltaForRange(range);
+    
     for (let i = 1; i < points.length; i++) {
         const p0 = points[i-1];
         const p1 = points[i];
         let deltaSeconds = p1.timestamp - p0.timestamp;
         
-        // Cap max interval to 10 mins (600s) to avoid massive jumps if data was missing
-        if (deltaSeconds > 600) deltaSeconds = 600;
+        // Cap max interval to avoid massive jumps if data was missing
+        if (deltaSeconds > maxDelta) deltaSeconds = maxDelta;
         if (deltaSeconds < 0) deltaSeconds = 0;
 
         totalRxBytes += (p0.rx / 8) * deltaSeconds;
