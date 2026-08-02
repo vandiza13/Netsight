@@ -36,7 +36,9 @@
             <div class="router-meta mt-1">
               <span class="meta-ip font-mono">{{ olt.ip_address }}</span>
               <span class="meta-divider">•</span>
-              <span class="meta-os">{{ getVendorName(olt.vendor_code) }}</span>
+              <span class="meta-os" style="max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; vertical-align: bottom;" :title="olt.hardware_version || getVendorName(olt.vendor_code)">
+                {{ olt.hardware_version || getVendorName(olt.vendor_code) }}
+              </span>
               <span class="meta-divider">•</span>
               <span class="board-badge font-mono">{{ olt.technology ? olt.technology.toUpperCase() : 'EPON' }} ({{ olt.total_pons || 4 }} PON)</span>
             </div>
