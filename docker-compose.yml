@@ -120,6 +120,7 @@ services:
       - GENIEACS_CWMP_ACCESS_LOG_FILE=/var/log/genieacs/genieacs-cwmp-access.log
       - GENIEACS_NBI_ACCESS_LOG_FILE=/var/log/genieacs/genieacs-nbi-access.log
       - GENIEACS_FS_ACCESS_LOG_FILE=/var/log/genieacs/genieacs-fs-access.log
+      - NODE_OPTIONS=--max-old-space-size=384
     volumes:
       - genieacs_ext:/opt/genieacs/ext
       - genieacs_logs:/var/log/genieacs
@@ -129,7 +130,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M
 
   # ---------------------------------------------------------------------------
   # Caddy Reverse Proxy / Web Server
