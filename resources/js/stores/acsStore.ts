@@ -4,9 +4,19 @@ import api from '../utils/api'
 
 export const useAcsStore = defineStore('acs', () => {
   const devices = ref([])
+  const stats = ref({ total: 0, online: 0, offline: 0, critical_rx: 0 })
   const loading = ref(false)
   const pagination = ref({ current_page: 1, last_page: 1, total: 0 })
   const error = ref<string | null>(null)
+
+  const fetchStats = async () => {
+    try {
+      const response = await api.get('/acs/stats')
+      stats.value = response.data.data
+    } catch (err: any) {
+      console.error('Failed to fetch ACS stats', err)
+    }
+  }
 
   const fetchDevices = async (page = 1, search = '') => {
     loading.value = true
@@ -58,14 +68,26 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
+  const factoryResetDevice = async (deviceId: number) => {
+    try {
+      const response = await api.post(`/acs/devices/${deviceId}/factory-reset`)
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal melakukan factory reset modem.' }
+    }
+  }
+
   return {
     devices,
+    stats,
     loading,
     pagination,
     error,
+    fetchStats,
     fetchDevices,
     rebootDevice,
     updateWifi,
-    refreshDevice
+    refreshDevice,
+    factoryResetDevice
   }
 })

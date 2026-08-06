@@ -86,11 +86,19 @@
 
           <!-- Footer Actions -->
           <div class="modal-footer">
-            <button type="button" @click="reboot" :disabled="isRebooting" class="btn btn-danger-outline btn-icon-text">
-              <svg v-if="!isRebooting" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
-              <span v-if="isRebooting" class="spinning">🔄</span>
-              <span>{{ isRebooting ? 'Rebooting...' : 'Reboot Modem' }}</span>
-            </button>
+            <div class="modal-footer-left">
+              <button type="button" @click="reboot" :disabled="isRebooting || isResetting" class="btn btn-danger-outline btn-icon-text">
+                <svg v-if="!isRebooting" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+                <span v-if="isRebooting" class="spinning">🔄</span>
+                <span>{{ isRebooting ? 'Rebooting...' : 'Reboot' }}</span>
+              </button>
+              
+              <button type="button" @click="factoryReset" :disabled="isRebooting || isResetting" class="btn btn-danger btn-icon-text">
+                <svg v-if="!isResetting" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 12v.01"/></svg>
+                <span v-if="isResetting" class="spinning">🔄</span>
+                <span>{{ isResetting ? 'Resetting...' : 'Factory Reset' }}</span>
+              </button>
+            </div>
 
             <div class="modal-footer-right">
               <button type="button" @click="close" class="btn btn-secondary">Cancel</button>
@@ -124,6 +132,7 @@ const showPassword = ref(false)
 const error = ref('')
 const isSaving = ref(false)
 const isRebooting = ref(false)
+const isResetting = ref(false)
 
 const form = reactive({
   ssid: '',
@@ -179,6 +188,26 @@ const reboot = async () => {
     error.value = err.message
   } finally {
     isRebooting.value = false
+  }
+}
+
+const factoryReset = async () => {
+  const confirmText = prompt('BAHAYA: Modem akan di-reset ke setelan pabrik dan pelanggan akan kehilangan koneksi internet. Ketik "RESET" untuk melanjutkan:')
+  if (confirmText !== 'RESET') {
+    if (confirmText !== null) alert('Konfirmasi dibatalkan. Anda harus mengetik "RESET".')
+    return
+  }
+
+  error.value = ''
+  isResetting.value = true
+  try {
+    await store.factoryResetDevice(props.device.id)
+    emit('updated', 'Factory Reset command sent to modem.')
+    close()
+  } catch (err: any) {
+    error.value = err.message
+  } finally {
+    isResetting.value = false
   }
 }
 </script>
@@ -487,6 +516,15 @@ const reboot = async () => {
   background: rgba(245, 158, 11, 0.12);
   color: #fbbf24;
 }
+.btn-danger {
+  background: #f43f5e;
+  color: #fff;
+  border: 1px solid #f43f5e;
+}
+.btn-danger:hover:not(:disabled) {
+  background: #e11d48;
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.4);
+}
 .btn-icon-text svg { flex-shrink: 0; }
 
 /* ── Footer ─────────────────────────────────────────────── */
@@ -497,6 +535,10 @@ const reboot = async () => {
   margin-top: 24px;
   padding-top: 20px;
   border-top: 1px solid var(--border);
+}
+.modal-footer-left {
+  display: flex;
+  gap: 10px;
 }
 .modal-footer-right {
   display: flex;

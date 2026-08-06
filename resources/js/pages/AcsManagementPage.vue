@@ -35,6 +35,46 @@
           </div>
         </section>
 
+        <!-- Analytics Cards -->
+        <section class="analytics-grid" v-if="store.stats">
+          <div class="stat-card fade-in">
+            <div class="stat-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-title">Total ONT</span>
+              <span class="stat-value">{{ store.stats.total }}</span>
+            </div>
+          </div>
+          <div class="stat-card stat-online fade-in" style="animation-delay: 0.1s">
+            <div class="stat-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-title">Online</span>
+              <span class="stat-value">{{ store.stats.online }}</span>
+            </div>
+          </div>
+          <div class="stat-card stat-offline fade-in" style="animation-delay: 0.2s">
+            <div class="stat-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-title">Offline</span>
+              <span class="stat-value">{{ store.stats.offline }}</span>
+            </div>
+          </div>
+          <div class="stat-card stat-critical fade-in" style="animation-delay: 0.3s">
+            <div class="stat-icon-wrap">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-title">Redaman Kritis</span>
+              <span class="stat-value">{{ store.stats.critical_rx }}</span>
+            </div>
+          </div>
+        </section>
+
         <!-- Error Alert -->
         <div v-if="store.error" class="alert-box alert-box--danger fade-in">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -187,6 +227,7 @@ const isModalOpen = ref(false)
 const selectedDevice = ref(null)
 
 onMounted(() => {
+  store.fetchStats()
   fetchData(1)
 })
 
@@ -294,6 +335,54 @@ const getDbmClass = (power: number | null) => {
   animation: spin 1s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Analytics Cards ────────────────────────────────────── */
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--surface-1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+.stat-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+.stat-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-1);
+}
+.stat-online .stat-icon-wrap { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.stat-offline .stat-icon-wrap { background: rgba(107, 114, 128, 0.1); color: #9ca3af; }
+.stat-critical .stat-icon-wrap { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
 
 /* ── Scrollbar ──────────────────────────────────────────── */
 .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -626,10 +715,14 @@ const getDbmClass = (power: number | null) => {
 }
 
 /* ── Mobile ─────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .analytics-grid { grid-template-columns: repeat(2, 1fr); }
+}
 @media (max-width: 768px) {
   .dashboard__content {
     padding: 16px;
   }
+  .analytics-grid { grid-template-columns: 1fr; }
   .flex-header {
     flex-direction: column;
     align-items: flex-start;
