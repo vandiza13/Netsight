@@ -132,18 +132,18 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
-  const triggerSpeedtest = async (deviceId: number, url: string) => {
+  const triggerSpeedtest = async (deviceId: number, url: string, type: 'download' | 'upload' = 'download') => {
     try {
-      const response = await api.post(`/acs/devices/${deviceId}/speedtest`, { url })
+      const response = await api.post(`/acs/devices/${deviceId}/speedtest`, { url, type })
       return response.data
     } catch (err: any) {
       throw err.response?.data || { message: 'Gagal menjalankan Speedtest.' }
     }
   }
 
-  const fetchSpeedtestResult = async (deviceId: number) => {
+  const fetchSpeedtestResult = async (deviceId: number, type: 'download' | 'upload' = 'download') => {
     try {
-      const response = await api.get(`/acs/devices/${deviceId}/speedtest/result`)
+      const response = await api.get(`/acs/devices/${deviceId}/speedtest/result`, { params: { type } })
       return response.data.data
     } catch (err: any) {
       throw err.response?.data || { message: 'Gagal mengambil hasil Speedtest.' }

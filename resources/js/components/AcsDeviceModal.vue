@@ -323,17 +323,26 @@
 
             <!-- SPEEDTEST SECTION -->
             <div class="hosts-section">
-              <h5 class="hosts-section-title"><span class="badge badge-primary mr-2">3</span> Speedtest (Download)</h5>
+              <h5 class="hosts-section-title"><span class="badge badge-primary mr-2">3</span> Speedtest</h5>
               <div class="p-3">
                 <div class="form-group mb-0">
-                  <label class="form-label">Download URL Target</label>
+                  <div class="band-selector mb-3" style="width: 100%; max-width: 300px;">
+                    <label class="radio-label">
+                      <input type="radio" v-model="speedtestForm.type" value="download"> Download
+                    </label>
+                    <label class="radio-label">
+                      <input type="radio" v-model="speedtestForm.type" value="upload"> Upload
+                    </label>
+                  </div>
+                  <label class="form-label">{{ speedtestForm.type === 'download' ? 'Download' : 'Upload' }} URL Target</label>
                   <div class="ping-input-row">
-                    <input v-model="speedtestForm.url" type="text" class="input-modern" placeholder="http://speedtest.isp.net/100MB.bin">
+                    <input v-model="speedtestForm.url" type="text" class="input-modern" :placeholder="speedtestForm.type === 'download' ? 'http://speedtest.isp.net/100MB.bin' : 'http://speedtest.isp.net/upload.php'">
                     <button type="button" @click="triggerSpeedtest" :disabled="isSpeedtesting" class="btn btn-primary">
                       <span v-if="isSpeedtesting" class="spinning mr-2">🔄</span>
                       {{ isSpeedtesting ? 'Testing...' : 'Test' }}
                     </button>
                   </div>
+                  <span class="form-hint mt-2">Gunakan URL file langsung (bukan speedtest.net). Contoh: <code>http://speedtest.tele2.net/10MB.zip</code></span>
                 </div>
 
                 <div v-if="speedtestError" class="alert-box alert-box--danger mt-3 mb-0">
@@ -350,8 +359,9 @@
                   
                   <div class="ping-stats" v-if="speedtestResult.state === 'Complete'">
                     <div class="ping-stat">
-                      <span class="ping-label">Total Received</span>
-                      <span class="ping-value color-good">{{ (speedtestResult.total_bytes_received / 1024 / 1024).toFixed(2) }} MB</span>
+                      <span class="ping-label">{{ speedtestForm.type === 'download' ? 'Total Received' : 'Total Sent' }}</span>
+                      <span class="ping-value color-good" v-if="speedtestForm.type === 'download'">{{ (speedtestResult.total_bytes_received / 1024 / 1024).toFixed(2) }} MB</span>
+                      <span class="ping-value color-good" v-else>{{ (speedtestResult.total_bytes_sent / 1024 / 1024).toFixed(2) }} MB</span>
                     </div>
                     <div class="ping-stat">
                       <span class="ping-label">BOM Time</span>
@@ -401,7 +411,7 @@ const isRefreshingHosts = ref(false)
 
 const pingForm = reactive({ host: '8.8.8.8' })
 const tracerouteForm = reactive({ host: '8.8.8.8' })
-const speedtestForm = reactive({ url: 'http://speedtest.tele2.net/10MB.zip' })
+const speedtestForm = reactive({ url: 'http://speedtest.tele2.net/10MB.zip', type: 'download' as 'download' | 'upload' })
 
 const isPinging = ref(false)
 const isFetchingPing = ref(false)
@@ -596,7 +606,7 @@ const triggerSpeedtest = async () => {
   speedtestResult.value = { state: 'Requested' }
   
   try {
-    await store.triggerSpeedtest(props.device.id, speedtestForm.url)
+    await store.triggerSpeedtest(props.device.id, speedtestForm.url, speedtestForm.type)
     setTimeout(() => {
       fetchSpeedtestResult()
     }, 15000)
@@ -612,7 +622,7 @@ const fetchSpeedtestResult = async () => {
   isFetchingSpeedtest.value = true
   speedtestError.value = ''
   try {
-    const res = await store.fetchSpeedtestResult(props.device.id)
+    const res = await store.fetchSpeedtestResult(props.device.id, speedtestForm.type)
     if (res) {
       speedtestResult.value = res
     }
