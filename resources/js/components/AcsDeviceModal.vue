@@ -65,7 +65,7 @@
             </h4>
 
             <div class="form-stack">
-              <div class="form-group">
+              <div class="form-group" v-if="device?.has_5g">
                 <label class="form-label">Frekuensi (Band)</label>
                 <div class="band-selector">
                   <label class="radio-label">
@@ -136,7 +136,7 @@
         <!-- Hosts Tab -->
         <div v-if="activeTab === 'hosts'" class="tab-pane fade-in">
           <div class="hosts-header">
-            <h4 class="form-section-title mb-0">Connected Devices</h4>
+            <h4 class="form-section-title mb-0">Connected Devices <span class="badge badge-primary ml-2">{{ totalHosts }} Total</span></h4>
             <button type="button" @click="refreshHosts" :disabled="isRefreshingHosts" class="btn btn-primary-outline btn-sm btn-icon-text">
               <span v-if="isRefreshingHosts" class="spinning">🔄</span>
               <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
@@ -153,85 +153,219 @@
           <div v-else-if="hosts.length === 0" class="empty-state mt-3">
             Belum ada data perangkat yang terhubung.
           </div>
-          <div v-else class="table-responsive custom-scrollbar mt-3">
-            <table class="table hosts-table">
-              <thead>
-                <tr>
-                  <th>Hostname</th>
-                  <th>IP Address</th>
-                  <th>MAC Address</th>
-                  <th>Tipe</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="host in hosts" :key="host.mac">
-                  <td><strong>{{ host.hostname }}</strong></td>
-                  <td><span class="badge badge-outline">{{ host.ip }}</span></td>
-                  <td class="color-muted">{{ host.mac }}</td>
-                  <td>
-                    <span :class="['badge', String(host.type).includes('802.11') ? 'badge-primary' : 'badge-secondary']">
-                      {{ host.type }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="status-cell">
-                      <span :class="['status-glow', host.active ? 'online' : 'offline']"></span>
-                      {{ host.active ? 'Active' : 'Inactive' }}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+          
+          <div v-else class="hosts-split-view mt-3">
+            <!-- WLAN Devices -->
+            <div class="hosts-section mb-4">
+              <h5 class="hosts-section-title"><span class="badge badge-primary mr-2">WiFi</span> Klien Nirkabel ({{ wifiHosts.length }})</h5>
+              <div v-if="wifiHosts.length === 0" class="empty-state small">Tidak ada klien WiFi.</div>
+              <div v-else class="table-responsive custom-scrollbar">
+                <table class="table hosts-table">
+                  <thead>
+                    <tr>
+                      <th>Hostname</th>
+                      <th>IP Address</th>
+                      <th>MAC Address</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="host in wifiHosts" :key="host.mac">
+                      <td><strong>{{ host.hostname }}</strong></td>
+                      <td><span class="badge badge-outline">{{ host.ip }}</span></td>
+                      <td class="color-muted">{{ host.mac }}</td>
+                      <td>
+                        <span class="status-cell">
+                          <span :class="['status-glow', host.active ? 'online' : 'offline']"></span>
+                          {{ host.active ? 'Active' : 'Inactive' }}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- LAN Devices -->
+            <div class="hosts-section">
+              <h5 class="hosts-section-title"><span class="badge badge-secondary mr-2">LAN</span> Klien Kabel ({{ lanHosts.length }})</h5>
+              <div v-if="lanHosts.length === 0" class="empty-state small">Tidak ada klien kabel.</div>
+              <div v-else class="table-responsive custom-scrollbar">
+                <table class="table hosts-table">
+                  <thead>
+                    <tr>
+                      <th>Hostname</th>
+                      <th>IP Address</th>
+                      <th>MAC Address</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="host in lanHosts" :key="host.mac">
+                      <td><strong>{{ host.hostname }}</strong></td>
+                      <td><span class="badge badge-outline">{{ host.ip }}</span></td>
+                      <td class="color-muted">{{ host.mac }}</td>
+                      <td>
+                        <span class="status-cell">
+                          <span :class="['status-glow', host.active ? 'online' : 'offline']"></span>
+                          {{ host.active ? 'Active' : 'Inactive' }}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Diagnostics Tab -->
         <div v-if="activeTab === 'diag'" class="tab-pane fade-in">
-          <div class="hosts-header">
+          <div class="hosts-header mb-4">
             <h4 class="form-section-title mb-0">Diagnostic Tools</h4>
           </div>
 
-          <div class="form-stack mt-3">
-            <div class="form-group">
-              <label class="form-label">Ping Target (IP / Domain)</label>
-              <div class="ping-input-row">
-                <input v-model="pingForm.host" type="text" class="input-modern" placeholder="e.g. 8.8.8.8">
-                <button type="button" @click="triggerPing" :disabled="isPinging" class="btn btn-primary">
-                  <span v-if="isPinging" class="spinning mr-2">🔄</span>
-                  {{ isPinging ? 'Pinging...' : 'Ping' }}
-                </button>
-              </div>
-              <span class="form-hint">Tekan Ping untuk mengirim perintah ke modem. Proses memakan waktu sekitar 10 detik.</span>
-            </div>
-          </div>
+          <div class="hosts-split-view">
+            <!-- PING SECTION -->
+            <div class="hosts-section mb-4">
+              <h5 class="hosts-section-title"><span class="badge badge-primary mr-2">1</span> IP Ping</h5>
+              <div class="p-3">
+                <div class="form-group mb-0">
+                  <div class="ping-input-row">
+                    <input v-model="pingForm.host" type="text" class="input-modern" placeholder="e.g. 8.8.8.8">
+                    <button type="button" @click="triggerPing" :disabled="isPinging" class="btn btn-primary">
+                      <span v-if="isPinging" class="spinning mr-2">🔄</span>
+                      {{ isPinging ? 'Pinging...' : 'Ping' }}
+                    </button>
+                  </div>
+                  <span class="form-hint mt-2">Tekan Ping untuk mengirim perintah ke modem. Proses memakan waktu sekitar 10 detik.</span>
+                </div>
 
-          <div v-if="pingError" class="alert-box alert-box--danger mt-3">
-            <span>{{ pingError }}</span>
-          </div>
+                <div v-if="pingError" class="alert-box alert-box--danger mt-3 mb-0">
+                  <span>{{ pingError }}</span>
+                </div>
 
-          <div v-if="pingResult" class="ping-result-box mt-3">
-            <div class="ping-result-header">
-              <strong class="color-text-1">Hasil Ping (State: {{ pingResult.state }})</strong>
-              <button v-if="pingResult.state === 'Requested' || pingResult.state === 'None'" type="button" @click="fetchPingResult" class="btn btn-secondary btn-sm" :disabled="isFetchingPing">
-                 <span v-if="isFetchingPing" class="spinning mr-2">🔄</span> Cek Hasil
-              </button>
+                <div v-if="pingResult" class="ping-result-box mt-3">
+                  <div class="ping-result-header">
+                    <strong class="color-text-1">Hasil Ping (State: {{ pingResult.state }})</strong>
+                    <button v-if="pingResult.state === 'Requested' || pingResult.state === 'None'" type="button" @click="fetchPingResult" class="btn btn-secondary btn-sm" :disabled="isFetchingPing">
+                      <span v-if="isFetchingPing" class="spinning mr-2">🔄</span> Cek Hasil
+                    </button>
+                  </div>
+                  
+                  <div class="ping-stats" v-if="pingResult.state === 'Complete'">
+                    <div class="ping-stat">
+                      <span class="ping-label">Success</span>
+                      <span class="ping-value color-good">{{ pingResult.success_count }}</span>
+                    </div>
+                    <div class="ping-stat">
+                      <span class="ping-label">Failure</span>
+                      <span class="ping-value color-critical">{{ pingResult.failure_count }}</span>
+                    </div>
+                    <div class="ping-stat">
+                      <span class="ping-label">Avg. MS</span>
+                      <span class="ping-value">{{ pingResult.avg_response_time }} ms</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            
-            <div class="ping-stats" v-if="pingResult.state === 'Complete'">
-              <div class="ping-stat">
-                <span class="ping-label">Success</span>
-                <span class="ping-value color-good">{{ pingResult.success_count }}</span>
-              </div>
-              <div class="ping-stat">
-                <span class="ping-label">Failure</span>
-                <span class="ping-value color-critical">{{ pingResult.failure_count }}</span>
-              </div>
-              <div class="ping-stat">
-                <span class="ping-label">Avg. MS</span>
-                <span class="ping-value">{{ pingResult.avg_response_time }}</span>
+
+            <!-- TRACEROUTE SECTION -->
+            <div class="hosts-section mb-4">
+              <h5 class="hosts-section-title"><span class="badge badge-primary mr-2">2</span> Traceroute</h5>
+              <div class="p-3">
+                <div class="form-group mb-0">
+                  <div class="ping-input-row">
+                    <input v-model="tracerouteForm.host" type="text" class="input-modern" placeholder="e.g. 8.8.8.8">
+                    <button type="button" @click="triggerTraceroute" :disabled="isTracerouting" class="btn btn-primary">
+                      <span v-if="isTracerouting" class="spinning mr-2">🔄</span>
+                      {{ isTracerouting ? 'Tracerouting...' : 'Trace' }}
+                    </button>
+                  </div>
+                </div>
+
+                <div v-if="tracerouteError" class="alert-box alert-box--danger mt-3 mb-0">
+                  <span>{{ tracerouteError }}</span>
+                </div>
+
+                <div v-if="tracerouteResult" class="ping-result-box mt-3">
+                  <div class="ping-result-header">
+                    <strong class="color-text-1">Hasil Traceroute (State: {{ tracerouteResult.state }})</strong>
+                    <button v-if="tracerouteResult.state === 'Requested' || tracerouteResult.state === 'None'" type="button" @click="fetchTracerouteResult" class="btn btn-secondary btn-sm" :disabled="isFetchingTraceroute">
+                      <span v-if="isFetchingTraceroute" class="spinning mr-2">🔄</span> Cek Hasil
+                    </button>
+                  </div>
+                  
+                  <div class="table-responsive mt-2" v-if="tracerouteResult.state === 'Complete'">
+                    <table class="table hosts-table">
+                      <thead>
+                        <tr>
+                          <th>Hop</th>
+                          <th>Host</th>
+                          <th>IP Address</th>
+                          <th>RTT (ms)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(hop, index) in tracerouteResult.hops" :key="index">
+                          <td>{{ index + 1 }}</td>
+                          <td>{{ hop.host || '-' }}</td>
+                          <td>{{ hop.host_address || '*' }}</td>
+                          <td>{{ hop.rtt[0] || '*' }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
+
+            <!-- SPEEDTEST SECTION -->
+            <div class="hosts-section">
+              <h5 class="hosts-section-title"><span class="badge badge-primary mr-2">3</span> Speedtest (Download)</h5>
+              <div class="p-3">
+                <div class="form-group mb-0">
+                  <label class="form-label">Download URL Target</label>
+                  <div class="ping-input-row">
+                    <input v-model="speedtestForm.url" type="text" class="input-modern" placeholder="http://speedtest.isp.net/100MB.bin">
+                    <button type="button" @click="triggerSpeedtest" :disabled="isSpeedtesting" class="btn btn-primary">
+                      <span v-if="isSpeedtesting" class="spinning mr-2">🔄</span>
+                      {{ isSpeedtesting ? 'Testing...' : 'Test' }}
+                    </button>
+                  </div>
+                </div>
+
+                <div v-if="speedtestError" class="alert-box alert-box--danger mt-3 mb-0">
+                  <span>{{ speedtestError }}</span>
+                </div>
+
+                <div v-if="speedtestResult" class="ping-result-box mt-3">
+                  <div class="ping-result-header">
+                    <strong class="color-text-1">Hasil Speedtest (State: {{ speedtestResult.state }})</strong>
+                    <button v-if="speedtestResult.state === 'Requested' || speedtestResult.state === 'None'" type="button" @click="fetchSpeedtestResult" class="btn btn-secondary btn-sm" :disabled="isFetchingSpeedtest">
+                      <span v-if="isFetchingSpeedtest" class="spinning mr-2">🔄</span> Cek Hasil
+                    </button>
+                  </div>
+                  
+                  <div class="ping-stats" v-if="speedtestResult.state === 'Complete'">
+                    <div class="ping-stat">
+                      <span class="ping-label">Total Received</span>
+                      <span class="ping-value color-good">{{ (speedtestResult.total_bytes_received / 1024 / 1024).toFixed(2) }} MB</span>
+                    </div>
+                    <div class="ping-stat">
+                      <span class="ping-label">BOM Time</span>
+                      <span class="ping-value color-text-2">{{ speedtestResult.bom_time ? new Date(speedtestResult.bom_time).toLocaleTimeString() : '-' }}</span>
+                    </div>
+                    <div class="ping-stat">
+                      <span class="ping-label">EOM Time</span>
+                      <span class="ping-value color-text-2">{{ speedtestResult.eom_time ? new Date(speedtestResult.eom_time).toLocaleTimeString() : '-' }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -241,7 +375,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, reactive } from 'vue'
+import { ref, watch, reactive, computed } from 'vue'
 import { useAcsStore } from '../stores/acsStore'
 
 const props = defineProps<{
@@ -265,20 +399,34 @@ const hosts = ref<any[]>([])
 const isLoadingHosts = ref(false)
 const isRefreshingHosts = ref(false)
 
+const pingForm = reactive({ host: '8.8.8.8' })
+const tracerouteForm = reactive({ host: '8.8.8.8' })
+const speedtestForm = reactive({ url: 'http://speedtest.tele2.net/10MB.zip' })
+
 const isPinging = ref(false)
 const isFetchingPing = ref(false)
 const pingError = ref('')
 const pingResult = ref<any>(null)
 
-const pingForm = reactive({
-  host: '8.8.8.8'
-})
+const isTracerouting = ref(false)
+const isFetchingTraceroute = ref(false)
+const tracerouteError = ref('')
+const tracerouteResult = ref<any>(null)
+
+const isSpeedtesting = ref(false)
+const isFetchingSpeedtest = ref(false)
+const speedtestError = ref('')
+const speedtestResult = ref<any>(null)
 
 const form = reactive({
   ssid: '',
   password: '',
   band: '1'
 })
+
+const totalHosts = computed(() => hosts.value.length)
+const wifiHosts = computed(() => hosts.value.filter(h => String(h.type).includes('802.11')))
+const lanHosts = computed(() => hosts.value.filter(h => !String(h.type).includes('802.11')))
 
 watch(() => props.show, (newVal) => {
   if (newVal && props.device) {
@@ -289,6 +437,10 @@ watch(() => props.show, (newVal) => {
     hostsError.value = ''
     pingError.value = ''
     pingResult.value = null
+    tracerouteError.value = ''
+    tracerouteResult.value = null
+    speedtestError.value = ''
+    speedtestResult.value = null
     showPassword.value = false
     activeTab.value = 'config'
     hosts.value = []
@@ -393,6 +545,84 @@ const fetchPingResult = async () => {
   }
 }
 
+const triggerTraceroute = async () => {
+  if (!props.device) return
+  if (!tracerouteForm.host) {
+    tracerouteError.value = 'Target host tidak boleh kosong.'
+    return
+  }
+  
+  isTracerouting.value = true
+  tracerouteError.value = ''
+  tracerouteResult.value = { state: 'Requested' }
+  
+  try {
+    await store.triggerTraceroute(props.device.id, tracerouteForm.host)
+    setTimeout(() => {
+      fetchTracerouteResult()
+    }, 15000)
+  } catch (err: any) {
+    tracerouteError.value = err.message
+  } finally {
+    isTracerouting.value = false
+  }
+}
+
+const fetchTracerouteResult = async () => {
+  if (!props.device) return
+  isFetchingTraceroute.value = true
+  tracerouteError.value = ''
+  try {
+    const res = await store.fetchTracerouteResult(props.device.id)
+    if (res) {
+      tracerouteResult.value = res
+    }
+  } catch (err: any) {
+    tracerouteError.value = err.message
+  } finally {
+    isFetchingTraceroute.value = false
+  }
+}
+
+const triggerSpeedtest = async () => {
+  if (!props.device) return
+  if (!speedtestForm.url) {
+    speedtestError.value = 'URL Target tidak boleh kosong.'
+    return
+  }
+  
+  isSpeedtesting.value = true
+  speedtestError.value = ''
+  speedtestResult.value = { state: 'Requested' }
+  
+  try {
+    await store.triggerSpeedtest(props.device.id, speedtestForm.url)
+    setTimeout(() => {
+      fetchSpeedtestResult()
+    }, 15000)
+  } catch (err: any) {
+    speedtestError.value = err.message
+  } finally {
+    isSpeedtesting.value = false
+  }
+}
+
+const fetchSpeedtestResult = async () => {
+  if (!props.device) return
+  isFetchingSpeedtest.value = true
+  speedtestError.value = ''
+  try {
+    const res = await store.fetchSpeedtestResult(props.device.id)
+    if (res) {
+      speedtestResult.value = res
+    }
+  } catch (err: any) {
+    speedtestError.value = err.message
+  } finally {
+    isFetchingSpeedtest.value = false
+  }
+}
+
 const reboot = async () => {
   if (!confirm('Yakin ingin mereboot modem ini? Koneksi pelanggan akan terputus sementara.')) {
     return
@@ -453,7 +683,7 @@ const factoryReset = async () => {
   border-radius: 16px;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
   width: 100%;
-  max-width: 560px;
+  max-width: 800px;
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -784,9 +1014,32 @@ const factoryReset = async () => {
   justify-content: space-between;
   align-items: center;
 }
+.hosts-section {
+  background: var(--surface-2);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.hosts-section-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-1);
+  padding: 12px 16px;
+  margin: 0;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  align-items: center;
+}
 .mb-0 { margin-bottom: 0 !important; }
+.mb-4 { margin-bottom: 24px !important; }
 .mt-3 { margin-top: 16px; }
 .mr-2 { margin-right: 8px; }
+.ml-2 { margin-left: 8px; }
+.empty-state.small {
+  padding: 24px;
+  font-size: 0.9rem;
+}
 .hosts-table {
   width: 100%;
   border-collapse: collapse;

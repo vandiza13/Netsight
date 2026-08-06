@@ -114,6 +114,42 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
+  const triggerTraceroute = async (deviceId: number, host: string) => {
+    try {
+      const response = await api.post(`/acs/devices/${deviceId}/traceroute`, { host })
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal menjalankan Traceroute.' }
+    }
+  }
+
+  const fetchTracerouteResult = async (deviceId: number) => {
+    try {
+      const response = await api.get(`/acs/devices/${deviceId}/traceroute/result`)
+      return response.data.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal mengambil hasil Traceroute.' }
+    }
+  }
+
+  const triggerSpeedtest = async (deviceId: number, url: string) => {
+    try {
+      const response = await api.post(`/acs/devices/${deviceId}/speedtest`, { url })
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal menjalankan Speedtest.' }
+    }
+  }
+
+  const fetchSpeedtestResult = async (deviceId: number) => {
+    try {
+      const response = await api.get(`/acs/devices/${deviceId}/speedtest/result`)
+      return response.data.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal mengambil hasil Speedtest.' }
+    }
+  }
+
   return {
     devices,
     stats,
@@ -129,6 +165,10 @@ export const useAcsStore = defineStore('acs', () => {
     fetchDeviceHosts,
     refreshDeviceHosts,
     triggerPing,
-    fetchPingResult
+    fetchPingResult,
+    triggerTraceroute,
+    fetchTracerouteResult,
+    triggerSpeedtest,
+    fetchSpeedtestResult
   }
 })

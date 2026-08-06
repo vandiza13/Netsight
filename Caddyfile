@@ -36,5 +36,7 @@
     # ACS CWMP SaaS Tenant Routing
     reverse_proxy genieacs:7547 {
         header_up X-Forwarded-Host {host}
+        header_up X-Real-IP {remote}
+        flush_interval -1
     }
 }
