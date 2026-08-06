@@ -57,7 +57,52 @@
 
           <hr class="modal-divider" />
 
-          <!-- Config Forms -->
+          <!-- PPPoE Config Form -->
+          <form @submit.prevent="savePppoe" class="mb-4">
+            <h4 class="form-section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              PPPoE Configuration
+            </h4>
+
+            <div class="form-stack">
+              <div class="form-group">
+                <label class="form-label">Username PPPoE</label>
+                <div class="input-icon-wrap">
+                  <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <input v-model="pppoeForm.username" type="text" class="input-modern input-has-icon" placeholder="Username dari ISP">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Password PPPoE</label>
+                <div class="input-icon-wrap">
+                  <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  <input v-model="pppoeForm.password" :type="showPppoePassword ? 'text' : 'password'" class="input-modern input-has-icon input-has-action" placeholder="Biarkan kosong jika tidak diubah">
+                  <button type="button" @click="showPppoePassword = !showPppoePassword" class="input-action-btn">
+                    <svg v-if="!showPppoePassword" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group" style="display: flex; justify-content: flex-end;">
+                <button type="submit" :disabled="isSavingPppoe" class="btn btn-primary btn-sm btn-icon-text">
+                  <span v-if="isSavingPppoe" class="spinning">🔄</span>
+                  <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>{{ isSavingPppoe ? 'Applying...' : 'Simpan PPPoE' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <div v-if="pppoeError" class="alert-box alert-box--danger mt-2 mb-0">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span>{{ pppoeError }}</span>
+            </div>
+          </form>
+
+          <hr class="modal-divider" />
+
+          <!-- WiFi Config Forms -->
           <form @submit.prevent="saveWifi">
             <h4 class="form-section-title">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
@@ -398,6 +443,9 @@ const emit = defineEmits(['close', 'updated'])
 const store = useAcsStore()
 
 const showPassword = ref(false)
+const showPppoePassword = ref(false)
+const pppoeError = ref('')
+const isSavingPppoe = ref(false)
 const error = ref('')
 const hostsError = ref('')
 const isSaving = ref(false)
@@ -434,6 +482,11 @@ const form = reactive({
   band: '1'
 })
 
+const pppoeForm = reactive({
+  username: '',
+  password: ''
+})
+
 const totalHosts = computed(() => hosts.value.length)
 const wifiHosts = computed(() => hosts.value.filter(h => String(h.type).includes('802.11')))
 const lanHosts = computed(() => hosts.value.filter(h => !String(h.type).includes('802.11')))
@@ -444,6 +497,7 @@ watch(() => props.show, (newVal) => {
     form.password = ''
     form.band = '1'
     error.value = ''
+    pppoeError.value = ''
     hostsError.value = ''
     pingError.value = ''
     pingResult.value = null
@@ -452,11 +506,16 @@ watch(() => props.show, (newVal) => {
     speedtestError.value = ''
     speedtestResult.value = null
     showPassword.value = false
+    showPppoePassword.value = false
     activeTab.value = 'config'
     hosts.value = []
     
     // Auto load hosts if not loaded
     loadHosts()
+
+    // PPPoE Pre-fill
+    pppoeForm.username = props.device.pppoe_username || ''
+    pppoeForm.password = ''
   }
 })
 
@@ -512,6 +571,40 @@ const saveWifi = async () => {
     error.value = err.message
   } finally {
     isSaving.value = false
+  }
+}
+
+const savePppoe = async () => {
+  if (!props.device) return
+  
+  if (!pppoeForm.username && !pppoeForm.password) {
+    pppoeError.value = 'Minimal isi Username atau Password PPPoE'
+    return
+  }
+
+  if (pppoeForm.username && pppoeForm.username.length < 3) {
+    pppoeError.value = 'Username PPPoE terlalu pendek'
+    return
+  }
+
+  pppoeError.value = ''
+  isSavingPppoe.value = true
+  try {
+    await store.updatePppoeConfig(props.device.id, pppoeForm)
+    emit('updated', 'PPPoE config update requested.')
+    
+    // Optional: Update local modal prop data directly
+    if (pppoeForm.username) {
+      props.device.pppoe_username = pppoeForm.username
+    }
+    
+    // Reset password field after submit
+    pppoeForm.password = ''
+    alert('Perintah ubah PPPoE telah dikirim ke modem. Modem mungkin akan terputus sesaat.')
+  } catch (err: any) {
+    pppoeError.value = err.message
+  } finally {
+    isSavingPppoe.value = false
   }
 }
 

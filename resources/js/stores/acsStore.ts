@@ -78,6 +78,15 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
+  const updatePppoeConfig = async (deviceId: number, data: { username?: string, password?: string }) => {
+    try {
+      const response = await api.post(`/acs/devices/${deviceId}/pppoe`, data)
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal mengubah konfigurasi PPPoE.' }
+    }
+  }
+
   const fetchDeviceHosts = async (deviceId: number) => {
     try {
       const response = await api.get(`/acs/devices/${deviceId}/hosts`)
@@ -169,6 +178,7 @@ export const useAcsStore = defineStore('acs', () => {
     triggerTraceroute,
     fetchTracerouteResult,
     triggerSpeedtest,
-    fetchSpeedtestResult
+    fetchSpeedtestResult,
+    updatePppoeConfig
   }
 })
