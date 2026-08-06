@@ -47,11 +47,12 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
-  const updateWifi = async (deviceId: number, ssid: string, password: string) => {
+  const updateWifi = async (deviceId: number, ssid: string, password: string, band: string = '1') => {
     try {
       const response = await api.post(`/acs/devices/${deviceId}/wifi`, {
         ssid,
-        password
+        password,
+        band
       })
       return response.data
     } catch (err: any) {
@@ -95,6 +96,24 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
+  const triggerPing = async (deviceId: number, host: string) => {
+    try {
+      const response = await api.post(`/acs/devices/${deviceId}/ping`, { host })
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal menjalankan Ping.' }
+    }
+  }
+
+  const fetchPingResult = async (deviceId: number) => {
+    try {
+      const response = await api.get(`/acs/devices/${deviceId}/ping/result`)
+      return response.data.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal mengambil hasil Ping.' }
+    }
+  }
+
   return {
     devices,
     stats,
@@ -108,6 +127,8 @@ export const useAcsStore = defineStore('acs', () => {
     refreshDevice,
     factoryResetDevice,
     fetchDeviceHosts,
-    refreshDeviceHosts
+    refreshDeviceHosts,
+    triggerPing,
+    fetchPingResult
   }
 })

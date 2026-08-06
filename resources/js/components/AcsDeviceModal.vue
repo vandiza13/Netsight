@@ -20,6 +20,7 @@
         <div class="modal-tabs">
           <button type="button" :class="['tab-btn', { active: activeTab === 'config' }]" @click="activeTab = 'config'">Overview & Config</button>
           <button type="button" :class="['tab-btn', { active: activeTab === 'hosts' }]" @click="activeTab = 'hosts'">Connected Devices</button>
+          <button type="button" :class="['tab-btn', { active: activeTab === 'diag' }]" @click="activeTab = 'diag'">Diagnostics</button>
         </div>
 
         <!-- Config Tab -->
@@ -64,6 +65,18 @@
             </h4>
 
             <div class="form-stack">
+              <div class="form-group">
+                <label class="form-label">Frekuensi (Band)</label>
+                <div class="band-selector">
+                  <label class="radio-label">
+                    <input type="radio" v-model="form.band" value="1"> 2.4 GHz
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" v-model="form.band" value="5"> 5 GHz
+                  </label>
+                </div>
+              </div>
+
               <div class="form-group">
                 <label class="form-label">SSID Name</label>
                 <div class="input-icon-wrap">
@@ -173,6 +186,55 @@
           </div>
         </div>
 
+        <!-- Diagnostics Tab -->
+        <div v-if="activeTab === 'diag'" class="tab-pane fade-in">
+          <div class="hosts-header">
+            <h4 class="form-section-title mb-0">Diagnostic Tools</h4>
+          </div>
+
+          <div class="form-stack mt-3">
+            <div class="form-group">
+              <label class="form-label">Ping Target (IP / Domain)</label>
+              <div class="ping-input-row">
+                <input v-model="pingForm.host" type="text" class="input-modern" placeholder="e.g. 8.8.8.8">
+                <button type="button" @click="triggerPing" :disabled="isPinging" class="btn btn-primary">
+                  <span v-if="isPinging" class="spinning mr-2">🔄</span>
+                  {{ isPinging ? 'Pinging...' : 'Ping' }}
+                </button>
+              </div>
+              <span class="form-hint">Tekan Ping untuk mengirim perintah ke modem. Proses memakan waktu sekitar 10 detik.</span>
+            </div>
+          </div>
+
+          <div v-if="pingError" class="alert-box alert-box--danger mt-3">
+            <span>{{ pingError }}</span>
+          </div>
+
+          <div v-if="pingResult" class="ping-result-box mt-3">
+            <div class="ping-result-header">
+              <strong class="color-text-1">Hasil Ping (State: {{ pingResult.state }})</strong>
+              <button v-if="pingResult.state === 'Requested' || pingResult.state === 'None'" type="button" @click="fetchPingResult" class="btn btn-secondary btn-sm" :disabled="isFetchingPing">
+                 <span v-if="isFetchingPing" class="spinning mr-2">🔄</span> Cek Hasil
+              </button>
+            </div>
+            
+            <div class="ping-stats" v-if="pingResult.state === 'Complete'">
+              <div class="ping-stat">
+                <span class="ping-label">Success</span>
+                <span class="ping-value color-good">{{ pingResult.success_count }}</span>
+              </div>
+              <div class="ping-stat">
+                <span class="ping-label">Failure</span>
+                <span class="ping-value color-critical">{{ pingResult.failure_count }}</span>
+              </div>
+              <div class="ping-stat">
+                <span class="ping-label">Avg. MS</span>
+                <span class="ping-value">{{ pingResult.avg_response_time }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -203,17 +265,30 @@ const hosts = ref<any[]>([])
 const isLoadingHosts = ref(false)
 const isRefreshingHosts = ref(false)
 
+const isPinging = ref(false)
+const isFetchingPing = ref(false)
+const pingError = ref('')
+const pingResult = ref<any>(null)
+
+const pingForm = reactive({
+  host: '8.8.8.8'
+})
+
 const form = reactive({
   ssid: '',
-  password: ''
+  password: '',
+  band: '1'
 })
 
 watch(() => props.show, (newVal) => {
   if (newVal && props.device) {
     form.ssid = props.device.wifi_ssid || ''
     form.password = ''
+    form.band = '1'
     error.value = ''
     hostsError.value = ''
+    pingError.value = ''
+    pingResult.value = null
     showPassword.value = false
     activeTab.value = 'config'
     hosts.value = []
@@ -268,13 +343,53 @@ const saveWifi = async () => {
   error.value = ''
   isSaving.value = true
   try {
-    await store.updateWifi(props.device.id, form.ssid, form.password)
+    await store.updateWifi(props.device.id, form.ssid, form.password, form.band)
     emit('updated', 'WiFi config update requested.')
     close()
   } catch (err: any) {
     error.value = err.message
   } finally {
     isSaving.value = false
+  }
+}
+
+const triggerPing = async () => {
+  if (!props.device) return
+  if (!pingForm.host) {
+    pingError.value = 'Target host tidak boleh kosong.'
+    return
+  }
+  
+  isPinging.value = true
+  pingError.value = ''
+  pingResult.value = { state: 'Requested' }
+  
+  try {
+    await store.triggerPing(props.device.id, pingForm.host)
+    // Auto fetch result after 10 seconds
+    setTimeout(() => {
+      fetchPingResult()
+    }, 10000)
+  } catch (err: any) {
+    pingError.value = err.message
+  } finally {
+    isPinging.value = false
+  }
+}
+
+const fetchPingResult = async () => {
+  if (!props.device) return
+  isFetchingPing.value = true
+  pingError.value = ''
+  try {
+    const res = await store.fetchPingResult(props.device.id)
+    if (res) {
+      pingResult.value = res
+    }
+  } catch (err: any) {
+    pingError.value = err.message
+  } finally {
+    isFetchingPing.value = false
   }
 }
 
@@ -691,6 +806,64 @@ const factoryReset = async () => {
 }
 .hosts-table tr:hover td {
   background: var(--surface-2);
+}
+
+/* ── Form Extensions ────────────────────────────────────── */
+.band-selector {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2);
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.ping-input-row {
+  display: flex;
+  gap: 8px;
+}
+.ping-input-row input {
+  flex: 1;
+}
+
+/* ── Ping Diagnostics Box ───────────────────────────────── */
+.ping-result-box {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+.ping-result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.ping-stats {
+  display: flex;
+  gap: 24px;
+  background: var(--surface-3);
+  padding: 12px;
+  border-radius: 6px;
+}
+.ping-stat {
+  display: flex;
+  flex-direction: column;
+}
+.ping-label {
+  font-size: 0.8rem;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.ping-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 4px;
 }
 
 /* ── Footer ─────────────────────────────────────────────── */
