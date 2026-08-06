@@ -159,6 +159,24 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
+  const fetchAdvancedWifi = async (deviceId: number) => {
+    try {
+      const response = await api.get(`/acs/devices/${deviceId}/advanced-wifi`)
+      return response.data.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal mengambil konfigurasi Advanced WiFi.' }
+    }
+  }
+
+  const updateAdvancedWifi = async (deviceId: number, data: any) => {
+    try {
+      const response = await api.post(`/acs/devices/${deviceId}/advanced-wifi`, data)
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal menyimpan konfigurasi Advanced WiFi.' }
+    }
+  }
+
   return {
     devices,
     stats,
@@ -179,6 +197,8 @@ export const useAcsStore = defineStore('acs', () => {
     fetchTracerouteResult,
     triggerSpeedtest,
     fetchSpeedtestResult,
-    updatePppoeConfig
+    updatePppoeConfig,
+    fetchAdvancedWifi,
+    updateAdvancedWifi
   }
 })

@@ -102,55 +102,77 @@
 
           <hr class="modal-divider" />
 
-          <!-- WiFi Config Forms -->
-          <form @submit.prevent="saveWifi">
-            <h4 class="form-section-title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
-              Wi-Fi Configuration
-            </h4>
-
-            <div class="form-stack">
-              <div class="form-group" v-if="device?.has_5g">
-                <label class="form-label">Frekuensi (Band)</label>
-                <div class="band-selector">
-                  <label class="radio-label">
-                    <input type="radio" v-model="form.band" value="1"> 2.4 GHz
-                  </label>
-                  <label class="radio-label">
-                    <input type="radio" v-model="form.band" value="5"> 5 GHz
-                  </label>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">SSID Name</label>
-                <div class="input-icon-wrap">
-                  <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
-                  <input v-model="form.ssid" type="text" required class="input-modern input-has-icon" placeholder="Network Name">
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Wi-Fi Password</label>
-                <div class="input-icon-wrap">
-                  <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                  <input v-model="form.password" :type="showPassword ? 'text' : 'password'" minlength="8" class="input-modern input-has-icon input-has-action" placeholder="Biarkan kosong jika tidak diubah">
-                  <button type="button" @click="showPassword = !showPassword" class="input-action-btn">
-                    <svg v-if="!showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                    <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
-                  </button>
-                </div>
-                <span class="form-hint">Kosongkan jika hanya mengubah SSID</span>
-              </div>
+          <!-- Advanced WiFi Management -->
+          <div class="wifi-management">
+            <div class="flex-between align-center mb-3">
+              <h4 class="form-section-title mb-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+                Advanced Wi-Fi Management
+              </h4>
+              <button type="button" @click="loadAdvancedWifi" :disabled="isLoadingWifi" class="btn btn-sm btn-secondary btn-icon-text">
+                <span v-if="isLoadingWifi" class="spinning">🔄</span>
+                <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+                <span>Refresh WiFi</span>
+              </button>
             </div>
 
-            <!-- Error Alert -->
-            <div v-if="error" class="alert-box alert-box--danger mt-3">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              <span>{{ error }}</span>
+            <div v-if="isLoadingWifi" class="loading-state text-center py-4">
+              <div class="spinning mb-2" style="font-size: 24px;">🔄</div>
+              <p class="text-muted">Memuat data SSID dari Modem...</p>
             </div>
 
-            <!-- Config Footer Actions -->
+            <div v-else-if="wifiError" class="alert-box alert-box--danger mb-3">
+              <span>{{ wifiError }}</span>
+            </div>
+
+            <div v-else class="wifi-cards">
+              <div v-for="ssid in advancedWifiList" :key="ssid.index" class="wifi-card p-3 mb-3 border rounded">
+                <div class="flex-between align-center mb-3">
+                  <div class="flex align-center gap-2">
+                    <span class="badge" :class="ssid.band === '5 GHz' ? 'badge-primary' : 'badge-secondary'">{{ ssid.band }}</span>
+                    <strong class="text-md">SSID {{ ssid.index }}</strong>
+                    <span v-if="ssid.index === 1 || ssid.index === 5" class="badge badge-success text-xs">Utama</span>
+                    <span v-else class="badge badge-warning text-xs">Guest</span>
+                  </div>
+                  
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" :id="'enable-'+ssid.index" v-model="ssid.enable">
+                    <label class="form-check-label" :for="'enable-'+ssid.index">{{ ssid.enable ? 'Enabled' : 'Disabled' }}</label>
+                  </div>
+                </div>
+
+                <div class="form-stack" :class="{'opacity-50': !ssid.enable}">
+                  <div class="form-group">
+                    <label class="form-label text-sm">Nama SSID</label>
+                    <input v-model="ssid.ssid" type="text" class="input-modern" placeholder="Nama WiFi">
+                  </div>
+                  
+                  <div class="form-group">
+                    <label class="form-label text-sm">Password WiFi</label>
+                    <input v-model="ssid.password" type="text" class="input-modern" placeholder="Password (Minimal 8 karakter)">
+                  </div>
+
+                  <div class="form-group flex-between mt-2">
+                    <div class="text-xs text-muted">
+                      Channel: {{ ssid.channel }}
+                    </div>
+                    <button type="button" @click="saveAdvancedWifi(ssid)" :disabled="ssid.isSaving" class="btn btn-sm btn-primary btn-icon-text">
+                      <span v-if="ssid.isSaving" class="spinning">🔄</span>
+                      <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span>Simpan SSID {{ ssid.index }}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div v-if="advancedWifiList.length === 0" class="text-center text-muted p-4">
+                Tidak ada data SSID yang ditemukan.
+              </div>
+            </div>
+            
+            <hr class="modal-divider mt-4" />
+            
+            <!-- Global Footer Actions (Reboot / Reset) -->
             <div class="modal-footer">
               <div class="modal-footer-left">
                 <button type="button" @click="reboot" :disabled="isRebooting || isResetting" class="btn btn-danger-outline btn-icon-text">
@@ -167,15 +189,10 @@
               </div>
 
               <div class="modal-footer-right">
-                <button type="button" @click="close" class="btn btn-secondary">Cancel</button>
-                <button type="submit" :disabled="isSaving" class="btn btn-primary btn-icon-text">
-                  <span v-if="isSaving" class="spinning">🔄</span>
-                  <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span>{{ isSaving ? 'Applying...' : 'Apply Changes' }}</span>
-                </button>
+                <button type="button" @click="close" class="btn btn-secondary">Tutup</button>
               </div>
             </div>
-          </form>
+          </div>
         </div>
 
         <!-- Hosts Tab -->
@@ -447,6 +464,9 @@ const showPppoePassword = ref(false)
 const pppoeError = ref('')
 const isSavingPppoe = ref(false)
 const error = ref('')
+const wifiError = ref('')
+const isLoadingWifi = ref(false)
+const advancedWifiList = ref<any[]>([])
 const hostsError = ref('')
 const isSaving = ref(false)
 const isRebooting = ref(false)
@@ -476,11 +496,7 @@ const isFetchingSpeedtest = ref(false)
 const speedtestError = ref('')
 const speedtestResult = ref<any>(null)
 
-const form = reactive({
-  ssid: '',
-  password: '',
-  band: '1'
-})
+
 
 const pppoeForm = reactive({
   username: '',
@@ -493,10 +509,8 @@ const lanHosts = computed(() => hosts.value.filter(h => !String(h.type).includes
 
 watch(() => props.show, (newVal) => {
   if (newVal && props.device) {
-    form.ssid = props.device.wifi_ssid || ''
-    form.password = ''
-    form.band = '1'
     error.value = ''
+    wifiError.value = ''
     pppoeError.value = ''
     hostsError.value = ''
     pingError.value = ''
@@ -505,13 +519,14 @@ watch(() => props.show, (newVal) => {
     tracerouteResult.value = null
     speedtestError.value = ''
     speedtestResult.value = null
-    showPassword.value = false
     showPppoePassword.value = false
     activeTab.value = 'config'
     hosts.value = []
+    advancedWifiList.value = []
     
-    // Auto load hosts if not loaded
+    // Auto load data
     loadHosts()
+    loadAdvancedWifi()
 
     // PPPoE Pre-fill
     pppoeForm.username = props.device.pppoe_username || ''
@@ -560,17 +575,44 @@ const close = () => {
   emit('close')
 }
 
-const saveWifi = async () => {
-  error.value = ''
-  isSaving.value = true
+const loadAdvancedWifi = async () => {
+  if (!props.device) return
+  isLoadingWifi.value = true
+  wifiError.value = ''
   try {
-    await store.updateWifi(props.device.id, form.ssid, form.password, form.band)
-    emit('updated', 'WiFi config update requested.')
-    close()
+    const list = await store.fetchAdvancedWifi(props.device.id)
+    // append local UI state
+    advancedWifiList.value = list.map((item: any) => ({
+      ...item,
+      isSaving: false
+    }))
   } catch (err: any) {
-    error.value = err.message
+    wifiError.value = err.message
   } finally {
-    isSaving.value = false
+    isLoadingWifi.value = false
+  }
+}
+
+const saveAdvancedWifi = async (ssidObj: any) => {
+  if (!props.device) return
+  
+  ssidObj.isSaving = true
+  wifiError.value = ''
+  
+  try {
+    await store.updateAdvancedWifi(props.device.id, {
+      index: ssidObj.index,
+      enable: ssidObj.enable,
+      ssid: ssidObj.ssid,
+      password: ssidObj.password
+    })
+    
+    emit('updated', `Konfigurasi SSID ${ssidObj.index} sedang diproses.`)
+    alert(`Perintah simpan SSID ${ssidObj.index} telah dikirim ke modem.`)
+  } catch (err: any) {
+    wifiError.value = err.message
+  } finally {
+    ssidObj.isSaving = false
   }
 }
 
