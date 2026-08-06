@@ -77,6 +77,24 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
+  const fetchDeviceHosts = async (deviceId: number) => {
+    try {
+      const response = await api.get(`/acs/devices/${deviceId}/hosts`)
+      return response.data.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal memuat data klien (host).' }
+    }
+  }
+
+  const refreshDeviceHosts = async (deviceId: number) => {
+    try {
+      const response = await api.post(`/acs/devices/${deviceId}/hosts/refresh`)
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal refresh klien.' }
+    }
+  }
+
   return {
     devices,
     stats,
@@ -88,6 +106,8 @@ export const useAcsStore = defineStore('acs', () => {
     rebootDevice,
     updateWifi,
     refreshDevice,
-    factoryResetDevice
+    factoryResetDevice,
+    fetchDeviceHosts,
+    refreshDeviceHosts
   }
 })

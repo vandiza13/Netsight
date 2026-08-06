@@ -16,100 +16,163 @@
 
       <!-- Body -->
       <div class="modal-body">
-        <!-- Modem Info Grid -->
-        <div class="info-grid">
-          <div class="info-cell">
-            <span class="info-label">Status</span>
-            <div class="status-cell">
-              <span :class="['status-glow', device?.status === 'online' ? 'online' : 'offline']"></span>
-              <span class="info-value capitalize">{{ device?.status || 'unknown' }}</span>
+        
+        <div class="modal-tabs">
+          <button type="button" :class="['tab-btn', { active: activeTab === 'config' }]" @click="activeTab = 'config'">Overview & Config</button>
+          <button type="button" :class="['tab-btn', { active: activeTab === 'hosts' }]" @click="activeTab = 'hosts'">Connected Devices</button>
+        </div>
+
+        <!-- Config Tab -->
+        <div v-if="activeTab === 'config'" class="tab-pane fade-in">
+          <!-- Modem Info Grid -->
+          <div class="info-grid">
+            <div class="info-cell">
+              <span class="info-label">Status</span>
+              <div class="status-cell">
+                <span :class="['status-glow', device?.status === 'online' ? 'online' : 'offline']"></span>
+                <span class="info-value capitalize">{{ device?.status || 'unknown' }}</span>
+              </div>
+            </div>
+
+            <div class="info-cell">
+              <span class="info-label">Optical Power</span>
+              <div class="info-value-row">
+                <span :class="getRxPowerColor(device?.rx_power_dbm)" class="info-value-bold">{{ device?.rx_power_dbm ?? 'N/A' }}</span>
+                <span v-if="device?.rx_power_dbm" class="info-unit">dBm</span>
+              </div>
+            </div>
+
+            <div class="info-cell">
+              <span class="info-label">Model / Vendor</span>
+              <span class="info-value">{{ device?.model || 'Unknown' }}</span>
+              <span class="info-sub">{{ device?.vendor }}</span>
+            </div>
+
+            <div class="info-cell">
+              <span class="info-label">IP Address</span>
+              <span class="info-value">{{ device?.ip_address || 'N/A' }}</span>
             </div>
           </div>
 
-          <div class="info-cell">
-            <span class="info-label">Optical Power</span>
-            <div class="info-value-row">
-              <span :class="getRxPowerColor(device?.rx_power_dbm)" class="info-value-bold">{{ device?.rx_power_dbm ?? 'N/A' }}</span>
-              <span v-if="device?.rx_power_dbm" class="info-unit">dBm</span>
+          <hr class="modal-divider" />
+
+          <!-- Config Forms -->
+          <form @submit.prevent="saveWifi">
+            <h4 class="form-section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+              Wi-Fi Configuration
+            </h4>
+
+            <div class="form-stack">
+              <div class="form-group">
+                <label class="form-label">SSID Name</label>
+                <div class="input-icon-wrap">
+                  <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+                  <input v-model="form.ssid" type="text" required class="input-modern input-has-icon" placeholder="Network Name">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Wi-Fi Password</label>
+                <div class="input-icon-wrap">
+                  <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  <input v-model="form.password" :type="showPassword ? 'text' : 'password'" minlength="8" class="input-modern input-has-icon input-has-action" placeholder="Biarkan kosong jika tidak diubah">
+                  <button type="button" @click="showPassword = !showPassword" class="input-action-btn">
+                    <svg v-if="!showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+                  </button>
+                </div>
+                <span class="form-hint">Kosongkan jika hanya mengubah SSID</span>
+              </div>
             </div>
+
+            <!-- Error Alert -->
+            <div v-if="error" class="alert-box alert-box--danger mt-3">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span>{{ error }}</span>
+            </div>
+
+            <!-- Config Footer Actions -->
+            <div class="modal-footer">
+              <div class="modal-footer-left">
+                <button type="button" @click="reboot" :disabled="isRebooting || isResetting" class="btn btn-danger-outline btn-icon-text">
+                  <svg v-if="!isRebooting" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+                  <span v-if="isRebooting" class="spinning">🔄</span>
+                  <span>{{ isRebooting ? 'Rebooting...' : 'Reboot' }}</span>
+                </button>
+                
+                <button type="button" @click="factoryReset" :disabled="isRebooting || isResetting" class="btn btn-danger btn-icon-text">
+                  <svg v-if="!isResetting" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 12v.01"/></svg>
+                  <span v-if="isResetting" class="spinning">🔄</span>
+                  <span>{{ isResetting ? 'Resetting...' : 'Factory Reset' }}</span>
+                </button>
+              </div>
+
+              <div class="modal-footer-right">
+                <button type="button" @click="close" class="btn btn-secondary">Cancel</button>
+                <button type="submit" :disabled="isSaving" class="btn btn-primary btn-icon-text">
+                  <span v-if="isSaving" class="spinning">🔄</span>
+                  <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                  <span>{{ isSaving ? 'Applying...' : 'Apply Changes' }}</span>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Hosts Tab -->
+        <div v-if="activeTab === 'hosts'" class="tab-pane fade-in">
+          <div class="hosts-header">
+            <h4 class="form-section-title mb-0">Connected Devices</h4>
+            <button type="button" @click="refreshHosts" :disabled="isRefreshingHosts" class="btn btn-primary-outline btn-sm btn-icon-text">
+              <span v-if="isRefreshingHosts" class="spinning">🔄</span>
+              <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+              <span>{{ isRefreshingHosts ? 'Refreshing...' : 'Refresh dari Modem' }}</span>
+            </button>
           </div>
 
-          <div class="info-cell">
-            <span class="info-label">Model / Vendor</span>
-            <span class="info-value">{{ device?.model || 'Unknown' }}</span>
-            <span class="info-sub">{{ device?.vendor }}</span>
+          <div v-if="isLoadingHosts" class="alert-box alert-box--warning mt-3">
+            <span class="spinning mr-2">🔄</span> Mengambil data klien...
           </div>
-
-          <div class="info-cell">
-            <span class="info-label">IP Address</span>
-            <span class="info-value">{{ device?.ip_address || 'N/A' }}</span>
+          <div v-else-if="hostsError" class="alert-box alert-box--danger mt-3">
+            <span>{{ hostsError }}</span>
+          </div>
+          <div v-else-if="hosts.length === 0" class="empty-state mt-3">
+            Belum ada data perangkat yang terhubung.
+          </div>
+          <div v-else class="table-responsive custom-scrollbar mt-3">
+            <table class="table hosts-table">
+              <thead>
+                <tr>
+                  <th>Hostname</th>
+                  <th>IP Address</th>
+                  <th>MAC Address</th>
+                  <th>Tipe</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="host in hosts" :key="host.mac">
+                  <td><strong>{{ host.hostname }}</strong></td>
+                  <td><span class="badge badge-outline">{{ host.ip }}</span></td>
+                  <td class="color-muted">{{ host.mac }}</td>
+                  <td>
+                    <span :class="['badge', String(host.type).includes('802.11') ? 'badge-primary' : 'badge-secondary']">
+                      {{ host.type }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="status-cell">
+                      <span :class="['status-glow', host.active ? 'online' : 'offline']"></span>
+                      {{ host.active ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <hr class="modal-divider" />
-
-        <!-- Config Forms -->
-        <form @submit.prevent="saveWifi">
-          <h4 class="form-section-title">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
-            Wi-Fi Configuration
-          </h4>
-
-          <div class="form-stack">
-            <div class="form-group">
-              <label class="form-label">SSID Name</label>
-              <div class="input-icon-wrap">
-                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
-                <input v-model="form.ssid" type="text" required class="input-modern input-has-icon" placeholder="Network Name">
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">Wi-Fi Password</label>
-              <div class="input-icon-wrap">
-                <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <input v-model="form.password" :type="showPassword ? 'text' : 'password'" minlength="8" class="input-modern input-has-icon input-has-action" placeholder="Biarkan kosong jika tidak diubah">
-                <button type="button" @click="showPassword = !showPassword" class="input-action-btn">
-                  <svg v-if="!showPassword" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                  <svg v-else width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
-                </button>
-              </div>
-              <span class="form-hint">Kosongkan jika hanya mengubah SSID</span>
-            </div>
-          </div>
-
-          <!-- Error Alert -->
-          <div v-if="error" class="alert-box alert-box--danger">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            <span>{{ error }}</span>
-          </div>
-
-          <!-- Footer Actions -->
-          <div class="modal-footer">
-            <div class="modal-footer-left">
-              <button type="button" @click="reboot" :disabled="isRebooting || isResetting" class="btn btn-danger-outline btn-icon-text">
-                <svg v-if="!isRebooting" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
-                <span v-if="isRebooting" class="spinning">🔄</span>
-                <span>{{ isRebooting ? 'Rebooting...' : 'Reboot' }}</span>
-              </button>
-              
-              <button type="button" @click="factoryReset" :disabled="isRebooting || isResetting" class="btn btn-danger btn-icon-text">
-                <svg v-if="!isResetting" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 12v.01"/></svg>
-                <span v-if="isResetting" class="spinning">🔄</span>
-                <span>{{ isResetting ? 'Resetting...' : 'Factory Reset' }}</span>
-              </button>
-            </div>
-
-            <div class="modal-footer-right">
-              <button type="button" @click="close" class="btn btn-secondary">Cancel</button>
-              <button type="submit" :disabled="isSaving" class="btn btn-primary btn-icon-text">
-                <span v-if="isSaving" class="spinning">🔄</span>
-                <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                <span>{{ isSaving ? 'Applying...' : 'Apply Changes' }}</span>
-              </button>
-            </div>
-          </div>
-        </form>
       </div>
     </div>
   </div>
@@ -130,9 +193,15 @@ const store = useAcsStore()
 
 const showPassword = ref(false)
 const error = ref('')
+const hostsError = ref('')
 const isSaving = ref(false)
 const isRebooting = ref(false)
 const isResetting = ref(false)
+
+const activeTab = ref('config')
+const hosts = ref<any[]>([])
+const isLoadingHosts = ref(false)
+const isRefreshingHosts = ref(false)
 
 const form = reactive({
   ssid: '',
@@ -144,9 +213,45 @@ watch(() => props.show, (newVal) => {
     form.ssid = props.device.wifi_ssid || ''
     form.password = ''
     error.value = ''
+    hostsError.value = ''
     showPassword.value = false
+    activeTab.value = 'config'
+    hosts.value = []
+    
+    // Auto load hosts if not loaded
+    loadHosts()
   }
 })
+
+const loadHosts = async () => {
+  if (!props.device) return
+  isLoadingHosts.value = true
+  hostsError.value = ''
+  try {
+    hosts.value = await store.fetchDeviceHosts(props.device.id)
+  } catch (err: any) {
+    hostsError.value = err.message
+  } finally {
+    isLoadingHosts.value = false
+  }
+}
+
+const refreshHosts = async () => {
+  if (!props.device) return
+  isRefreshingHosts.value = true
+  hostsError.value = ''
+  try {
+    await store.refreshDeviceHosts(props.device.id)
+    // Re-load hosts after refresh task is sent
+    // Note: TR-069 tasks are async. Data might not change instantly.
+    setTimeout(loadHosts, 3000)
+    emit('updated', 'Perintah refresh klien dikirim ke modem.')
+  } catch (err: any) {
+    hostsError.value = err.message
+  } finally {
+    isRefreshingHosts.value = false
+  }
+}
 
 const getRxPowerColor = (power: number | null) => {
   if (power === null || power === undefined) return 'color-muted'
@@ -526,6 +631,67 @@ const factoryReset = async () => {
   box-shadow: 0 0 20px rgba(244, 63, 94, 0.4);
 }
 .btn-icon-text svg { flex-shrink: 0; }
+
+/* ── Tabs ───────────────────────────────────────────────── */
+.modal-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+.tab-btn {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tab-btn:hover {
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+.tab-btn.active {
+  background: var(--surface-3);
+  color: var(--text-1);
+}
+.tab-pane {
+  animation: fadeIn 0.3s ease;
+}
+
+/* ── Hosts Table ────────────────────────────────────────── */
+.hosts-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.mb-0 { margin-bottom: 0 !important; }
+.mt-3 { margin-top: 16px; }
+.mr-2 { margin-right: 8px; }
+.hosts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.hosts-table th {
+  text-align: left;
+  padding: 12px;
+  color: var(--text-3);
+  border-bottom: 1px solid var(--border);
+  font-weight: 500;
+}
+.hosts-table td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.02);
+  color: var(--text-2);
+}
+.hosts-table tr:hover td {
+  background: var(--surface-2);
+}
 
 /* ── Footer ─────────────────────────────────────────────── */
 .modal-footer {
