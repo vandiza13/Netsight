@@ -1,0 +1,121 @@
+{
+  "resources/js/app.ts": {
+    "file": "assets/app-CmdLz904.js",
+    "name": "app",
+    "src": "resources/js/app.ts",
+    "isEntry": true,
+    "dynamicImports": [
+      "resources/js/pages/InspectPage.vue",
+      "resources/js/pages/RouterManagementPage.vue",
+      "resources/js/pages/OltManagementPage.vue",
+      "resources/js/pages/AcsManagementPage.vue",
+      "resources/js/pages/AuditLogPage.vue",
+      "resources/js/pages/StaffManagementPage.vue",
+      "resources/js/pages/ProfilePage.vue"
+    ],
+    "css": [
+      "assets/app-D679C3cM.css",
+      "assets/main-59iBUAnE.css"
+    ]
+  },
+  "resources/js/assets/main.css": {
+    "file": "assets/main-59iBUAnE.css",
+    "src": "resources/js/assets/main.css",
+    "isEntry": true,
+    "name": "main",
+    "names": [
+      "main.css"
+    ]
+  },
+  "resources/js/pages/AcsManagementPage.vue": {
+    "file": "assets/AcsManagementPage-B8QOPM7O.js",
+    "name": "AcsManagementPage",
+    "src": "resources/js/pages/AcsManagementPage.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts"
+    ],
+    "css": [
+      "assets/AcsManagementPage-DWF_GIGn.css",
+      "assets/main-59iBUAnE.css"
+    ]
+  },
+  "resources/js/pages/AuditLogPage.vue": {
+    "file": "assets/AuditLogPage-ClJQXG8-.js",
+    "name": "AuditLogPage",
+    "src": "resources/js/pages/AuditLogPage.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts"
+    ],
+    "css": [
+      "assets/AuditLogPage-DVuh9gGh.css",
+      "assets/main-59iBUAnE.css"
+    ]
+  },
+  "resources/js/pages/InspectPage.vue": {
+    "file": "assets/InspectPage-D4z1ci7y.js",
+    "name": "InspectPage",
+    "src": "resources/js/pages/InspectPage.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts"
+    ],
+    "css": [
+      "assets/InspectPage-Cs90CM36.css",
+      "assets/main-59iBUAnE.css"
+    ]
+  },
+  "resources/js/pages/OltManagementPage.vue": {
+    "file": "assets/OltManagementPage-DwH1vyZD.js",
+    "name": "OltManagementPage",
+    "src": "resources/js/pages/OltManagementPage.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts"
+    ],
+    "css": [
+      "assets/OltManagementPage-Be0Or0eE.css",
+      "assets/main-59iBUAnE.css"
+    ]
+  },
+  "resources/js/pages/ProfilePage.vue": {
+    "file": "assets/ProfilePage-CH6olnFL.js",
+    "name": "ProfilePage",
+    "src": "resources/js/pages/ProfilePage.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts"
+    ],
+    "css": [
+      "assets/ProfilePage-CseZXgMh.css",
+      "assets/main-59iBUAnE.css"
+    ]
+  },
+  "resources/js/pages/RouterManagementPage.vue": {
+    "file": "assets/RouterManagementPage-DtuqDNC7.js",
+    "name": "RouterManagementPage",
+    "src": "resources/js/pages/RouterManagementPage.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts"
+    ],
+    "css": [
+      "assets/RouterManagementPage-B_UZNgS-.css",
+      "assets/main-59iBUAnE.css"
+    ]
+  },
+  "resources/js/pages/StaffManagementPage.vue": {
+    "file": "assets/StaffManagementPage-CEepnwEv.js",
+    "name": "StaffManagementPage",
+    "src": "resources/js/pages/StaffManagementPage.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts"
+    ],
+    "css": [
+      "assets/StaffManagementPage-BkvtFpup.css",
+      "assets/main-59iBUAnE.css"
+    ]
+  }
+}
