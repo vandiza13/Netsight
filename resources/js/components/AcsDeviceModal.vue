@@ -847,29 +847,31 @@ const cancelEditRadio = (radio: any) => {
 const saveRadio = async (radioIndex: number) => {
   if (!props.device) return
   const targetRadio = radioIndex === 1 ? radio2g.value : radio5g.value
+  const band = radioIndex === 1 ? '2.4GHz' : '5GHz'
   if (!targetRadio) return
   
   wifiError.value = ''
   targetRadio.isSaving = true
   try {
-    await store.updateRadioConfig(props.device.id, {
-      radio_index: radioIndex,
+    const res = await store.updateRadioConfig(props.device.id, {
+      radio_index: targetRadio.index,
       wifi_enabled: targetRadio.wifi_enabled,
       channel: targetRadio.channel,
-      network_mode: targetRadio.network_mode,
+      network_mode: targetRadio.network_mode, 
       transmit_power: targetRadio.transmit_power,
       bandwidth: targetRadio.bandwidth
     })
     targetRadio.isEditing = false
     targetRadio._original = { 
-      wifi_enabled: targetRadio.wifi_enabled, 
-      channel: targetRadio.channel, 
+      wifi_enabled: targetRadio.wifi_enabled,
+      channel: targetRadio.channel,
       network_mode: targetRadio.network_mode, 
-      transmit_power: targetRadio.transmit_power, 
-      bandwidth: targetRadio.bandwidth 
+      transmit_power: targetRadio.transmit_power,
+      bandwidth: targetRadio.bandwidth
     }
-    emit('updated', `Pengaturan Radio ${radioIndex === 1 ? '2.4GHz' : '5GHz'} telah dikirim ke modem.`)
-    alert(`Pengaturan Radio ${radioIndex === 1 ? '2.4GHz' : '5GHz'} telah dikirim ke modem.`)
+    const successMsg = res.message || `Perintah simpan pengaturan Radio ${band} telah dikirim ke modem.`;
+    emit('updated', successMsg)
+    alert(successMsg)
   } catch (err: any) {
     wifiError.value = err.message
   } finally {
@@ -900,7 +902,7 @@ const saveSsid = async (ssidObj: any) => {
   wifiError.value = ''
   
   try {
-    await store.updateAdvancedWifi(props.device.id, {
+    const res = await store.updateAdvancedWifi(props.device.id, {
       index: ssidObj.index,
       enabled: ssidObj.enabled,
       hide: ssidObj.hide,
@@ -918,8 +920,9 @@ const saveSsid = async (ssidObj: any) => {
       max_clients: ssidObj.max_clients,
       passkey: ssidObj.passkey
     }
-    emit('updated', `Perintah simpan SSID ${ssidObj.index} (${ssidObj.name}) telah dikirim ke modem.`)
-    alert(`Perintah simpan SSID ${ssidObj.index} (${ssidObj.name}) telah dikirim ke modem.`)
+    const successMsg = res.message || `Perintah simpan SSID ${ssidObj.index} (${ssidObj.name}) telah dikirim ke modem.`;
+    emit('updated', successMsg)
+    alert(successMsg)
   } catch (err: any) {
     wifiError.value = err.message
   } finally {
