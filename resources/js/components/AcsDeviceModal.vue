@@ -1133,7 +1133,7 @@ const factoryReset = async () => {
   border-radius: 16px;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
   width: 100%;
-  max-width: 800px;
+  max-width: 1050px;
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -1631,9 +1631,11 @@ const factoryReset = async () => {
   font-weight: 700;
   font-size: 0.95rem;
   color: var(--text-1, #f8fafc);
-  text-align: center;
   letter-spacing: 0.5px;
   border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .wifi-radio-table {
   width: 100%;
@@ -1717,10 +1719,11 @@ const factoryReset = async () => {
   width: 100%;
 }
 .status-icon {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 20px;
   height: 20px;
-  line-height: 20px;
   border-radius: 50%;
   font-size: 11px;
   font-weight: bold;
