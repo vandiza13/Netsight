@@ -664,6 +664,9 @@
 <script setup lang="ts">
 import { ref, watch, reactive, computed } from 'vue'
 import { useAcsStore } from '../stores/acsStore'
+import { useToastStore } from '../stores/toastStore';
+
+const toastStore = useToastStore()
 
 const props = defineProps<{
   show: boolean
@@ -871,9 +874,10 @@ const saveRadio = async (radioIndex: number) => {
     }
     const successMsg = res.message || `Perintah simpan pengaturan Radio ${band} telah dikirim ke modem.`;
     emit('updated', successMsg)
-    alert(successMsg)
+    toastStore.success(successMsg)
   } catch (err: any) {
     wifiError.value = err.message
+    toastStore.error(err.message || 'Gagal menyimpan pengaturan radio')
   } finally {
     targetRadio.isSaving = false
   }
@@ -922,9 +926,10 @@ const saveSsid = async (ssidObj: any) => {
     }
     const successMsg = res.message || `Perintah simpan SSID ${ssidObj.index} (${ssidObj.name}) telah dikirim ke modem.`;
     emit('updated', successMsg)
-    alert(successMsg)
+    toastStore.success(successMsg)
   } catch (err: any) {
     wifiError.value = err.message
+    toastStore.error(err.message || 'Gagal menyimpan SSID')
   } finally {
     ssidObj.isSaving = false
   }
