@@ -178,9 +178,12 @@
                     <td class="lbl">Network Mode</td>
                     <td class="val">
                       <select v-model="radio2g.network_mode" :disabled="!radio2g.isEditing" class="select-sm">
+                        <option v-if="!['b,g,n', 'b,g', 'n', '802.11b/g/n', '802.11b/g'].includes(radio2g.network_mode)" :value="radio2g.network_mode">{{ radio2g.network_mode }}</option>
                         <option value="b,g,n">b,g,n</option>
                         <option value="b,g">b,g</option>
                         <option value="n">n only</option>
+                        <option value="802.11b/g/n">802.11b/g/n</option>
+                        <option value="802.11b/g">802.11b/g</option>
                       </select>
                     </td>
                   </tr>
@@ -244,17 +247,17 @@
                       <td><input type="text" v-model="ssid.name" :disabled="!ssid.isEditing" class="input-table" placeholder="SSID Name"></td>
                       <td>
                         <select v-model="ssid.security_type" :disabled="!ssid.isEditing" class="select-table">
+                          <option v-if="!['WPA2-PSK', 'WPA/WPA2-PSK', 'WPA-PSK/WPA2-PSK', 'Open', 'None', 'Basic'].includes(ssid.security_type)" :value="ssid.security_type">{{ ssid.security_type }}</option>
                           <option value="WPA2-PSK">WPA2-PSK</option>
                           <option value="WPA/WPA2-PSK">WPA/WPA2-PSK</option>
+                          <option value="WPA-PSK/WPA2-PSK">WPA-PSK/WPA2-PSK</option>
                           <option value="Open">Open (No Security)</option>
+                          <option value="None">None (Open)</option>
+                          <option value="Basic">Basic (Open)</option>
                         </select>
                       </td>
                       <td>
-                        <select v-model="ssid.max_clients" :disabled="!ssid.isEditing" class="select-table">
-                          <option :value="16">16</option>
-                          <option :value="32">32</option>
-                          <option :value="64">64</option>
-                        </select>
+                        <input type="number" v-model="ssid.max_clients" :disabled="!ssid.isEditing" class="input-table" min="1" max="64">
                       </td>
                       <td><input type="password" v-model="ssid.passkey" :disabled="!ssid.isEditing" class="input-table" placeholder="••••••••"></td>
                       <td class="text-center">
@@ -304,9 +307,12 @@
                     <td class="lbl">Network Mode</td>
                     <td class="val">
                       <select v-model="radio5g.network_mode" :disabled="!radio5g.isEditing" class="select-sm">
+                        <option v-if="!['a,n,ac', 'n,ac', 'ac', '802.11a/n/ac', '802.11ac'].includes(radio5g.network_mode)" :value="radio5g.network_mode">{{ radio5g.network_mode }}</option>
                         <option value="a,n,ac">a,n,ac</option>
                         <option value="n,ac">n,ac</option>
                         <option value="ac">ac only</option>
+                        <option value="802.11a/n/ac">802.11a/n/ac</option>
+                        <option value="802.11ac">802.11ac</option>
                       </select>
                     </td>
                   </tr>
@@ -371,17 +377,17 @@
                       <td><input type="text" v-model="ssid.name" :disabled="!ssid.isEditing" class="input-table" placeholder="SSID Name"></td>
                       <td>
                         <select v-model="ssid.security_type" :disabled="!ssid.isEditing" class="select-table">
+                          <option v-if="!['WPA2-PSK', 'WPA/WPA2-PSK', 'WPA-PSK/WPA2-PSK', 'Open', 'None', 'Basic'].includes(ssid.security_type)" :value="ssid.security_type">{{ ssid.security_type }}</option>
                           <option value="WPA2-PSK">WPA2-PSK</option>
                           <option value="WPA/WPA2-PSK">WPA/WPA2-PSK</option>
+                          <option value="WPA-PSK/WPA2-PSK">WPA-PSK/WPA2-PSK</option>
                           <option value="Open">Open (No Security)</option>
+                          <option value="None">None (Open)</option>
+                          <option value="Basic">Basic (Open)</option>
                         </select>
                       </td>
                       <td>
-                        <select v-model="ssid.max_clients" :disabled="!ssid.isEditing" class="select-table">
-                          <option :value="16">16</option>
-                          <option :value="32">32</option>
-                          <option :value="64">64</option>
-                        </select>
+                        <input type="number" v-model="ssid.max_clients" :disabled="!ssid.isEditing" class="input-table" min="1" max="64">
                       </td>
                       <td><input type="password" v-model="ssid.passkey" :disabled="!ssid.isEditing" class="input-table" placeholder="••••••••"></td>
                       <td class="text-center">
