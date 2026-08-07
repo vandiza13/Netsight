@@ -239,7 +239,7 @@
                       <td><input type="checkbox" v-model="ssid.enabled" :disabled="!ssid.isEditing" class="checkbox-modern"></td>
                       <td><input type="checkbox" v-model="ssid.hide" :disabled="!ssid.isEditing" class="checkbox-modern"></td>
                       <td class="text-center">
-                        <span class="status-icon" :class="ssid.enabled ? 'icon-up' : 'icon-down'">{{ ssid.enabled ? '<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : '<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' }}</span>
+                        <span class="status-icon" :class="ssid.enabled ? 'icon-up' : 'icon-down'" v-html="ssid.enabled ? '<svg width=\'1em\' height=\'1em\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><polyline points=\'20 6 9 17 4 12\'/></svg>' : '<svg width=\'1em\' height=\'1em\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><line x1=\'18\' y1=\'6\' x2=\'6\' y2=\'18\'/><line x1=\'6\' y1=\'6\' x2=\'18\' y2=\'18\'/></svg>'"></span>
                       </td>
                       <td><input type="text" v-model="ssid.name" :disabled="!ssid.isEditing" class="input-table" placeholder="SSID Name"></td>
                       <td>
@@ -366,7 +366,7 @@
                       <td><input type="checkbox" v-model="ssid.enabled" :disabled="!ssid.isEditing" class="checkbox-modern"></td>
                       <td><input type="checkbox" v-model="ssid.hide" :disabled="!ssid.isEditing" class="checkbox-modern"></td>
                       <td class="text-center">
-                        <span class="status-icon" :class="ssid.enabled ? 'icon-up' : 'icon-down'">{{ ssid.enabled ? '<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : '<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' }}</span>
+                        <span class="status-icon" :class="ssid.enabled ? 'icon-up' : 'icon-down'" v-html="ssid.enabled ? '<svg width=\'1em\' height=\'1em\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><polyline points=\'20 6 9 17 4 12\'/></svg>' : '<svg width=\'1em\' height=\'1em\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><line x1=\'18\' y1=\'6\' x2=\'6\' y2=\'18\'/><line x1=\'6\' y1=\'6\' x2=\'18\' y2=\'18\'/></svg>'"></span>
                       </td>
                       <td><input type="text" v-model="ssid.name" :disabled="!ssid.isEditing" class="input-table" placeholder="SSID Name"></td>
                       <td>
