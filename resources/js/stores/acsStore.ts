@@ -177,6 +177,15 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
+  const updateRadioConfig = async (deviceId: number, data: any) => {
+    try {
+      const response = await api.post(`/acs/devices/${deviceId}/radio`, data)
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal menyimpan konfigurasi Radio WiFi.' }
+    }
+  }
+
   return {
     devices,
     stats,
@@ -199,6 +208,7 @@ export const useAcsStore = defineStore('acs', () => {
     fetchSpeedtestResult,
     updatePppoeConfig,
     fetchAdvancedWifi,
-    updateAdvancedWifi
+    updateAdvancedWifi,
+    updateRadioConfig
   }
 })

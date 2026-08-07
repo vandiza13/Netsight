@@ -18,7 +18,8 @@
       <div class="modal-body">
         
         <div class="modal-tabs">
-          <button type="button" :class="['tab-btn', { active: activeTab === 'config' }]" @click="activeTab = 'config'">Overview & Config</button>
+          <button type="button" :class="['tab-btn', { active: activeTab === 'config' }]" @click="activeTab = 'config'">Overview & PPPoE</button>
+          <button type="button" :class="['tab-btn', { active: activeTab === 'wifi' }]" @click="activeTab = 'wifi'">WiFi Configuration</button>
           <button type="button" :class="['tab-btn', { active: activeTab === 'hosts' }]" @click="activeTab = 'hosts'">Connected Devices</button>
           <button type="button" :class="['tab-btn', { active: activeTab === 'diag' }]" @click="activeTab = 'diag'">Diagnostics</button>
         </div>
@@ -102,76 +103,6 @@
 
           <hr class="modal-divider" />
 
-          <!-- Advanced WiFi Management -->
-          <div class="wifi-management">
-            <div class="flex-between align-center mb-3">
-              <h4 class="form-section-title mb-0">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
-                Advanced Wi-Fi Management
-              </h4>
-              <button type="button" @click="loadAdvancedWifi" :disabled="isLoadingWifi" class="btn btn-sm btn-secondary btn-icon-text">
-                <span v-if="isLoadingWifi" class="spinning">🔄</span>
-                <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
-                <span>Refresh WiFi</span>
-              </button>
-            </div>
-
-            <div v-if="isLoadingWifi" class="loading-state text-center py-4">
-              <div class="spinning mb-2" style="font-size: 24px;">🔄</div>
-              <p class="text-muted">Memuat data SSID dari Modem...</p>
-            </div>
-
-            <div v-else-if="wifiError" class="alert-box alert-box--danger mb-3">
-              <span>{{ wifiError }}</span>
-            </div>
-
-            <div v-else class="wifi-cards">
-              <div v-for="ssid in advancedWifiList" :key="ssid.index" class="wifi-card p-3 mb-3 border rounded">
-                <div class="flex-between align-center mb-3">
-                  <div class="flex align-center gap-2">
-                    <span class="badge" :class="ssid.band === '5 GHz' ? 'badge-primary' : 'badge-secondary'">{{ ssid.band }}</span>
-                    <strong class="text-md">SSID {{ ssid.index }}</strong>
-                    <span v-if="ssid.index === 1 || ssid.index === 5" class="badge badge-success text-xs">Utama</span>
-                    <span v-else class="badge badge-warning text-xs">Guest</span>
-                  </div>
-                  
-                  <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" :id="'enable-'+ssid.index" v-model="ssid.enable">
-                    <label class="form-check-label" :for="'enable-'+ssid.index">{{ ssid.enable ? 'Enabled' : 'Disabled' }}</label>
-                  </div>
-                </div>
-
-                <div class="form-stack" :class="{'opacity-50': !ssid.enable}">
-                  <div class="form-group">
-                    <label class="form-label text-sm">Nama SSID</label>
-                    <input v-model="ssid.ssid" type="text" class="input-modern" placeholder="Nama WiFi">
-                  </div>
-                  
-                  <div class="form-group">
-                    <label class="form-label text-sm">Password WiFi</label>
-                    <input v-model="ssid.password" type="text" class="input-modern" placeholder="Password (Minimal 8 karakter)">
-                  </div>
-
-                  <div class="form-group flex-between mt-2">
-                    <div class="text-xs text-muted">
-                      Channel: {{ ssid.channel }}
-                    </div>
-                    <button type="button" @click="saveAdvancedWifi(ssid)" :disabled="ssid.isSaving" class="btn btn-sm btn-primary btn-icon-text">
-                      <span v-if="ssid.isSaving" class="spinning">🔄</span>
-                      <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                      <span>Simpan SSID {{ ssid.index }}</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              
-              <div v-if="advancedWifiList.length === 0" class="text-center text-muted p-4">
-                Tidak ada data SSID yang ditemukan.
-              </div>
-            </div>
-            
-            <hr class="modal-divider mt-4" />
-            
             <!-- Global Footer Actions (Reboot / Reset) -->
             <div class="modal-footer">
               <div class="modal-footer-left">
@@ -190,6 +121,274 @@
 
               <div class="modal-footer-right">
                 <button type="button" @click="close" class="btn btn-secondary">Tutup</button>
+              </div>
+            </div>
+          </div>
+
+        <!-- WiFi Configuration Tab -->
+        <div v-if="activeTab === 'wifi'" class="tab-pane fade-in">
+          <div class="flex-between align-center mb-3">
+            <h4 class="form-section-title mb-0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+              WiFi Configuration
+            </h4>
+            <button type="button" @click="loadAdvancedWifi" :disabled="isLoadingWifi" class="btn btn-sm btn-secondary btn-icon-text">
+              <span v-if="isLoadingWifi" class="spinning">🔄</span>
+              <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+              <span>Reload</span>
+            </button>
+          </div>
+
+          <div v-if="isLoadingWifi" class="loading-state text-center py-5">
+            <div class="spinning mb-2" style="font-size: 28px;">🔄</div>
+            <p class="text-muted">Memuat Konfigurasi WiFi TR-069...</p>
+          </div>
+
+          <div v-else-if="wifiError" class="alert-box alert-box--danger mb-3">
+            <span>{{ wifiError }}</span>
+          </div>
+
+          <div v-else class="wifi-config-container">
+            <!-- 2.4GHz Panel -->
+            <div class="wifi-band-panel mb-4" v-if="radio2g">
+              <div class="band-header">2.4Ghz</div>
+              
+              <!-- Radio Settings Table -->
+              <table class="wifi-radio-table">
+                <tbody>
+                  <tr>
+                    <td class="lbl">Wifi Enabled</td>
+                    <td class="val">
+                      <div class="flex align-center gap-2">
+                        <input type="checkbox" v-model="radio2g.wifi_enabled" class="checkbox-modern">
+                        <button type="button" @click="saveRadio(1)" class="btn-icon-edit" title="Save Radio Enabled">✏️</button>
+                      </div>
+                    </td>
+                    <td class="lbl">Network Mode</td>
+                    <td class="val">
+                      <div class="flex align-center gap-2">
+                        <select v-model="radio2g.network_mode" class="select-sm">
+                          <option value="b,g,n">b,g,n</option>
+                          <option value="b,g">b,g</option>
+                          <option value="n">n only</option>
+                        </select>
+                        <button type="button" @click="saveRadio(1)" class="btn-icon-edit" title="Save Network Mode">✏️</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="lbl">Possible Channel</td>
+                    <td class="val text-muted text-xs">{{ radio2g.possible_channels }}</td>
+                    <td class="lbl">Transmit Power Control</td>
+                    <td class="val">
+                      <div class="flex align-center gap-2">
+                        <select v-model="radio2g.transmit_power" class="select-sm">
+                          <option value="100">100 %</option>
+                          <option value="80">80 %</option>
+                          <option value="50">50 %</option>
+                          <option value="20">20 %</option>
+                        </select>
+                        <button type="button" @click="saveRadio(1)" class="btn-icon-edit" title="Save Transmit Power">✏️</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="lbl">Channel In Use</td>
+                    <td class="val">
+                      <div class="flex align-center gap-2">
+                        <select v-model="radio2g.channel" class="select-sm">
+                          <option value="0">Auto</option>
+                          <option v-for="ch in [1,2,3,4,5,6,7,8,9,10,11,12,13]" :key="ch" :value="String(ch)">{{ ch }}</option>
+                        </select>
+                        <button type="button" @click="saveRadio(1)" class="btn-icon-edit" title="Save Channel">✏️</button>
+                      </div>
+                    </td>
+                    <td class="lbl">BandWidth</td>
+                    <td class="val">
+                      <div class="flex align-center gap-2">
+                        <select v-model="radio2g.bandwidth" class="select-sm">
+                          <option value="20 MHz">20 MHz</option>
+                          <option value="40 MHz">40 MHz</option>
+                          <option value="Auto">Auto</option>
+                        </select>
+                        <button type="button" @click="saveRadio(1)" class="btn-icon-edit" title="Save Bandwidth">✏️</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- SSID Table 2.4G -->
+              <div class="table-responsive mt-3">
+                <table class="ssid-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 8%;">SSID</th>
+                      <th style="width: 7%;">Enabled</th>
+                      <th style="width: 6%;">Hide</th>
+                      <th style="width: 6%;">Status</th>
+                      <th style="width: 22%;">Name</th>
+                      <th style="width: 18%;">Security Type</th>
+                      <th style="width: 10%;">Max Clients</th>
+                      <th style="width: 17%;">Passkey</th>
+                      <th style="width: 6%; text-align: center;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="ssid in ssids2g" :key="ssid.index" :class="{'row-active': ssid.enabled}">
+                      <td class="bold">{{ 'SSID' + ssid.index }}</td>
+                      <td><input type="checkbox" v-model="ssid.enabled" class="checkbox-modern"></td>
+                      <td><input type="checkbox" v-model="ssid.hide" class="checkbox-modern"></td>
+                      <td class="text-center">
+                        <span class="status-icon" :class="ssid.enabled ? 'icon-up' : 'icon-down'">{{ ssid.enabled ? '✔' : '✖' }}</span>
+                      </td>
+                      <td><input type="text" v-model="ssid.name" class="input-table" placeholder="SSID Name"></td>
+                      <td>
+                        <select v-model="ssid.security_type" class="select-table">
+                          <option value="WPA2-PSK">WPA2-PSK</option>
+                          <option value="WPA/WPA2-PSK">WPA/WPA2-PSK</option>
+                          <option value="Open">Open (No Security)</option>
+                        </select>
+                      </td>
+                      <td>
+                        <select v-model="ssid.max_clients" class="select-table">
+                          <option :value="16">16</option>
+                          <option :value="32">32</option>
+                          <option :value="64">64</option>
+                        </select>
+                      </td>
+                      <td><input type="password" v-model="ssid.passkey" class="input-table" placeholder="••••••••"></td>
+                      <td class="text-center">
+                        <button type="button" @click="saveSsid(ssid)" :disabled="ssid.isSaving" class="btn-icon-edit" title="Simpan SSID">
+                          <span v-if="ssid.isSaving" class="spinning">🔄</span>
+                          <span v-else>✏️</span>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- 5GHz Panel -->
+            <div class="wifi-band-panel mb-4" v-if="radio5g">
+              <div class="band-header">5Ghz</div>
+              
+              <!-- Radio Settings Table -->
+              <table class="wifi-radio-table">
+                <tbody>
+                  <tr>
+                    <td class="lbl">Wifi Enabled</td>
+                    <td class="val">
+                      <div class="flex align-center gap-2">
+                        <input type="checkbox" v-model="radio5g.wifi_enabled" class="checkbox-modern">
+                        <button type="button" @click="saveRadio(5)" class="btn-icon-edit" title="Save Radio Enabled">✏️</button>
+                      </div>
+                    </td>
+                    <td class="lbl">Network Mode</td>
+                    <td class="val">
+                      <div class="flex align-center gap-2">
+                        <select v-model="radio5g.network_mode" class="select-sm">
+                          <option value="a,n,ac">a,n,ac</option>
+                          <option value="n,ac">n,ac</option>
+                          <option value="ac">ac only</option>
+                        </select>
+                        <button type="button" @click="saveRadio(5)" class="btn-icon-edit" title="Save Network Mode">✏️</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="lbl">Possible Channel</td>
+                    <td class="val text-muted text-xs">{{ radio5g.possible_channels }}</td>
+                    <td class="lbl">Transmit Power Control</td>
+                    <td class="val">
+                      <div class="flex align-center gap-2">
+                        <select v-model="radio5g.transmit_power" class="select-sm">
+                          <option value="100">100 %</option>
+                          <option value="80">80 %</option>
+                          <option value="50">50 %</option>
+                          <option value="20">20 %</option>
+                        </select>
+                        <button type="button" @click="saveRadio(5)" class="btn-icon-edit" title="Save Transmit Power">✏️</button>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="lbl">Channel In Use</td>
+                    <td class="val">
+                      <div class="flex align-center gap-2">
+                        <select v-model="radio5g.channel" class="select-sm">
+                          <option value="0">Auto</option>
+                          <option v-for="ch in [36,40,44,48,52,56,60,64,149,153,157,161]" :key="ch" :value="String(ch)">{{ ch }}</option>
+                        </select>
+                        <button type="button" @click="saveRadio(5)" class="btn-icon-edit" title="Save Channel">✏️</button>
+                      </div>
+                    </td>
+                    <td class="lbl">BandWidth</td>
+                    <td class="val">
+                      <div class="flex align-center gap-2">
+                        <select v-model="radio5g.bandwidth" class="select-sm">
+                          <option value="20 MHz">20 MHz</option>
+                          <option value="40 MHz">40 MHz</option>
+                          <option value="80 MHz">80 MHz</option>
+                          <option value="Auto">Auto</option>
+                        </select>
+                        <button type="button" @click="saveRadio(5)" class="btn-icon-edit" title="Save Bandwidth">✏️</button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- SSID Table 5G -->
+              <div class="table-responsive mt-3">
+                <table class="ssid-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 8%;">SSID</th>
+                      <th style="width: 7%;">Enabled</th>
+                      <th style="width: 6%;">Hide</th>
+                      <th style="width: 6%;">Status</th>
+                      <th style="width: 22%;">Name</th>
+                      <th style="width: 18%;">Security Type</th>
+                      <th style="width: 10%;">Max Clients</th>
+                      <th style="width: 17%;">Passkey</th>
+                      <th style="width: 6%; text-align: center;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="ssid in ssids5g" :key="ssid.index" :class="{'row-active': ssid.enabled}">
+                      <td class="bold">{{ 'SSID' + ssid.index }}</td>
+                      <td><input type="checkbox" v-model="ssid.enabled" class="checkbox-modern"></td>
+                      <td><input type="checkbox" v-model="ssid.hide" class="checkbox-modern"></td>
+                      <td class="text-center">
+                        <span class="status-icon" :class="ssid.enabled ? 'icon-up' : 'icon-down'">{{ ssid.enabled ? '✔' : '✖' }}</span>
+                      </td>
+                      <td><input type="text" v-model="ssid.name" class="input-table" placeholder="SSID Name"></td>
+                      <td>
+                        <select v-model="ssid.security_type" class="select-table">
+                          <option value="WPA2-PSK">WPA2-PSK</option>
+                          <option value="WPA/WPA2-PSK">WPA/WPA2-PSK</option>
+                          <option value="Open">Open (No Security)</option>
+                        </select>
+                      </td>
+                      <td>
+                        <select v-model="ssid.max_clients" class="select-table">
+                          <option :value="16">16</option>
+                          <option :value="32">32</option>
+                          <option :value="64">64</option>
+                        </select>
+                      </td>
+                      <td><input type="password" v-model="ssid.passkey" class="input-table" placeholder="••••••••"></td>
+                      <td class="text-center">
+                        <button type="button" @click="saveSsid(ssid)" :disabled="ssid.isSaving" class="btn-icon-edit" title="Simpan SSID">
+                          <span v-if="ssid.isSaving" class="spinning">🔄</span>
+                          <span v-else>✏️</span>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -575,14 +774,22 @@ const close = () => {
   emit('close')
 }
 
+const radio2g = ref<any>(null)
+const radio5g = ref<any>(null)
+const ssids = ref<any[]>([])
+
+const ssids2g = computed(() => ssids.value.filter((s: any) => s.index <= 4))
+const ssids5g = computed(() => ssids.value.filter((s: any) => s.index >= 5))
+
 const loadAdvancedWifi = async () => {
   if (!props.device) return
   isLoadingWifi.value = true
   wifiError.value = ''
   try {
-    const list = await store.fetchAdvancedWifi(props.device.id)
-    // append local UI state
-    advancedWifiList.value = list.map((item: any) => ({
+    const res = await store.fetchAdvancedWifi(props.device.id)
+    radio2g.value = res.radio_2g
+    radio5g.value = res.radio_5g
+    ssids.value = (res.ssids || []).map((item: any) => ({
       ...item,
       isSaving: false
     }))
@@ -593,22 +800,43 @@ const loadAdvancedWifi = async () => {
   }
 }
 
-const saveAdvancedWifi = async (ssidObj: any) => {
+const saveRadio = async (radioIndex: number) => {
   if (!props.device) return
+  const targetRadio = radioIndex === 1 ? radio2g.value : radio5g.value
+  if (!targetRadio) return
   
+  wifiError.value = ''
+  try {
+    await store.updateRadioConfig(props.device.id, {
+      radio_index: radioIndex,
+      wifi_enabled: targetRadio.wifi_enabled,
+      channel: targetRadio.channel,
+      network_mode: targetRadio.network_mode,
+      transmit_power: targetRadio.transmit_power,
+      bandwidth: targetRadio.bandwidth
+    })
+    alert(`Pengaturan Radio ${radioIndex === 1 ? '2.4GHz' : '5GHz'} telah dikirim ke modem.`)
+  } catch (err: any) {
+    wifiError.value = err.message
+  }
+}
+
+const saveSsid = async (ssidObj: any) => {
+  if (!props.device) return
   ssidObj.isSaving = true
   wifiError.value = ''
   
   try {
     await store.updateAdvancedWifi(props.device.id, {
       index: ssidObj.index,
-      enable: ssidObj.enable,
-      ssid: ssidObj.ssid,
-      password: ssidObj.password
+      enabled: ssidObj.enabled,
+      hide: ssidObj.hide,
+      name: ssidObj.name,
+      security_type: ssidObj.security_type,
+      max_clients: ssidObj.max_clients,
+      passkey: ssidObj.passkey
     })
-    
-    emit('updated', `Konfigurasi SSID ${ssidObj.index} sedang diproses.`)
-    alert(`Perintah simpan SSID ${ssidObj.index} telah dikirim ke modem.`)
+    alert(`Perintah simpan SSID ${ssidObj.index} (${ssidObj.name}) telah dikirim ke modem.`)
   } catch (err: any) {
     wifiError.value = err.message
   } finally {
@@ -1312,5 +1540,120 @@ const factoryReset = async () => {
     width: 100%;
     justify-content: flex-end;
   }
+}
+/* ── WiFi Config Tab Styling ───────────────────────────── */
+.wifi-band-panel {
+  background: var(--surface-1, #121624);
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 12px;
+  overflow: hidden;
+}
+.band-header {
+  background: var(--surface-2, #1a2035);
+  padding: 10px 16px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-1, #f8fafc);
+  text-align: center;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border, rgba(255,255,255,0.08));
+}
+.wifi-radio-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.wifi-radio-table td {
+  padding: 8px 12px;
+  border: 1px solid var(--border, rgba(255,255,255,0.06));
+  font-size: 0.85rem;
+}
+.wifi-radio-table td.lbl {
+  font-weight: 600;
+  color: var(--text-2, #94a3b8);
+  width: 20%;
+  background: rgba(255,255,255,0.02);
+}
+.wifi-radio-table td.val {
+  width: 30%;
+}
+.ssid-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.ssid-table th {
+  background: var(--surface-2, #1a2035);
+  color: var(--text-2, #94a3b8);
+  padding: 10px;
+  text-align: left;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+}
+.ssid-table td {
+  padding: 8px;
+  border: 1px solid var(--border, rgba(255,255,255,0.06));
+  vertical-align: middle;
+}
+.ssid-table tr.row-active {
+  background: rgba(16, 185, 129, 0.08);
+}
+.ssid-table tr.row-active td.bold {
+  color: #10b981;
+  font-weight: 700;
+}
+.checkbox-modern {
+  width: 18px;
+  height: 18px;
+  accent-color: #10b981;
+  cursor: pointer;
+}
+.btn-icon-edit {
+  background: var(--surface-2, #1e293b);
+  border: 1px solid var(--border, rgba(255,255,255,0.1));
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.2s;
+}
+.btn-icon-edit:hover {
+  background: var(--accent, #3b82f6);
+  color: #fff;
+}
+.select-sm, .select-table {
+  background: var(--surface-2, #1e293b);
+  color: var(--text-1, #f8fafc);
+  border: 1px solid var(--border, rgba(255,255,255,0.12));
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  width: 100%;
+}
+.input-table {
+  background: var(--surface-2, #1e293b);
+  color: var(--text-1, #f8fafc);
+  border: 1px solid var(--border, rgba(255,255,255,0.12));
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  width: 100%;
+}
+.status-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: bold;
+}
+.icon-up {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+.icon-down {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
 }
 </style>
