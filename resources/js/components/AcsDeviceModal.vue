@@ -88,7 +88,7 @@
 
               <div class="form-group" style="display: flex; justify-content: flex-end;">
                 <button type="submit" :disabled="isSavingPppoe" class="btn btn-primary btn-sm btn-icon-text">
-                  <span v-if="isSavingPppoe" class="spinning">🔄</span>
+                  <span v-if="isSavingPppoe" class="spinning"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>
                   <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                   <span>{{ isSavingPppoe ? 'Applying...' : 'Simpan PPPoE' }}</span>
                 </button>
@@ -108,13 +108,13 @@
               <div class="modal-footer-left">
                 <button type="button" @click="reboot" :disabled="isRebooting || isResetting" class="btn btn-danger-outline btn-icon-text">
                   <svg v-if="!isRebooting" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
-                  <span v-if="isRebooting" class="spinning">🔄</span>
+                  <span v-if="isRebooting" class="spinning"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>
                   <span>{{ isRebooting ? 'Rebooting...' : 'Reboot' }}</span>
                 </button>
                 
                 <button type="button" @click="factoryReset" :disabled="isRebooting || isResetting" class="btn btn-danger btn-icon-text">
                   <svg v-if="!isResetting" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 12v.01"/></svg>
-                  <span v-if="isResetting" class="spinning">🔄</span>
+                  <span v-if="isResetting" class="spinning"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>
                   <span>{{ isResetting ? 'Resetting...' : 'Factory Reset' }}</span>
                 </button>
               </div>
@@ -133,14 +133,14 @@
               WiFi Configuration
             </h4>
             <button type="button" @click="loadAdvancedWifi" :disabled="isLoadingWifi" class="btn btn-sm btn-secondary btn-icon-text">
-              <span v-if="isLoadingWifi" class="spinning">🔄</span>
+              <span v-if="isLoadingWifi" class="spinning"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>
               <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
               <span>Reload</span>
             </button>
           </div>
 
           <div v-if="isLoadingWifi" class="loading-state text-center py-5">
-            <div class="spinning mb-2" style="font-size: 28px;">🔄</div>
+            <div class="spinning mb-2" style="font-size: 28px;"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></div>
             <p class="text-muted">Memuat Konfigurasi WiFi TR-069...</p>
           </div>
 
@@ -151,7 +151,21 @@
           <div v-else class="wifi-config-container">
             <!-- 2.4GHz Panel -->
             <div class="wifi-band-panel mb-4" v-if="radio2g">
-              <div class="band-header">2.4Ghz</div>
+              <div class="band-header flex-between align-center">
+                <span>2.4Ghz</span>
+                <div class="band-actions" style="margin-right: 12px;">
+                  <div v-if="!radio2g.isEditing">
+                    <button type="button" @click="editRadio(radio2g)" class="btn-icon-edit" style="color: var(--accent)" title="Edit Pengaturan 2.4Ghz"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
+                  </div>
+                  <div v-else class="flex align-center gap-2">
+                    <button type="button" @click="saveRadio(1)" :disabled="radio2g.isSaving" class="btn-icon-edit color-good" title="Simpan">
+                      <span v-if="radio2g.isSaving" class="spinning"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>
+                      <span v-else><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Simpan</span>
+                    </button>
+                    <button type="button" @click="cancelEditRadio(radio2g)" :disabled="radio2g.isSaving" class="btn-icon-edit color-critical" title="Batal"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Batal</button>
+                  </div>
+                </div>
+              </div>
               
               <!-- Radio Settings Table -->
               <table class="wifi-radio-table">
@@ -159,21 +173,15 @@
                   <tr>
                     <td class="lbl">Wifi Enabled</td>
                     <td class="val">
-                      <div class="flex align-center gap-2">
-                        <input type="checkbox" v-model="radio2g.wifi_enabled" class="checkbox-modern">
-                        <button type="button" @click="saveRadio(1)" class="btn-icon-edit" title="Save Radio Enabled">✏️</button>
-                      </div>
+                      <input type="checkbox" v-model="radio2g.wifi_enabled" :disabled="!radio2g.isEditing" class="checkbox-modern">
                     </td>
                     <td class="lbl">Network Mode</td>
                     <td class="val">
-                      <div class="flex align-center gap-2">
-                        <select v-model="radio2g.network_mode" class="select-sm">
-                          <option value="b,g,n">b,g,n</option>
-                          <option value="b,g">b,g</option>
-                          <option value="n">n only</option>
-                        </select>
-                        <button type="button" @click="saveRadio(1)" class="btn-icon-edit" title="Save Network Mode">✏️</button>
-                      </div>
+                      <select v-model="radio2g.network_mode" :disabled="!radio2g.isEditing" class="select-sm">
+                        <option value="b,g,n">b,g,n</option>
+                        <option value="b,g">b,g</option>
+                        <option value="n">n only</option>
+                      </select>
                     </td>
                   </tr>
                   <tr>
@@ -181,38 +189,29 @@
                     <td class="val text-muted text-xs">{{ radio2g.possible_channels }}</td>
                     <td class="lbl">Transmit Power Control</td>
                     <td class="val">
-                      <div class="flex align-center gap-2">
-                        <select v-model="radio2g.transmit_power" class="select-sm">
-                          <option value="100">100 %</option>
-                          <option value="80">80 %</option>
-                          <option value="50">50 %</option>
-                          <option value="20">20 %</option>
-                        </select>
-                        <button type="button" @click="saveRadio(1)" class="btn-icon-edit" title="Save Transmit Power">✏️</button>
-                      </div>
+                      <select v-model="radio2g.transmit_power" :disabled="!radio2g.isEditing" class="select-sm">
+                        <option value="100">100 %</option>
+                        <option value="80">80 %</option>
+                        <option value="50">50 %</option>
+                        <option value="20">20 %</option>
+                      </select>
                     </td>
                   </tr>
                   <tr>
                     <td class="lbl">Channel In Use</td>
                     <td class="val">
-                      <div class="flex align-center gap-2">
-                        <select v-model="radio2g.channel" class="select-sm">
-                          <option value="0">Auto</option>
-                          <option v-for="ch in [1,2,3,4,5,6,7,8,9,10,11,12,13]" :key="ch" :value="String(ch)">{{ ch }}</option>
-                        </select>
-                        <button type="button" @click="saveRadio(1)" class="btn-icon-edit" title="Save Channel">✏️</button>
-                      </div>
+                      <select v-model="radio2g.channel" :disabled="!radio2g.isEditing" class="select-sm">
+                        <option value="0">Auto</option>
+                        <option v-for="ch in [1,2,3,4,5,6,7,8,9,10,11,12,13]" :key="ch" :value="String(ch)">{{ ch }}</option>
+                      </select>
                     </td>
                     <td class="lbl">BandWidth</td>
                     <td class="val">
-                      <div class="flex align-center gap-2">
-                        <select v-model="radio2g.bandwidth" class="select-sm">
-                          <option value="20 MHz">20 MHz</option>
-                          <option value="40 MHz">40 MHz</option>
-                          <option value="Auto">Auto</option>
-                        </select>
-                        <button type="button" @click="saveRadio(1)" class="btn-icon-edit" title="Save Bandwidth">✏️</button>
-                      </div>
+                      <select v-model="radio2g.bandwidth" :disabled="!radio2g.isEditing" class="select-sm">
+                        <option value="20 MHz">20 MHz</option>
+                        <option value="40 MHz">40 MHz</option>
+                        <option value="Auto">Auto</option>
+                      </select>
                     </td>
                   </tr>
                 </tbody>
@@ -237,32 +236,38 @@
                   <tbody>
                     <tr v-for="ssid in ssids2g" :key="ssid.index" :class="{'row-active': ssid.enabled}">
                       <td class="bold">{{ 'SSID' + ssid.index }}</td>
-                      <td><input type="checkbox" v-model="ssid.enabled" class="checkbox-modern"></td>
-                      <td><input type="checkbox" v-model="ssid.hide" class="checkbox-modern"></td>
+                      <td><input type="checkbox" v-model="ssid.enabled" :disabled="!ssid.isEditing" class="checkbox-modern"></td>
+                      <td><input type="checkbox" v-model="ssid.hide" :disabled="!ssid.isEditing" class="checkbox-modern"></td>
                       <td class="text-center">
-                        <span class="status-icon" :class="ssid.enabled ? 'icon-up' : 'icon-down'">{{ ssid.enabled ? '✔' : '✖' }}</span>
+                        <span class="status-icon" :class="ssid.enabled ? 'icon-up' : 'icon-down'">{{ ssid.enabled ? '<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : '<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' }}</span>
                       </td>
-                      <td><input type="text" v-model="ssid.name" class="input-table" placeholder="SSID Name"></td>
+                      <td><input type="text" v-model="ssid.name" :disabled="!ssid.isEditing" class="input-table" placeholder="SSID Name"></td>
                       <td>
-                        <select v-model="ssid.security_type" class="select-table">
+                        <select v-model="ssid.security_type" :disabled="!ssid.isEditing" class="select-table">
                           <option value="WPA2-PSK">WPA2-PSK</option>
                           <option value="WPA/WPA2-PSK">WPA/WPA2-PSK</option>
                           <option value="Open">Open (No Security)</option>
                         </select>
                       </td>
                       <td>
-                        <select v-model="ssid.max_clients" class="select-table">
+                        <select v-model="ssid.max_clients" :disabled="!ssid.isEditing" class="select-table">
                           <option :value="16">16</option>
                           <option :value="32">32</option>
                           <option :value="64">64</option>
                         </select>
                       </td>
-                      <td><input type="password" v-model="ssid.passkey" class="input-table" placeholder="••••••••"></td>
+                      <td><input type="password" v-model="ssid.passkey" :disabled="!ssid.isEditing" class="input-table" placeholder="••••••••"></td>
                       <td class="text-center">
-                        <button type="button" @click="saveSsid(ssid)" :disabled="ssid.isSaving" class="btn-icon-edit" title="Simpan SSID">
-                          <span v-if="ssid.isSaving" class="spinning">🔄</span>
-                          <span v-else>✏️</span>
-                        </button>
+                        <div v-if="!ssid.isEditing">
+                          <button type="button" @click="editSsid(ssid)" class="btn-icon-edit" title="Edit SSID"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                        </div>
+                        <div v-else class="flex gap-1 justify-center align-center">
+                          <button type="button" @click="saveSsid(ssid)" :disabled="ssid.isSaving" class="btn-icon-edit color-good" title="Simpan">
+                            <span v-if="ssid.isSaving" class="spinning"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>
+                            <span v-else><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                          </button>
+                          <button type="button" @click="cancelEditSsid(ssid)" :disabled="ssid.isSaving" class="btn-icon-edit color-critical" title="Batal"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                        </div>
                       </td>
                     </tr>
                   </tbody>
@@ -272,7 +277,21 @@
 
             <!-- 5GHz Panel -->
             <div class="wifi-band-panel mb-4" v-if="radio5g">
-              <div class="band-header">5Ghz</div>
+              <div class="band-header flex-between align-center">
+                <span>5Ghz</span>
+                <div class="band-actions" style="margin-right: 12px;">
+                  <div v-if="!radio5g.isEditing">
+                    <button type="button" @click="editRadio(radio5g)" class="btn-icon-edit" style="color: var(--accent)" title="Edit Pengaturan 5Ghz"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Edit</button>
+                  </div>
+                  <div v-else class="flex align-center gap-2">
+                    <button type="button" @click="saveRadio(5)" :disabled="radio5g.isSaving" class="btn-icon-edit color-good" title="Simpan">
+                      <span v-if="radio5g.isSaving" class="spinning"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>
+                      <span v-else><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Simpan</span>
+                    </button>
+                    <button type="button" @click="cancelEditRadio(radio5g)" :disabled="radio5g.isSaving" class="btn-icon-edit color-critical" title="Batal"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Batal</button>
+                  </div>
+                </div>
+              </div>
               
               <!-- Radio Settings Table -->
               <table class="wifi-radio-table">
@@ -280,21 +299,15 @@
                   <tr>
                     <td class="lbl">Wifi Enabled</td>
                     <td class="val">
-                      <div class="flex align-center gap-2">
-                        <input type="checkbox" v-model="radio5g.wifi_enabled" class="checkbox-modern">
-                        <button type="button" @click="saveRadio(5)" class="btn-icon-edit" title="Save Radio Enabled">✏️</button>
-                      </div>
+                      <input type="checkbox" v-model="radio5g.wifi_enabled" :disabled="!radio5g.isEditing" class="checkbox-modern">
                     </td>
                     <td class="lbl">Network Mode</td>
                     <td class="val">
-                      <div class="flex align-center gap-2">
-                        <select v-model="radio5g.network_mode" class="select-sm">
-                          <option value="a,n,ac">a,n,ac</option>
-                          <option value="n,ac">n,ac</option>
-                          <option value="ac">ac only</option>
-                        </select>
-                        <button type="button" @click="saveRadio(5)" class="btn-icon-edit" title="Save Network Mode">✏️</button>
-                      </div>
+                      <select v-model="radio5g.network_mode" :disabled="!radio5g.isEditing" class="select-sm">
+                        <option value="a,n,ac">a,n,ac</option>
+                        <option value="n,ac">n,ac</option>
+                        <option value="ac">ac only</option>
+                      </select>
                     </td>
                   </tr>
                   <tr>
@@ -302,39 +315,30 @@
                     <td class="val text-muted text-xs">{{ radio5g.possible_channels }}</td>
                     <td class="lbl">Transmit Power Control</td>
                     <td class="val">
-                      <div class="flex align-center gap-2">
-                        <select v-model="radio5g.transmit_power" class="select-sm">
-                          <option value="100">100 %</option>
-                          <option value="80">80 %</option>
-                          <option value="50">50 %</option>
-                          <option value="20">20 %</option>
-                        </select>
-                        <button type="button" @click="saveRadio(5)" class="btn-icon-edit" title="Save Transmit Power">✏️</button>
-                      </div>
+                      <select v-model="radio5g.transmit_power" :disabled="!radio5g.isEditing" class="select-sm">
+                        <option value="100">100 %</option>
+                        <option value="80">80 %</option>
+                        <option value="50">50 %</option>
+                        <option value="20">20 %</option>
+                      </select>
                     </td>
                   </tr>
                   <tr>
                     <td class="lbl">Channel In Use</td>
                     <td class="val">
-                      <div class="flex align-center gap-2">
-                        <select v-model="radio5g.channel" class="select-sm">
-                          <option value="0">Auto</option>
-                          <option v-for="ch in [36,40,44,48,52,56,60,64,149,153,157,161]" :key="ch" :value="String(ch)">{{ ch }}</option>
-                        </select>
-                        <button type="button" @click="saveRadio(5)" class="btn-icon-edit" title="Save Channel">✏️</button>
-                      </div>
+                      <select v-model="radio5g.channel" :disabled="!radio5g.isEditing" class="select-sm">
+                        <option value="0">Auto</option>
+                        <option v-for="ch in [36,40,44,48,52,56,60,64,149,153,157,161]" :key="ch" :value="String(ch)">{{ ch }}</option>
+                      </select>
                     </td>
                     <td class="lbl">BandWidth</td>
                     <td class="val">
-                      <div class="flex align-center gap-2">
-                        <select v-model="radio5g.bandwidth" class="select-sm">
-                          <option value="20 MHz">20 MHz</option>
-                          <option value="40 MHz">40 MHz</option>
-                          <option value="80 MHz">80 MHz</option>
-                          <option value="Auto">Auto</option>
-                        </select>
-                        <button type="button" @click="saveRadio(5)" class="btn-icon-edit" title="Save Bandwidth">✏️</button>
-                      </div>
+                      <select v-model="radio5g.bandwidth" :disabled="!radio5g.isEditing" class="select-sm">
+                        <option value="20 MHz">20 MHz</option>
+                        <option value="40 MHz">40 MHz</option>
+                        <option value="80 MHz">80 MHz</option>
+                        <option value="Auto">Auto</option>
+                      </select>
                     </td>
                   </tr>
                 </tbody>
@@ -359,32 +363,38 @@
                   <tbody>
                     <tr v-for="ssid in ssids5g" :key="ssid.index" :class="{'row-active': ssid.enabled}">
                       <td class="bold">{{ 'SSID' + ssid.index }}</td>
-                      <td><input type="checkbox" v-model="ssid.enabled" class="checkbox-modern"></td>
-                      <td><input type="checkbox" v-model="ssid.hide" class="checkbox-modern"></td>
+                      <td><input type="checkbox" v-model="ssid.enabled" :disabled="!ssid.isEditing" class="checkbox-modern"></td>
+                      <td><input type="checkbox" v-model="ssid.hide" :disabled="!ssid.isEditing" class="checkbox-modern"></td>
                       <td class="text-center">
-                        <span class="status-icon" :class="ssid.enabled ? 'icon-up' : 'icon-down'">{{ ssid.enabled ? '✔' : '✖' }}</span>
+                        <span class="status-icon" :class="ssid.enabled ? 'icon-up' : 'icon-down'">{{ ssid.enabled ? '<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : '<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' }}</span>
                       </td>
-                      <td><input type="text" v-model="ssid.name" class="input-table" placeholder="SSID Name"></td>
+                      <td><input type="text" v-model="ssid.name" :disabled="!ssid.isEditing" class="input-table" placeholder="SSID Name"></td>
                       <td>
-                        <select v-model="ssid.security_type" class="select-table">
+                        <select v-model="ssid.security_type" :disabled="!ssid.isEditing" class="select-table">
                           <option value="WPA2-PSK">WPA2-PSK</option>
                           <option value="WPA/WPA2-PSK">WPA/WPA2-PSK</option>
                           <option value="Open">Open (No Security)</option>
                         </select>
                       </td>
                       <td>
-                        <select v-model="ssid.max_clients" class="select-table">
+                        <select v-model="ssid.max_clients" :disabled="!ssid.isEditing" class="select-table">
                           <option :value="16">16</option>
                           <option :value="32">32</option>
                           <option :value="64">64</option>
                         </select>
                       </td>
-                      <td><input type="password" v-model="ssid.passkey" class="input-table" placeholder="••••••••"></td>
+                      <td><input type="password" v-model="ssid.passkey" :disabled="!ssid.isEditing" class="input-table" placeholder="••••••••"></td>
                       <td class="text-center">
-                        <button type="button" @click="saveSsid(ssid)" :disabled="ssid.isSaving" class="btn-icon-edit" title="Simpan SSID">
-                          <span v-if="ssid.isSaving" class="spinning">🔄</span>
-                          <span v-else>✏️</span>
-                        </button>
+                        <div v-if="!ssid.isEditing">
+                          <button type="button" @click="editSsid(ssid)" class="btn-icon-edit" title="Edit SSID"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                        </div>
+                        <div v-else class="flex gap-1 justify-center align-center">
+                          <button type="button" @click="saveSsid(ssid)" :disabled="ssid.isSaving" class="btn-icon-edit color-good" title="Simpan">
+                            <span v-if="ssid.isSaving" class="spinning"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>
+                            <span v-else><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                          </button>
+                          <button type="button" @click="cancelEditSsid(ssid)" :disabled="ssid.isSaving" class="btn-icon-edit color-critical" title="Batal"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                        </div>
                       </td>
                     </tr>
                   </tbody>
@@ -399,14 +409,14 @@
           <div class="hosts-header">
             <h4 class="form-section-title mb-0">Connected Devices <span class="badge badge-primary ml-2">{{ totalHosts }} Total</span></h4>
             <button type="button" @click="refreshHosts" :disabled="isRefreshingHosts" class="btn btn-primary-outline btn-sm btn-icon-text">
-              <span v-if="isRefreshingHosts" class="spinning">🔄</span>
+              <span v-if="isRefreshingHosts" class="spinning"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>
               <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
               <span>{{ isRefreshingHosts ? 'Refreshing...' : 'Refresh dari Modem' }}</span>
             </button>
           </div>
 
           <div v-if="isLoadingHosts" class="alert-box alert-box--warning mt-3">
-            <span class="spinning mr-2">🔄</span> Mengambil data klien...
+            <span class="spinning mr-2"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span> Mengambil data klien...
           </div>
           <div v-else-if="hostsError" class="alert-box alert-box--danger mt-3">
             <span>{{ hostsError }}</span>
@@ -495,7 +505,7 @@
                   <div class="ping-input-row">
                     <input v-model="pingForm.host" type="text" class="input-modern" placeholder="e.g. 8.8.8.8">
                     <button type="button" @click="triggerPing" :disabled="isPinging" class="btn btn-primary">
-                      <span v-if="isPinging" class="spinning mr-2">🔄</span>
+                      <span v-if="isPinging" class="spinning mr-2"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>
                       {{ isPinging ? 'Pinging...' : 'Ping' }}
                     </button>
                   </div>
@@ -510,7 +520,7 @@
                   <div class="ping-result-header">
                     <strong class="color-text-1">Hasil Ping (State: {{ pingResult.state }})</strong>
                     <button v-if="pingResult.state === 'Requested' || pingResult.state === 'None'" type="button" @click="fetchPingResult" class="btn btn-secondary btn-sm" :disabled="isFetchingPing">
-                      <span v-if="isFetchingPing" class="spinning mr-2">🔄</span> Cek Hasil
+                      <span v-if="isFetchingPing" class="spinning mr-2"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span> Cek Hasil
                     </button>
                   </div>
                   
@@ -540,7 +550,7 @@
                   <div class="ping-input-row">
                     <input v-model="tracerouteForm.host" type="text" class="input-modern" placeholder="e.g. 8.8.8.8">
                     <button type="button" @click="triggerTraceroute" :disabled="isTracerouting" class="btn btn-primary">
-                      <span v-if="isTracerouting" class="spinning mr-2">🔄</span>
+                      <span v-if="isTracerouting" class="spinning mr-2"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>
                       {{ isTracerouting ? 'Tracerouting...' : 'Trace' }}
                     </button>
                   </div>
@@ -554,7 +564,7 @@
                   <div class="ping-result-header">
                     <strong class="color-text-1">Hasil Traceroute (State: {{ tracerouteResult.state }})</strong>
                     <button v-if="tracerouteResult.state === 'Requested' || tracerouteResult.state === 'None'" type="button" @click="fetchTracerouteResult" class="btn btn-secondary btn-sm" :disabled="isFetchingTraceroute">
-                      <span v-if="isFetchingTraceroute" class="spinning mr-2">🔄</span> Cek Hasil
+                      <span v-if="isFetchingTraceroute" class="spinning mr-2"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span> Cek Hasil
                     </button>
                   </div>
                   
@@ -599,7 +609,7 @@
                   <div class="ping-input-row">
                     <input v-model="speedtestForm.url" type="text" class="input-modern" :placeholder="speedtestForm.type === 'download' ? 'http://speedtest.isp.net/100MB.bin' : 'http://speedtest.isp.net/upload.php'">
                     <button type="button" @click="triggerSpeedtest" :disabled="isSpeedtesting" class="btn btn-primary">
-                      <span v-if="isSpeedtesting" class="spinning mr-2">🔄</span>
+                      <span v-if="isSpeedtesting" class="spinning mr-2"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span>
                       {{ isSpeedtesting ? 'Testing...' : 'Test' }}
                     </button>
                   </div>
@@ -614,7 +624,7 @@
                   <div class="ping-result-header">
                     <strong class="color-text-1">Hasil Speedtest (State: {{ speedtestResult.state }})</strong>
                     <button v-if="speedtestResult.state === 'Requested' || speedtestResult.state === 'None'" type="button" @click="fetchSpeedtestResult" class="btn btn-secondary btn-sm" :disabled="isFetchingSpeedtest">
-                      <span v-if="isFetchingSpeedtest" class="spinning mr-2">🔄</span> Cek Hasil
+                      <span v-if="isFetchingSpeedtest" class="spinning mr-2"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></span> Cek Hasil
                     </button>
                   </div>
                   
@@ -787,11 +797,23 @@ const loadAdvancedWifi = async () => {
   wifiError.value = ''
   try {
     const res = await store.fetchAdvancedWifi(props.device.id)
-    radio2g.value = res.radio_2g
-    radio5g.value = res.radio_5g
+    if (res.radio_2g) {
+      radio2g.value = { ...res.radio_2g, isEditing: false, isSaving: false, _original: { ...res.radio_2g } }
+    } else {
+      radio2g.value = null
+    }
+    
+    if (res.radio_5g) {
+      radio5g.value = { ...res.radio_5g, isEditing: false, isSaving: false, _original: { ...res.radio_5g } }
+    } else {
+      radio5g.value = null
+    }
+    
     ssids.value = (res.ssids || []).map((item: any) => ({
       ...item,
-      isSaving: false
+      isSaving: false,
+      isEditing: false,
+      _original: { ...item }
     }))
   } catch (err: any) {
     wifiError.value = err.message
@@ -800,12 +822,29 @@ const loadAdvancedWifi = async () => {
   }
 }
 
+const editRadio = (radio: any) => {
+  radio._original = { 
+    wifi_enabled: radio.wifi_enabled, 
+    channel: radio.channel, 
+    network_mode: radio.network_mode, 
+    transmit_power: radio.transmit_power, 
+    bandwidth: radio.bandwidth 
+  }
+  radio.isEditing = true
+}
+
+const cancelEditRadio = (radio: any) => {
+  Object.assign(radio, radio._original)
+  radio.isEditing = false
+}
+
 const saveRadio = async (radioIndex: number) => {
   if (!props.device) return
   const targetRadio = radioIndex === 1 ? radio2g.value : radio5g.value
   if (!targetRadio) return
   
   wifiError.value = ''
+  targetRadio.isSaving = true
   try {
     await store.updateRadioConfig(props.device.id, {
       radio_index: radioIndex,
@@ -815,10 +854,38 @@ const saveRadio = async (radioIndex: number) => {
       transmit_power: targetRadio.transmit_power,
       bandwidth: targetRadio.bandwidth
     })
+    targetRadio.isEditing = false
+    targetRadio._original = { 
+      wifi_enabled: targetRadio.wifi_enabled, 
+      channel: targetRadio.channel, 
+      network_mode: targetRadio.network_mode, 
+      transmit_power: targetRadio.transmit_power, 
+      bandwidth: targetRadio.bandwidth 
+    }
+    emit('updated', `Pengaturan Radio ${radioIndex === 1 ? '2.4GHz' : '5GHz'} telah dikirim ke modem.`)
     alert(`Pengaturan Radio ${radioIndex === 1 ? '2.4GHz' : '5GHz'} telah dikirim ke modem.`)
   } catch (err: any) {
     wifiError.value = err.message
+  } finally {
+    targetRadio.isSaving = false
   }
+}
+
+const editSsid = (ssid: any) => {
+  ssid._original = { 
+    enabled: ssid.enabled,
+    hide: ssid.hide,
+    name: ssid.name,
+    security_type: ssid.security_type,
+    max_clients: ssid.max_clients,
+    passkey: ssid.passkey
+  }
+  ssid.isEditing = true
+}
+
+const cancelEditSsid = (ssid: any) => {
+  Object.assign(ssid, ssid._original)
+  ssid.isEditing = false
 }
 
 const saveSsid = async (ssidObj: any) => {
@@ -836,6 +903,16 @@ const saveSsid = async (ssidObj: any) => {
       max_clients: ssidObj.max_clients,
       passkey: ssidObj.passkey
     })
+    ssidObj.isEditing = false
+    ssidObj._original = { 
+      enabled: ssidObj.enabled,
+      hide: ssidObj.hide,
+      name: ssidObj.name,
+      security_type: ssidObj.security_type,
+      max_clients: ssidObj.max_clients,
+      passkey: ssidObj.passkey
+    }
+    emit('updated', `Perintah simpan SSID ${ssidObj.index} (${ssidObj.name}) telah dikirim ke modem.`)
     alert(`Perintah simpan SSID ${ssidObj.index} (${ssidObj.name}) telah dikirim ke modem.`)
   } catch (err: any) {
     wifiError.value = err.message
