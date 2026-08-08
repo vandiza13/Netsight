@@ -8,12 +8,34 @@ use Vandiza\NetsightCore\Models\AcsDevice;
 
 class CheckAcsTasks extends Command
 {
-    protected $signature = 'acs:check-tasks {genieacs_id}';
+    protected $signature = 'acs:check-tasks {genieacs_id?}';
     protected $description = 'Check queued tasks and faults for a device in GenieACS';
 
     public function handle()
     {
         $genieacsId = $this->argument('genieacs_id');
+
+        if (!$genieacsId) {
+            $devices = AcsDevice::orderBy('updated_at', 'desc')->take(20)->get();
+            if ($devices->isEmpty()) {
+                $this->error('Tidak ada device di database lokal.');
+                return 1;
+            }
+            
+            $options = [];
+            foreach ($devices as $d) {
+                $options[$d->genieacs_id] = "{$d->genieacs_id} (SN: {$d->serial_number})";
+            }
+            
+            $choice = $this->choice(
+                'Pilih ID Modem (menampilkan 20 terakhir):',
+                array_values($options)
+            );
+            
+            // Extract the genieacs_id from the chosen string
+            $genieacsId = array_search($choice, $options);
+        }
+
         $encodedId = rawurlencode($genieacsId);
         $genieUrl = env('GENIEACS_API_URL', 'http://10.99.99.1:7557');
 
