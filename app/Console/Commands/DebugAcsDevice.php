@@ -18,14 +18,17 @@ class DebugAcsDevice extends Command
 
         $this->info("Fetching device data for: $genieacsId");
         
-        $response = Http::timeout(10)->get("$genieUrl/devices/$encodedId");
+        $response = Http::timeout(10)->get("$genieUrl/devices", [
+            'query' => json_encode(['_id' => $genieacsId])
+        ]);
 
-        if ($response->failed()) {
+        if ($response->failed() || empty($response->json())) {
             $this->error("Failed to connect to GenieACS or device not found.");
             return 1;
         }
 
-        $device = $response->json();
+        $devices = $response->json();
+        $device = $devices[0];
         
         $this->info("\n=== DIAGNOSTIK MODEM ===");
         $this->line("IP Address (dari GenieACS): " . ($device['_ip'] ?? 'Tidak ada'));
