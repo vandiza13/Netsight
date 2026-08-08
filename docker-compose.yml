@@ -113,6 +113,8 @@ services:
       - "7547"
       - "7557"
       - "7548"
+    ports:
+      - "3478:3478/udp" # STUN Server Port
     environment:
       - GENIEACS_MONGODB_CONNECTION_URL=mongodb://mongodb:27017/genieacs
       - GENIEACS_EXT_DIR=/opt/genieacs/ext
