@@ -8,21 +8,15 @@ use Vandiza\NetsightCore\Services\GenieAcsService;
 class SetupAcsPresets extends Command
 {
     protected $signature = 'acs:setup-presets';
-    protected $description = 'Setup GenieACS Fast Inform and STUN Presets to solve NAT delays';
+    protected $description = 'Setup GenieACS presets (STUN preset disabled - uses $exists which kills GenieACS 1.2)';
 
     public function handle(GenieAcsService $acsService)
     {
-        $this->info("Membuat Preset STUN dan Fast Inform (60 detik) di GenieACS...");
-        
-        $success = $acsService->ensureFastInformPreset();
-        
-        if ($success) {
-            $this->info("✅ Preset berhasil dibuat! Semua modem yang aktif akan diatur untuk lapor setiap 60 detik dan mengaktifkan STUN Server.");
-            $this->info("Perubahan ini akan otomatis berlaku pada semua modem sesaat setelah mereka melapor untuk pertama kalinya.");
-            return 0;
-        } else {
-            $this->error("❌ Gagal membuat preset di GenieACS. Cek error log.");
-            return 1;
-        }
+        $this->warn("⚠️  Perintah ini sudah DINONAKTIFKAN secara permanen.");
+        $this->warn("   Alasan: Preset 00_SET_FAST_INFORM_AND_STUN menggunakan operator \$exists");
+        $this->warn("   yang TIDAK didukung GenieACS 1.2, menyebabkan SELURUH koneksi modem gagal.");
+        $this->info("");
+        $this->info("PeriodicInform sudah dikelola oleh preset 'netsight_auto' + provision 'netsight_refresh' (interval 300 detik).");
+        return 0;
     }
 }
