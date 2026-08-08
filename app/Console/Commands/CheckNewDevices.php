@@ -15,12 +15,13 @@ class CheckNewDevices extends Command
         
         $this->info("Mengambil 10 perangkat terakhir yang melapor ke GenieACS...");
         
-        // Fetch devices sorted by _lastInform descending
-        $url = "$genieUrl/devices?sort=-_lastInform&limit=10";
+        // Fetch all devices (GenieACS 1.2 requires query param or projection)
+        $url = "$genieUrl/devices?query=%7B%7D";
         $response = Http::timeout(10)->get($url);
 
         if (!$response->successful()) {
             $this->error("Gagal terhubung ke GenieACS. Status: " . $response->status());
+            $this->error("Response: " . $response->body());
             return 1;
         }
 
@@ -30,6 +31,14 @@ class CheckNewDevices extends Command
             $this->warn("TIDAK ADA PERANGKAT SAMA SEKALI DI GENIEACS!");
             return 0;
         }
+
+        usort($devices, function($a, $b) {
+            $timeA = strtotime($a['_lastInform'] ?? '1970-01-01');
+            $timeB = strtotime($b['_lastInform'] ?? '1970-01-01');
+            return $timeB <=> $timeA;
+        });
+
+        $devices = array_slice($devices, 0, 10);
 
         foreach ($devices as $device) {
             $id = $device['_id'] ?? 'Unknown ID';
