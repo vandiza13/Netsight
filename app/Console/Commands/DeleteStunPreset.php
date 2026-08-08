@@ -13,17 +13,18 @@ class DeleteStunPreset extends Command
     public function handle()
     {
         $genieUrl = rtrim(env('GENIEACS_NBI_URL', 'http://genieacs:7557'), '/');
-        $presetId = "00_SET_FAST_INFORM_AND_STUN";
+        $presets = ["00_SET_FAST_INFORM", "00_SET_FAST_INFORM_AND_STUN"];
 
-        $this->info("Menghapus preset beracun: $presetId");
-        
-        $response = Http::timeout(10)->delete("$genieUrl/presets/$presetId");
+        foreach ($presets as $presetId) {
+            $this->info("Menghapus preset beracun: $presetId");
+            $response = Http::timeout(10)->delete("$genieUrl/presets/$presetId");
 
-        if ($response->successful()) {
-            $this->info("✅ Preset berhasil dihapus dari database!");
-        } else {
-            $this->error("❌ Gagal menghapus preset! HTTP Status: " . $response->status());
-            $this->error("Response: " . $response->body());
+            if ($response->successful()) {
+                $this->info("✅ Preset $presetId berhasil dihapus dari database!");
+            } else {
+                $this->error("❌ Gagal menghapus preset $presetId! HTTP Status: " . $response->status());
+                $this->error("Response: " . $response->body());
+            }
         }
         
         return 0;
