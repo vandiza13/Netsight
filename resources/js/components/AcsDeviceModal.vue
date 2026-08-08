@@ -874,7 +874,12 @@ const saveRadio = async (radioIndex: number) => {
     }
     const successMsg = res.message || `Perintah simpan pengaturan Radio ${band} telah dikirim ke modem.`;
     emit('updated', successMsg)
-    toastStore.success(successMsg)
+    
+    if (res.status === 'warning' && res.execution_type === 'queued') {
+      toastStore.info(successMsg) // Biru
+    } else {
+      toastStore.success(successMsg) // Hijau
+    }
   } catch (err: any) {
     wifiError.value = err.message
     toastStore.error(err.message || 'Gagal menyimpan pengaturan radio')
@@ -926,7 +931,12 @@ const saveSsid = async (ssidObj: any) => {
     }
     const successMsg = res.message || `Perintah simpan SSID ${ssidObj.index} (${ssidObj.name}) telah dikirim ke modem.`;
     emit('updated', successMsg)
-    toastStore.success(successMsg)
+    
+    if (res.status === 'warning' && res.execution_type === 'queued') {
+      toastStore.info(successMsg)
+    } else {
+      toastStore.success(successMsg)
+    }
   } catch (err: any) {
     wifiError.value = err.message
     toastStore.error(err.message || 'Gagal menyimpan SSID')
@@ -951,8 +961,15 @@ const savePppoe = async () => {
   pppoeError.value = ''
   isSavingPppoe.value = true
   try {
-    await store.updatePppoeConfig(props.device.id, pppoeForm)
-    emit('updated', 'PPPoE config update requested.')
+    const res = await store.updatePppoeConfig(props.device.id, pppoeForm)
+    const successMsg = res.message || 'Perintah ubah PPPoE telah dikirim ke modem. Modem mungkin akan terputus sesaat.'
+    emit('updated', successMsg)
+    
+    if (res.status === 'warning' && res.execution_type === 'queued') {
+      toastStore.info(successMsg)
+    } else {
+      toastStore.success(successMsg)
+    }
     
     // Optional: Update local modal prop data directly
     if (pppoeForm.username) {
@@ -961,7 +978,6 @@ const savePppoe = async () => {
     
     // Reset password field after submit
     pppoeForm.password = ''
-    alert('Perintah ubah PPPoE telah dikirim ke modem. Modem mungkin akan terputus sesaat.')
   } catch (err: any) {
     pppoeError.value = err.message
   } finally {
