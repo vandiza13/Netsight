@@ -37,7 +37,7 @@ class CheckAcsTasks extends Command
         }
 
         $encodedId = rawurlencode($genieacsId);
-        $genieUrl = env('GENIEACS_API_URL', 'http://10.99.99.1:7557');
+        $genieUrl = rtrim(env('GENIEACS_NBI_URL', 'http://genieacs:7557'), '/');
 
         $this->info("Fetching tasks for: $genieacsId");
         
