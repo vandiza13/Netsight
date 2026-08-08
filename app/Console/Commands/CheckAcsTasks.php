@@ -41,7 +41,8 @@ class CheckAcsTasks extends Command
 
         $this->info("Fetching tasks for: $genieacsId");
         
-        $response = Http::timeout(10)->get("$genieUrl/devices/$encodedId/tasks");
+        $query = rawurlencode(json_encode(['device' => $genieacsId]));
+        $response = Http::timeout(10)->get("$genieUrl/tasks?query=$query");
 
         if ($response->failed()) {
             $this->error("Failed to connect to GenieACS.");
