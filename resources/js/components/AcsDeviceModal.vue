@@ -177,14 +177,15 @@
                     </td>
                     <td class="lbl">Network Mode</td>
                     <td class="val">
-                      <select v-model="radio2g.network_mode" :disabled="!radio2g.isEditing" class="select-sm">
-                        <option v-if="!['b,g,n', 'b,g', 'n', '802.11b/g/n', '802.11b/g'].includes(radio2g.network_mode)" :value="radio2g.network_mode">{{ radio2g.network_mode }}</option>
-                        <option value="b,g,n">b,g,n</option>
-                        <option value="b,g">b,g</option>
-                        <option value="n">n only</option>
-                        <option value="802.11b/g/n">802.11b/g/n</option>
-                        <option value="802.11b/g">802.11b/g</option>
-                      </select>
+                        <select v-model="radio2g.network_mode" :disabled="!radio2g.isEditing" class="select-sm">
+                          <option v-if="!['b,g,n', 'g,n', 'b,g', 'n', 'g', 'b'].includes(radio2g.network_mode)" :value="radio2g.network_mode">{{ radio2g.network_mode }}</option>
+                          <option value="b,g,n">b,g,n</option>
+                          <option value="g,n">g,n</option>
+                          <option value="b,g">b,g</option>
+                          <option value="n">n</option>
+                          <option value="g">g</option>
+                          <option value="b">b</option>
+                        </select>
                     </td>
                   </tr>
                   <tr>
@@ -211,8 +212,9 @@
                     <td class="lbl">BandWidth</td>
                     <td class="val">
                       <select v-model="radio2g.bandwidth" :disabled="!radio2g.isEditing" class="select-sm">
-                        <option value="20 MHz">20 MHz</option>
-                        <option value="40 MHz">40 MHz</option>
+                        <option v-if="!['20MHz', '40MHz', 'Auto'].includes(radio2g.bandwidth)" :value="radio2g.bandwidth">{{ radio2g.bandwidth }}</option>
+                        <option value="20MHz">20MHz</option>
+                        <option value="40MHz">40MHz</option>
                         <option value="Auto">Auto</option>
                       </select>
                     </td>
@@ -247,13 +249,12 @@
                       <td><input type="text" v-model="ssid.name" :disabled="!ssid.isEditing" class="input-table" placeholder="SSID Name"></td>
                       <td>
                         <select v-model="ssid.security_type" :disabled="!ssid.isEditing" class="select-table">
-                          <option v-if="!['WPA2-PSK', 'WPA/WPA2-PSK', 'WPA-PSK/WPA2-PSK', 'Open', 'None', 'Basic'].includes(ssid.security_type)" :value="ssid.security_type">{{ ssid.security_type }}</option>
-                          <option value="WPA2-PSK">WPA2-PSK</option>
-                          <option value="WPA/WPA2-PSK">WPA/WPA2-PSK</option>
-                          <option value="WPA-PSK/WPA2-PSK">WPA-PSK/WPA2-PSK</option>
-                          <option value="Open">Open (No Security)</option>
-                          <option value="None">None (Open)</option>
-                          <option value="Basic">Basic (Open)</option>
+                          <option v-if="!['WPAand11i', '11i', 'WPA', 'Basic', 'None'].includes(ssid.security_type)" :value="ssid.security_type">{{ ssid.security_type }}</option>
+                          <option value="WPAand11i">WPA/WPA2-PSK</option>
+                          <option value="11i">WPA2-PSK</option>
+                          <option value="WPA">WPA-PSK</option>
+                          <option value="Basic">Open (Basic)</option>
+                          <option value="None">Open (None)</option>
                         </select>
                       </td>
                       <td>
@@ -310,12 +311,12 @@
                     <td class="lbl">Network Mode</td>
                     <td class="val">
                       <select v-model="radio5g.network_mode" :disabled="!radio5g.isEditing" class="select-sm">
-                        <option v-if="!['a,n,ac', 'n,ac', 'ac', '802.11a/n/ac', '802.11ac'].includes(radio5g.network_mode)" :value="radio5g.network_mode">{{ radio5g.network_mode }}</option>
+                        <option v-if="!['a,n,ac', 'n,ac', 'ac', 'a,n', 'n'].includes(radio5g.network_mode)" :value="radio5g.network_mode">{{ radio5g.network_mode }}</option>
                         <option value="a,n,ac">a,n,ac</option>
                         <option value="n,ac">n,ac</option>
-                        <option value="ac">ac only</option>
-                        <option value="802.11a/n/ac">802.11a/n/ac</option>
-                        <option value="802.11ac">802.11ac</option>
+                        <option value="ac">ac</option>
+                        <option value="a,n">a,n</option>
+                        <option value="n">n</option>
                       </select>
                     </td>
                   </tr>
@@ -343,9 +344,10 @@
                     <td class="lbl">BandWidth</td>
                     <td class="val">
                       <select v-model="radio5g.bandwidth" :disabled="!radio5g.isEditing" class="select-sm">
-                        <option value="20 MHz">20 MHz</option>
-                        <option value="40 MHz">40 MHz</option>
-                        <option value="80 MHz">80 MHz</option>
+                        <option v-if="!['20MHz', '40MHz', '80MHz', 'Auto'].includes(radio5g.bandwidth)" :value="radio5g.bandwidth">{{ radio5g.bandwidth }}</option>
+                        <option value="20MHz">20MHz</option>
+                        <option value="40MHz">40MHz</option>
+                        <option value="80MHz">80MHz</option>
                         <option value="Auto">Auto</option>
                       </select>
                     </td>
@@ -380,13 +382,12 @@
                       <td><input type="text" v-model="ssid.name" :disabled="!ssid.isEditing" class="input-table" placeholder="SSID Name"></td>
                       <td>
                         <select v-model="ssid.security_type" :disabled="!ssid.isEditing" class="select-table">
-                          <option v-if="!['WPA2-PSK', 'WPA/WPA2-PSK', 'WPA-PSK/WPA2-PSK', 'Open', 'None', 'Basic'].includes(ssid.security_type)" :value="ssid.security_type">{{ ssid.security_type }}</option>
-                          <option value="WPA2-PSK">WPA2-PSK</option>
-                          <option value="WPA/WPA2-PSK">WPA/WPA2-PSK</option>
-                          <option value="WPA-PSK/WPA2-PSK">WPA-PSK/WPA2-PSK</option>
-                          <option value="Open">Open (No Security)</option>
-                          <option value="None">None (Open)</option>
-                          <option value="Basic">Basic (Open)</option>
+                          <option v-if="!['WPAand11i', '11i', 'WPA', 'Basic', 'None'].includes(ssid.security_type)" :value="ssid.security_type">{{ ssid.security_type }}</option>
+                          <option value="WPAand11i">WPA/WPA2-PSK</option>
+                          <option value="11i">WPA2-PSK</option>
+                          <option value="WPA">WPA-PSK</option>
+                          <option value="Basic">Open (Basic)</option>
+                          <option value="None">Open (None)</option>
                         </select>
                       </td>
                       <td>
