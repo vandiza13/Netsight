@@ -88,6 +88,7 @@ services:
     command: --wiredTigerCacheSizeGB 0.25
     volumes:
       - mongodata:/data/db
+      - ./docker/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
       - netsight
     deploy:
