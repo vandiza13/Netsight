@@ -257,7 +257,10 @@
                         </select>
                       </td>
                       <td>
-                        <input type="number" v-model="ssid.max_clients" :disabled="!ssid.isEditing" class="input-table" min="1" max="64">
+                        <select v-model="ssid.max_clients" :disabled="!ssid.isEditing" class="select-table text-center">
+                          <option value="0">0 (No Limit)</option>
+                          <option v-for="n in 32" :key="n" :value="n">{{ n }}</option>
+                        </select>
                       </td>
                       <td><input type="password" v-model="ssid.passkey" :disabled="!ssid.isEditing" class="input-table" placeholder="••••••••"></td>
                       <td class="text-center">
@@ -387,7 +390,10 @@
                         </select>
                       </td>
                       <td>
-                        <input type="number" v-model="ssid.max_clients" :disabled="!ssid.isEditing" class="input-table" min="1" max="64">
+                        <select v-model="ssid.max_clients" :disabled="!ssid.isEditing" class="select-table text-center">
+                          <option value="0">0 (No Limit)</option>
+                          <option v-for="n in 32" :key="n" :value="n">{{ n }}</option>
+                        </select>
                       </td>
                       <td><input type="password" v-model="ssid.passkey" :disabled="!ssid.isEditing" class="input-table" placeholder="••••••••"></td>
                       <td class="text-center">
