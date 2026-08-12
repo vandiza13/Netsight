@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'genieacs' => [
+        'url' => env('GENIEACS_NBI_URL', 'http://genieacs:7557'),
+        'secret' => env('GENIEACS_NBI_SECRET', 'netsight_genieacs_secret_key'),
+    ],
+
 ];
