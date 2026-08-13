@@ -69,6 +69,10 @@ class WarmDemoSandboxes extends Command
 
         // 4. Run migrations on the new schema
         Artisan::call('migrate', [
+            '--path' => [
+                'database/migrations',
+                'packages/vandiza/netsight-core/database/migrations',
+            ],
             '--force' => true,
         ]);
 
