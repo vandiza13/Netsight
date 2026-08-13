@@ -97,13 +97,13 @@
               <table class="premium-table">
                 <thead>
                   <tr>
-                    <th style="width: 8%;">STATUS</th>
-                    <th style="width: 20%;">DEVICE INFO</th>
-                    <th style="width: 16%;">PPPoE</th>
+                    <th style="width: 10%;">STATUS</th>
+                    <th style="width: 22%;">DEVICE INFO</th>
+                    <th style="width: 15%;">PPPoE</th>
                     <th style="width: 12%;">REDAMAN (RX)</th>
-                    <th style="width: 14%;">Wi-Fi SSID</th>
-                    <th style="width: 14%;">LAST INFORM</th>
-                    <th style="width: 16%; text-align: right;">AKSI</th>
+                    <th style="width: 15%;">Wi-Fi SSID</th>
+                    <th style="width: 12%;">LAST INFORM</th>
+                    <th style="width: 14%; text-align: right;">AKSI</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -173,9 +173,8 @@
                         <button class="btn-action-icon" @click="refreshParams(device.id)" title="Refresh Data">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
                         </button>
-                        <button class="btn btn-sm btn-primary btn-icon-text" @click="openModal(device)" title="Manage Device">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-                          <span>Kelola</span>
+                        <button class="btn-action-icon btn-action-icon--primary" @click="openModal(device)" title="Manage Device">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
                       </div>
                     </td>
@@ -563,6 +562,16 @@ const deleteDeviceConfirm = async (deviceId: number, serialNumber: string) => {
   color: var(--text-1);
   border-color: var(--border-hover);
 }
+.btn-action-icon--primary {
+  color: var(--accent);
+  background: rgba(56, 189, 248, 0.05);
+  border-color: rgba(56, 189, 248, 0.2);
+}
+.btn-action-icon--primary:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
 .btn-action-icon--danger:hover {
   background: rgba(244, 63, 94, 0.1);
   color: #f43f5e;
@@ -571,12 +580,12 @@ const deleteDeviceConfirm = async (deviceId: number, serialNumber: string) => {
 
 /* ── Inform Status ──────────────────────────────────────── */
 .inform-text {
-  font-weight: 500;
-  font-size: 0.85rem;
+  font-weight: 400;
+  font-size: 0.8rem;
 }
-.inform-fresh { color: #10b981; }
-.inform-stale { color: #f59e0b; }
-.inform-dead { color: #f43f5e; }
+.inform-fresh { color: #34d399; } /* Softer green */
+.inform-stale { color: #fbbf24; } /* Softer amber */
+.inform-dead { color: #fb7185; } /* Softer red */
 
 /* ── Alert Boxes ────────────────────────────────────────── */
 .alert-box {
@@ -650,7 +659,7 @@ const deleteDeviceConfirm = async (deviceId: number, serialNumber: string) => {
   top: 0;
   background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(8px);
-  padding: 16px;
+  padding: 14px 16px;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -660,7 +669,7 @@ const deleteDeviceConfirm = async (deviceId: number, serialNumber: string) => {
   z-index: 10;
 }
 .premium-table td {
-  padding: 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid rgba(255,255,255,0.03);
   font-size: 0.875rem;
   color: var(--text-1);
@@ -691,18 +700,15 @@ const deleteDeviceConfirm = async (deviceId: number, serialNumber: string) => {
 .device-info-col {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
-.cust-title { font-weight: 600; color: var(--text-1); }
-.val-code-xs { font-size: 0.75rem; color: var(--text-2); font-family: var(--font-mono); }
-.device-vendor-text { font-size: 0.75rem; color: var(--text-3); }
+.cust-title { font-weight: 500; color: var(--text-1); font-size: 0.9rem; letter-spacing: 0.01em; }
+.val-code-xs { font-size: 0.75rem; color: var(--text-2); font-family: var(--font-mono); opacity: 0.8; }
+.device-vendor-text { font-size: 0.7rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.02em; }
 
 .pppoe-tag {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: #38bdf8;
-  background: rgba(56, 189, 248, 0.1);
-  padding: 2px 8px;
-  border-radius: 4px;
   display: inline-block;
   font-weight: 500;
 }
@@ -715,37 +721,36 @@ const deleteDeviceConfirm = async (deviceId: number, serialNumber: string) => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 14px;
-  border-radius: 9999px;
-  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 600;
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   letter-spacing: 0.02em;
-  min-width: 90px;
+  min-width: 60px;
   border: 1px solid transparent;
 }
-.dbm-good { background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
-.dbm-warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); }
-.dbm-critical { background: rgba(244, 63, 94, 0.15); color: #f43f5e; border-color: rgba(244, 63, 94, 0.3); }
-.dbm-offline { background: rgba(255,255,255,0.05); color: var(--text-3); border-color: rgba(255,255,255,0.1); }
+.dbm-good { background: rgba(52, 211, 153, 0.1); color: #34d399; border-color: rgba(52, 211, 153, 0.2); }
+.dbm-warning { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: rgba(251, 191, 36, 0.2); }
+.dbm-critical { background: rgba(251, 113, 133, 0.1); color: #fb7185; border-color: rgba(251, 113, 133, 0.2); }
+.dbm-offline { background: rgba(255,255,255,0.03); color: var(--text-3); border-color: rgba(255,255,255,0.05); }
 
 /* ── WiFi Badge ─────────────────────────────────────────── */
 .wifi-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  padding: 5px 12px;
-  border-radius: 8px;
-  max-width: 180px;
+  background: transparent;
+  padding: 0;
+  max-width: 160px;
 }
 .wifi-badge svg {
   flex-shrink: 0;
-  color: var(--text-3);
+  color: var(--text-2);
 }
 .wifi-name {
-  font-weight: 500;
+  font-weight: 400;
+  font-size: 0.85rem;
   color: var(--text-1);
   overflow: hidden;
   text-overflow: ellipsis;
