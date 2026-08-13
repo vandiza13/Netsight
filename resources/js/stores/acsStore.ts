@@ -186,6 +186,15 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
+  const deleteDevice = async (deviceId: number) => {
+    try {
+      const response = await api.delete(`/acs/devices/${deviceId}`)
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal menghapus perangkat.' }
+    }
+  }
+
   return {
     devices,
     stats,
@@ -209,6 +218,7 @@ export const useAcsStore = defineStore('acs', () => {
     updatePppoeConfig,
     fetchAdvancedWifi,
     updateAdvancedWifi,
-    updateRadioConfig
+    updateRadioConfig,
+    deleteDevice
   }
 })

@@ -85,7 +85,7 @@
         </div>
 
         <!-- Success Notification -->
-        <div v-if="notification" class="alert-box alert-box--success fade-in">
+        <div v-if="notification" :class="['alert-box', `alert-box--${notificationType}`, 'fade-in']">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           <span>{{ notification }}</span>
         </div>
@@ -97,12 +97,13 @@
               <table class="premium-table">
                 <thead>
                   <tr>
-                    <th style="width: 10%;">STATUS</th>
-                    <th style="width: 22%;">DEVICE INFO</th>
-                    <th style="width: 18%;">PPPoE</th>
-                    <th style="width: 14%;">REDAMAN (RX)</th>
-                    <th style="width: 18%;">Wi-Fi SSID</th>
-                    <th style="width: 18%; text-align: right;">AKSI</th>
+                    <th style="width: 8%;">STATUS</th>
+                    <th style="width: 20%;">DEVICE INFO</th>
+                    <th style="width: 16%;">PPPoE</th>
+                    <th style="width: 12%;">REDAMAN (RX)</th>
+                    <th style="width: 14%;">Wi-Fi SSID</th>
+                    <th style="width: 14%;">LAST INFORM</th>
+                    <th style="width: 16%; text-align: right;">AKSI</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -157,9 +158,18 @@
                       </div>
                       <span v-else class="text-muted">Hidden/None</span>
                     </td>
+                    <!-- Last Inform -->
+                    <td>
+                      <span :class="['inform-text', getInformClass(device.last_inform_at)]">
+                        {{ formatRelativeTime(device.last_inform_at) }}
+                      </span>
+                    </td>
                     <!-- Actions -->
                     <td class="text-right">
                       <div class="action-buttons-row">
+                        <button class="btn-action-icon btn-action-icon--danger" @click="deleteDeviceConfirm(device.id, device.serial_number)" title="Delete Device">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        </button>
                         <button class="btn-action-icon" @click="refreshParams(device.id)" title="Refresh Data">
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
                         </button>
@@ -223,6 +233,7 @@ const store = useAcsStore()
 const sidebarOpen = ref(false)
 const searchQuery = ref('')
 const notification = ref('')
+const notificationType = ref('success')
 const isModalOpen = ref(false)
 const selectedDevice = ref(null)
 
@@ -244,8 +255,9 @@ const openModal = (device: any) => {
   isModalOpen.value = true
 }
 
-const showNotification = (msg: string) => {
+const showNotification = (msg: string, type: string = 'success') => {
   notification.value = msg
+  notificationType.value = type
   setTimeout(() => {
     notification.value = ''
   }, 5000)
@@ -258,10 +270,16 @@ const onDeviceUpdated = (msg: string) => {
 
 const refreshParams = async (deviceId: number) => {
   try {
-    await store.refreshDevice(deviceId)
-    showNotification('Sync command queued successfully.')
+    const res = await store.refreshDevice(deviceId)
+    const status = res?.status || 'success'
+    const msg = res?.message || 'Sinkronisasi berhasil.'
+    if (status === 'warning') {
+      showNotification(msg, 'warning')
+    } else {
+      showNotification(msg)
+    }
   } catch (err: any) {
-    alert(err.message)
+    showNotification(err?.message || 'Gagal menghubungi modem.', 'error')
   }
 }
 
@@ -270,6 +288,44 @@ const getDbmClass = (power: number | null) => {
   if (power >= -25 && power <= -8) return 'dbm-good'
   if ((power < -25 && power >= -28) || (power > -8 && power <= -3)) return 'dbm-warning'
   return 'dbm-critical'
+}
+
+const formatRelativeTime = (dateStr: string | null) => {
+  if (!dateStr) return '-'
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  
+  if (diffMins < 60) return `${diffMins} menit lalu`
+  const diffHours = Math.floor(diffMins / 60)
+  if (diffHours < 24) return `${diffHours} jam lalu`
+  const diffDays = Math.floor(diffHours / 24)
+  return `${diffDays} hari lalu`
+}
+
+const getInformClass = (dateStr: string | null) => {
+  if (!dateStr) return 'inform-dead'
+  const date = new Date(dateStr)
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMins = Math.floor(diffMs / 60000)
+  
+  if (diffMins < 10) return 'inform-fresh'
+  if (diffMins <= 24 * 60) return 'inform-stale'
+  return 'inform-dead'
+}
+
+const deleteDeviceConfirm = async (deviceId: number, serialNumber: string) => {
+  if (confirm(`Hapus perangkat ${serialNumber}? Data akan dihapus dari ACS dan database.`)) {
+    try {
+      await store.deleteDevice(deviceId)
+      showNotification('Perangkat berhasil dihapus dari ACS dan database.')
+      fetchData(1)
+    } catch (err: any) {
+      alert(err.message)
+    }
+  }
 }
 </script>
 
@@ -507,6 +563,20 @@ const getDbmClass = (power: number | null) => {
   color: var(--text-1);
   border-color: var(--border-hover);
 }
+.btn-action-icon--danger:hover {
+  background: rgba(244, 63, 94, 0.1);
+  color: #f43f5e;
+  border-color: rgba(244, 63, 94, 0.3);
+}
+
+/* ── Inform Status ──────────────────────────────────────── */
+.inform-text {
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+.inform-fresh { color: #10b981; }
+.inform-stale { color: #f59e0b; }
+.inform-dead { color: #f43f5e; }
 
 /* ── Alert Boxes ────────────────────────────────────────── */
 .alert-box {
@@ -530,6 +600,16 @@ const getDbmClass = (power: number | null) => {
   background: rgba(244, 63, 94, 0.08);
   border: 1px solid rgba(244, 63, 94, 0.2);
   color: #f43f5e;
+}
+.alert-box--error {
+  background: rgba(244, 63, 94, 0.08);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+  color: #f43f5e;
+}
+.alert-box--warning {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
 }
 .alert-box--success {
   background: rgba(16, 185, 129, 0.08);
