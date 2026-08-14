@@ -38,6 +38,8 @@ return [
     'genieacs' => [
         'url' => env('GENIEACS_NBI_URL', 'http://genieacs:7557'),
         'secret' => env('GENIEACS_NBI_SECRET', 'netsight_genieacs_secret_key'),
+        'multi_tenant' => env('GENIEACS_MULTI_TENANT', false),
+        'tenant_slug' => env('TENANT_SLUG'),
     ],
 
 ];
