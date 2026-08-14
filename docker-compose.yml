@@ -123,17 +123,16 @@ services:
       - GENIEACS_CWMP_ACCESS_LOG_FILE=/var/log/genieacs/genieacs-cwmp-access.log
       - GENIEACS_NBI_ACCESS_LOG_FILE=/var/log/genieacs/genieacs-nbi-access.log
       - GENIEACS_FS_ACCESS_LOG_FILE=/var/log/genieacs/genieacs-fs-access.log
-    command: /bin/sh -c "genieacs-cwmp & genieacs-nbi & genieacs-fs & wait"
     volumes:
       - genieacs_ext:/opt/genieacs/ext
       - genieacs_logs:/var/log/genieacs
     networks:
       - netsight
-    # 🔒 Batasi RAM GenieACS (Ditingkatkan agar 3 proses Node.js bisa berjalan tanpa I/O thrashing)
+    # 🔒 Batasi RAM GenieACS (Ditingkatkan agar 4 proses Node.js bawaan bisa berjalan tanpa I/O thrashing)
     deploy:
       resources:
         limits:
-          memory: 768M
+          memory: 1024M
 
   # ---------------------------------------------------------------------------
   # Caddy Reverse Proxy / Web Server
