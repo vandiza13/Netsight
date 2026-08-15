@@ -56,18 +56,18 @@ class WarmDemoSandboxes extends Command
 
     private function createSandbox()
     {
-        // 1. Generate unique schema name
+        // Generate unique schema name
         $schema = 'demo_' . strtolower(Str::random(8));
         $this->info("Creating schema: {$schema}");
 
-        // 2. Create Schema on current connection
+        // Create Schema on current connection
         DB::statement("CREATE SCHEMA {$schema}");
 
-        // 3. Reconnect with new search path to run migrations
+        // Reconnect with new search path to run migrations
         config(['database.connections.pgsql.search_path' => $schema]);
         DB::purge('pgsql');
 
-        // 4. Run migrations on the new schema
+        // Run migrations on the new schema
         Artisan::call('migrate', [
             '--path' => [
                 'database/migrations',
@@ -76,7 +76,7 @@ class WarmDemoSandboxes extends Command
             '--force' => true,
         ]);
 
-        // 5. Create default admin user in this schema (no TOTP required for instant demo access)
+        // Create default admin user in this schema (no TOTP required for instant demo access)
         $admin = new StaffNoc([
             'name' => 'Demo Admin',
             'email' => 'demo@netsight.id',
@@ -86,7 +86,7 @@ class WarmDemoSandboxes extends Command
         ]);
         $admin->save();
 
-        // 6. Seed a Dummy Router for the sandbox
+        // Seed a Dummy Router for the sandbox
         $router = new Router();
         $router->name = 'Simulated Core Router (Demo)';
         $router->host = '192.168.88.1';
@@ -99,7 +99,7 @@ class WarmDemoSandboxes extends Command
         $router->last_synced_at = now()->subMinutes(2);
         $router->save();
 
-        // 6a. Seed Dummy PPPoE Users
+        // Seed Dummy PPPoE Users
         $profiles = ['10M', '20M', '50M', '100M'];
         $users = [];
         for ($i = 1; $i <= 45; $i++) {
@@ -117,7 +117,7 @@ class WarmDemoSandboxes extends Command
         }
         DB::table('pppoe_users_cache')->insert($users);
 
-        // 6b. Seed Dummy Torch Sessions History
+        // Seed Dummy Torch Sessions History
         $sessions = [];
         for ($i = 1; $i <= 5; $i++) {
             $avgTx = rand(5000000, 20000000); // 5 - 20 Mbps download (TX)
@@ -148,7 +148,7 @@ class WarmDemoSandboxes extends Command
         }
         DB::table('torch_sessions')->insert($sessions);
 
-        // 7. Track the schema in public database as 'idle'
+        // Track the schema in public database as 'idle'
         // Reset search path back to public first just to be safe
         config(['database.connections.pgsql.search_path' => 'public']);
         DB::purge('pgsql');

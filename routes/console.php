@@ -12,17 +12,13 @@ use Illuminate\Support\Facades\Schedule;
 |--------------------------------------------------------------------------
 */
 
-// ==========================================
-// 1. Demo Sandbox Commands (Non-Production Only)
-// ==========================================
+// Demo Sandbox Commands (Non-Production Only)
 if (app()->environment('local', 'demo')) {
     Schedule::command('app:cleanup-demo-sandboxes')->hourly();
     Schedule::command('app:warm-demo-sandboxes')->everyMinute()->withoutOverlapping();
 }
 
-// ==========================================
-// 2. Staggered Background Sync
-// ==========================================
+// Staggered Background Sync
 // Berjalan setiap menit, mendistribusikan beban query ke Mikrotik.
 Schedule::call(function () {
     $currentMinute = now()->minute;
@@ -43,9 +39,7 @@ Schedule::call(function () {
 })->everyMinute()->name('staggered-sync')->withoutOverlapping();
 
 
-// ==========================================
-// 3. Torch Orphaned Session Watchdog
-// ==========================================
+// Torch Orphaned Session Watchdog
 Schedule::call(function () {
     $interval = config('netsight.torch.watchdog_interval_seconds', 15);
     $runs = max(1, floor(60 / $interval));
@@ -55,9 +49,7 @@ Schedule::call(function () {
             ->delay(now()->addSeconds($i * $interval));
     }
 })->everyMinute()->name('torch-watchdog');
-// ==========================================
-// 4. SNMP Live Traffic Poller
-// ==========================================
+// SNMP Live Traffic Poller
 Schedule::call(function () {
     $routers = Router::whereNotNull('monitored_interface')
         ->whereNotNull('snmp_community')
@@ -78,17 +70,13 @@ Schedule::call(function () {
     }
 })->everyMinute()->name('snmp-poller');
 
-// ==========================================
-// 5. OLT ONU Status & Power Poller
-// ==========================================
+// OLT ONU Status & Power Poller
 Schedule::command('netsight:poll-olts')
     ->everyFiveMinutes()
     ->name('olt-poller')
     ->withoutOverlapping();
 
-// ==========================================
-// 6. Traffic History Aggregator
-// ==========================================
+// Traffic History Aggregator
 Schedule::command('netsight:aggregate-traffic')
     ->everyFiveMinutes()
     ->name('traffic-aggregator')
