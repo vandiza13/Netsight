@@ -231,7 +231,8 @@ jobs:
 
       - name: Compress Source Code
         run: |
-          tar -czf netsight-onpremise-latest.tar.gz --exclude=.git --exclude=node_modules --exclude=vendor --exclude=docker-compose.yml --exclude=netsight-onpremise-latest.tar.gz .
+          tar -czf ../netsight-onpremise-latest.tar.gz --exclude=.git --exclude=node_modules --exclude=vendor --exclude=docker-compose.yml .
+          mv ../netsight-onpremise-latest.tar.gz ./netsight-onpremise-latest.tar.gz
 
       - name: Deploy Installer to VPS A
         uses: appleboy/scp-action@v0.1.7
