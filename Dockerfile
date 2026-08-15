@@ -65,8 +65,8 @@ RUN apk del $PHPIZE_DEPS linux-headers \
 # PHP-FPM Static Tuning for production (RAM Saving)
 RUN echo "[www]" > /usr/local/etc/php-fpm.d/zz-netsight.conf \
     && echo "pm = static" >> /usr/local/etc/php-fpm.d/zz-netsight.conf \
-    && echo "pm.max_children = 4" >> /usr/local/etc/php-fpm.d/zz-netsight.conf \
-    && echo "pm.max_requests = 500" >> /usr/local/etc/php-fpm.d/zz-netsight.conf
+    && echo "pm.max_children = 20" >> /usr/local/etc/php-fpm.d/zz-netsight.conf \
+    && echo "pm.max_requests = 1000" >> /usr/local/etc/php-fpm.d/zz-netsight.conf
 
 WORKDIR /var/www/html
 
