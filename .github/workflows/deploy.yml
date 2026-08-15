@@ -213,11 +213,11 @@ jobs:
           yakpro-po packages/vandiza/netsight-core/src -o /tmp/obfuscated_src
           rm -rf packages/vandiza/netsight-core/src
           
-          # yakpro-po uses absolute paths internally (e.g. /home/runner/work/...) 
-          # which means the output is deeply nested in /tmp/obfuscated_src/home/runner/...
-          # We use 'find' starting from /tmp/obfuscated_src to dynamically locate the obfuscated 'src' directory.
-          OBFUSCATED_DIR=$(find /tmp/obfuscated_src -type d -path "*/netsight-core/src" | head -n 1)
-          mv "$OBFUSCATED_DIR" packages/vandiza/netsight-core/src
+          # yakpro-po pathing can be highly unpredictable depending on the environment.
+          # We search for a known inner directory ('Jobs') to guarantee we find the root of the obfuscated src.
+          JOBS_DIR=$(find /tmp/obfuscated_src -type d -name "Jobs" | head -n 1)
+          SRC_DIR=$(dirname "$JOBS_DIR")
+          mv "$SRC_DIR" packages/vandiza/netsight-core/src
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
