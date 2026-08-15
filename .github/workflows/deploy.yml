@@ -211,8 +211,8 @@ jobs:
           mkdir /tmp/obfuscated_src
           yakpro-po packages/vandiza/netsight-core/src -o /tmp/obfuscated_src
           rm -rf packages/vandiza/netsight-core/src
-          # yakpro-po places the obfuscated files maintaining the full path structure
-          mv /tmp/obfuscated_src/packages/vandiza/netsight-core/src packages/vandiza/netsight-core/src
+          # yakpro-po places the obfuscated files inside an 'obfuscated' subfolder maintaining the full path structure
+          mv /tmp/obfuscated_src/obfuscated/packages/vandiza/netsight-core/src packages/vandiza/netsight-core/src
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
