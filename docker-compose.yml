@@ -190,8 +190,3 @@ volumes:
 networks:
   netsight:
     driver: bridge
-    driver_opts:
-      com.docker.network.bridge.name: br-netsight
-    ipam:
-      config:
-        - subnet: 172.25.0.0/16
