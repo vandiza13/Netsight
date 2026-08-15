@@ -22,8 +22,6 @@ services:
         condition: service_started
     env_file:
       - .env
-    environment:
-      - LICENSE_KEY=demo_license_bypass_123
     volumes:
       - ./.env:/var/www/html/.env
       - ./public:/var/www/html/public
