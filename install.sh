@@ -53,6 +53,9 @@ fi
 # Memasukkan lisensi ke dalam file .env
 echo "LICENSE_KEY=${LICENSE_KEY}" >> .env
 
+# Memberikan izin baca/tulis penuh ke .env agar bisa diperbarui via UI (di dalam container Alpine)
+chmod 666 .env
+
 # ====== TAMBAHAN WAJIB UNTUK SECRETS ======
 echo "[4.5/5] Menyiapkan Kunci Keamanan (Secrets)..."
 mkdir -p docker/secrets
