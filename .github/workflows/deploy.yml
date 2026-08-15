@@ -14,6 +14,7 @@ on:
         options:
           - demo
           - production
+          - onpremise
 
 jobs:
   build:
@@ -176,3 +177,62 @@ jobs:
                 docker compose exec -T app chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
               fi
             done
+
+  build-onpremise-release:
+    name: Build & Deploy On-Premise Installer
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'onpremise'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Checkout Netsight Core
+        uses: actions/checkout@v4
+        with:
+          repository: vandiza13/Netsight-core
+          path: packages/vandiza/netsight-core
+          token: ${{ secrets.NETSIGHT_CORE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Install yakpro-po (PHP Obfuscator)
+        run: |
+          git clone https://github.com/pk-fr/yakpro-po.git /tmp/yakpro-po
+          cd /tmp/yakpro-po
+          git clone https://github.com/nikic/PHP-Parser.git
+          sudo ln -s /tmp/yakpro-po/yakpro-po.php /usr/local/bin/yakpro-po
+          chmod +x /tmp/yakpro-po/yakpro-po.php
+
+      - name: Obfuscate netsight-core
+        run: |
+          mkdir /tmp/obfuscated_src
+          yakpro-po packages/vandiza/netsight-core/src -o /tmp/obfuscated_src
+          rm -rf packages/vandiza/netsight-core/src
+          # yakpro-po places the obfuscated files maintaining the full path structure
+          mv /tmp/obfuscated_src/packages/vandiza/netsight-core/src packages/vandiza/netsight-core/src
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies & Build Frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Compress Source Code
+        run: |
+          tar -czf netsight-onpremise-latest.tar.gz --exclude=.git --exclude=node_modules --exclude=vendor --exclude=docker-compose.yml --exclude=netsight-onpremise-latest.tar.gz .
+
+      - name: Deploy Installer to VPS A
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: "netsight-onpremise-latest.tar.gz,install.sh"
+          target: "/var/www/install-netsight"

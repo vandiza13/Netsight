@@ -6,11 +6,22 @@
       </transition>
     </router-view>
     <ToastNotification />
+    <LicenseError />
   </div>
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
+import axios from 'axios'
 import ToastNotification from './components/ToastNotification.vue'
+import LicenseError from './components/LicenseError.vue'
+
+onMounted(() => {
+  // Ping backend to immediately trigger LicenseGuardMiddleware
+  axios.get('/api/settings/license-check').catch(() => {
+    // Interceptor will handle 403 LICENSE_EXPIRED
+  })
+})
 </script>
 
 <style scoped>

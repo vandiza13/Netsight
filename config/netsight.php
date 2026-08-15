@@ -125,4 +125,16 @@ return [
         'username_pattern' => '/^[a-zA-Z0-9._\-@]+$/',
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | License Configuration
+    |--------------------------------------------------------------------------
+    | Pengaturan untuk validasi lisensi ke server sentral.
+    */
+    'license' => [
+        'key' => env('LICENSE_KEY', ''),
+        'central_url' => env('NETSIGHT_CENTRAL_URL', 'https://central.vandiza.com'),
+        'public_key' => env('NETSIGHT_PUBLIC_KEY', ''),
+    ],
+
 ];

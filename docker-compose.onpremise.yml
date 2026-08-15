@@ -1,0 +1,192 @@
+# =============================================================================
+# NETSIGHT v2.1 - Docker Compose (Optimized for On-Premise / Self-Hosted)
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Application (PHP-FPM + Supervisord)
+  # ---------------------------------------------------------------------------
+  app:
+    build:
+      context: .
+    container_name: netsight-app
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    depends_on:
+      db:
+        condition: service_started
+      redis:
+        condition: service_started
+    env_file:
+      - .env
+    volumes:
+      - ./public:/var/www/html/public
+      - geoip_data:/var/www/html/storage/app/geoip
+    networks:
+      - netsight
+    secrets:
+      - db_password
+      - redis_password
+      - app_key
+    # 🔒 Batasi RAM Biar Gak Rakus
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    container_name: netsight-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: netsight
+      POSTGRES_USER: netsight
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - netsight
+    secrets:
+      - db_password
+    # 🔒 Batasi RAM Shared Buffers Postgres Docker
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ---------------------------------------------------------------------------
+  # Redis Cache / Queue
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: netsight-redis
+    restart: unless-stopped
+    command: sh -c 'redis-server --requirepass "$$(cat /run/secrets/redis_password)" --appendonly yes'
+    volumes:
+      - redisdata:/data
+    networks:
+      - netsight
+    secrets:
+      - redis_password
+    # 🔒 Batasi RAM Redis (Cache ringan)
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+  # ---------------------------------------------------------------------------
+  # MongoDB Database (For GenieACS)
+  # ---------------------------------------------------------------------------
+  mongodb:
+    image: mongo:6
+    container_name: netsight-mongodb
+    restart: unless-stopped
+    command: --wiredTigerCacheSizeGB 0.25
+    volumes:
+      - mongodata:/data/db
+      - ./docker/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - netsight
+    # 🔒 Batasi RAM MongoDB
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ---------------------------------------------------------------------------
+  # GenieACS Engine
+  # ---------------------------------------------------------------------------
+  genieacs:
+    image: drumsergio/genieacs:1.2.9
+    container_name: netsight-genieacs
+    restart: unless-stopped
+    depends_on:
+      - mongodb
+    # Disable UI to save RAM. Only run CWMP, NBI, and FS.
+    command: /bin/sh -c "genieacs-cwmp & genieacs-nbi & genieacs-fs & wait -n"
+    expose:
+      - "7547"
+      - "7557"
+      - "7548"
+    ports:
+      - "3478:3478/udp" # STUN Server Port
+    environment:
+      - GENIEACS_MONGODB_CONNECTION_URL=mongodb://mongodb:27017/genieacs
+      - GENIEACS_EXT_DIR=/opt/genieacs/ext
+      - GENIEACS_UI_JWT_SECRET=netsight_genieacs_secret_key
+      - GENIEACS_CWMP_ACCESS_LOG_FILE=/var/log/genieacs/genieacs-cwmp-access.log
+      - GENIEACS_NBI_ACCESS_LOG_FILE=/var/log/genieacs/genieacs-nbi-access.log
+      - GENIEACS_FS_ACCESS_LOG_FILE=/var/log/genieacs/genieacs-fs-access.log
+    volumes:
+      - genieacs_ext:/opt/genieacs/ext
+      - genieacs_logs:/var/log/genieacs
+    networks:
+      - netsight
+    # 🔒 Batasi RAM GenieACS (Ditingkatkan agar 4 proses Node.js bawaan bisa berjalan tanpa I/O thrashing)
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+
+  # ---------------------------------------------------------------------------
+  # Caddy Reverse Proxy / Web Server
+  # ---------------------------------------------------------------------------
+  caddy:
+    image: caddy:2-alpine
+    container_name: netsight-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "9090:9090" # CWMP Public Port (SaaS ACS URL)
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./public:/var/www/html/public:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+    networks:
+      - netsight
+    # 🔒 Caddy bawaan sangat ringan, batasi kecil saja
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+
+
+# =============================================================================
+# Secrets
+# =============================================================================
+secrets:
+  db_password:
+    file: ./docker/secrets/db_password
+  redis_password:
+    file: ./docker/secrets/redis_password
+  app_key:
+    file: ./docker/secrets/app_key
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  pgdata:
+  redisdata:
+  caddy_data:
+  caddy_config:
+  geoip_data:
+  mongodata:
+  genieacs_ext:
+  genieacs_logs:
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  netsight:
+    driver: bridge
