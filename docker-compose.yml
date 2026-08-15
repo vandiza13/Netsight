@@ -25,6 +25,7 @@ services:
     environment:
       - LICENSE_KEY=demo_license_bypass_123
     volumes:
+      - ./.env:/var/www/html/.env
       - ./public:/var/www/html/public
       - geoip_data:/var/www/html/storage/app/geoip
     networks:
