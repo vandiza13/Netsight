@@ -99,7 +99,7 @@ jobs:
             rsync -a --delete --exclude='.env*' --exclude='storage/' --exclude='docker/secrets/' --exclude='netsight.tar.gz' /tmp/netsight_temp/ ./
             rm -rf /tmp/netsight_temp netsight.tar.gz
             export GITHUB_TOKEN=$GITHUB_TOKEN
-            docker compose up -d --build
+            docker compose up -d --build --force-recreate
             echo "Waiting for database to be ready..."
             for i in {1..15}; do docker compose exec -T db pg_isready -U netsight 2>/dev/null && break || sleep 2; done
             docker compose exec -T app mkdir -p /var/www/html/storage/framework/views /var/www/html/storage/framework/cache/data /var/www/html/storage/framework/sessions /var/www/html/storage/logs
