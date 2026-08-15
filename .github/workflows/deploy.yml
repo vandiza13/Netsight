@@ -95,7 +95,7 @@ jobs:
             cd /var/www/netsight
             mkdir -p /tmp/netsight_temp
             tar -xzf netsight.tar.gz -C /tmp/netsight_temp
-            rsync -a --delete --exclude='.env' --exclude='storage/' --exclude='netsight.tar.gz' /tmp/netsight_temp/ ./
+            rsync -a --delete --exclude='.env*' --exclude='storage/' --exclude='docker/secrets/' --exclude='netsight.tar.gz' /tmp/netsight_temp/ ./
             rm -rf /tmp/netsight_temp netsight.tar.gz
             export GITHUB_TOKEN=$GITHUB_TOKEN
             docker compose up -d --build
@@ -150,7 +150,7 @@ jobs:
             cd /var/www/netsight-saas/master
             mkdir -p /tmp/netsight_temp
             tar -xzf netsight.tar.gz -C /tmp/netsight_temp
-            rsync -a --delete --exclude='.env' --exclude='storage/' --exclude='netsight.tar.gz' /tmp/netsight_temp/ ./
+            rsync -a --delete --exclude='.env*' --exclude='storage/' --exclude='docker/secrets/' --exclude='netsight.tar.gz' /tmp/netsight_temp/ ./
             rm -rf /tmp/netsight_temp netsight.tar.gz
             
             # Build new master image (tag as latest and prod to match tenant configurations)
