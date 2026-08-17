@@ -96,7 +96,8 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { useNetworkMapStore, NetworkNode } from '../../stores/networkMapStore'
+import { useNetworkMapStore } from '../../stores/networkMapStore'
+import type { NetworkNode } from '../../stores/networkMapStore'
 
 const props = defineProps<{ show: boolean, editNode?: NetworkNode | null }>()
 const emit = defineEmits(['close'])

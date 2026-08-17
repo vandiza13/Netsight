@@ -125,7 +125,7 @@ const navItems: NavItem[] = [
   { key: 'mapping', label: 'Network Topology', svgIcon: icons.mapping },
   { key: 'routers', label: 'Edge Routers', svgIcon: icons.routers },
   { key: 'olts', label: 'OLT Infrastructure', svgIcon: icons.olts, requiresTier2: true, badge: 'T2+', badgeClass: 'sidebar__link-badge--warning' },
-  { key: 'acs', label: 'ACS Provisioning', svgIcon: icons.acs, requiresTier2: true, badge: 'T2+', badgeClass: 'sidebar__link-badge--warning' },
+  { key: 'acs', label: 'ACS Devices', svgIcon: icons.acs, requiresTier2: true, badge: 'T2+', badgeClass: 'sidebar__link-badge--warning' },
   { key: 'inspect', label: 'Traffic Inspector', svgIcon: icons.inspect, requiresTier2: true, badge: 'T2+', badgeClass: 'sidebar__link-badge--warning' },
   { key: 'staff', label: 'Staff & Roles', svgIcon: icons.staff, requiresAdmin: true, badge: 'ADM', badgeClass: 'sidebar__link-badge--danger' },
   { key: 'audit', label: 'Audit & Security', svgIcon: icons.audit, requiresAdmin: true, badge: 'ADM', badgeClass: 'sidebar__link-badge--danger' },

@@ -49,7 +49,8 @@ import MapNodeDrawer from '../components/map/MapNodeDrawer.vue'
 import MapNodeModal from '../components/map/MapNodeModal.vue'
 import MapLineModal from '../components/map/MapLineModal.vue'
 import NetworkListView from '../components/map/NetworkListView.vue'
-import { useNetworkMapStore, NetworkNode, FiberLine } from '../stores/networkMapStore'
+import { useNetworkMapStore } from '../stores/networkMapStore'
+import type { NetworkNode, FiberLine } from '../stores/networkMapStore'
 
 const sidebarOpen = ref(false)
 const store = useNetworkMapStore()
@@ -91,6 +92,19 @@ const closeLineModal = () => {
 </script>
 
 <style scoped>
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+.dashboard__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .dashboard__content {
   height: calc(100vh - 64px);
   overflow: hidden;

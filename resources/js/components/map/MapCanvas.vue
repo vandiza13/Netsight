@@ -90,12 +90,16 @@ onMounted(() => {
 
   // Load geojson data
   if (store.geoJsonData) {
-    renderGeoJson(store.geoJsonData)
+    renderGeoJson(JSON.parse(JSON.stringify(store.geoJsonData)))
   }
 })
 
 watch(() => store.geoJsonData, (newData) => {
-  if (newData) renderGeoJson(newData)
+  if (newData) {
+    // Clone data to prevent Leaflet from mutating Vue reactive objects
+    // which triggers the deep watcher infinitely
+    renderGeoJson(JSON.parse(JSON.stringify(newData)))
+  }
 }, { deep: true })
 
 // Filter watch

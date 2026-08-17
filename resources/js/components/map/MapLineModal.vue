@@ -95,7 +95,8 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { useNetworkMapStore, FiberLine } from '../../stores/networkMapStore'
+import { useNetworkMapStore } from '../../stores/networkMapStore'
+import type { FiberLine } from '../../stores/networkMapStore'
 
 const props = defineProps<{ show: boolean, editLine?: FiberLine | null }>()
 const emit = defineEmits(['close'])
