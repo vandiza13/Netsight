@@ -1,6 +1,18 @@
 {
+  "node_modules/leaflet/dist/images/layers-2x.png": {
+    "file": "assets/layers-2x-Bpkbi35X.png",
+    "src": "node_modules/leaflet/dist/images/layers-2x.png"
+  },
+  "node_modules/leaflet/dist/images/layers.png": {
+    "file": "assets/layers-BWBAp2CZ.png",
+    "src": "node_modules/leaflet/dist/images/layers.png"
+  },
+  "node_modules/leaflet/dist/images/marker-icon.png": {
+    "file": "assets/marker-icon-hN30_KVU.png",
+    "src": "node_modules/leaflet/dist/images/marker-icon.png"
+  },
   "resources/js/app.ts": {
-    "file": "assets/app-DTUIqaN6.js",
+    "file": "assets/app-DPcbR4T6.js",
     "name": "app",
     "src": "resources/js/app.ts",
     "isEntry": true,
@@ -9,12 +21,13 @@
       "resources/js/pages/RouterManagementPage.vue",
       "resources/js/pages/OltManagementPage.vue",
       "resources/js/pages/AcsManagementPage.vue",
+      "resources/js/pages/NetworkMapPage.vue",
       "resources/js/pages/AuditLogPage.vue",
       "resources/js/pages/StaffManagementPage.vue",
       "resources/js/pages/ProfilePage.vue"
     ],
     "css": [
-      "assets/app-D679C3cM.css",
+      "assets/app-ByPmMA5W.css",
       "assets/main-59iBUAnE.css"
     ]
   },
@@ -28,7 +41,7 @@
     ]
   },
   "resources/js/pages/AcsManagementPage.vue": {
-    "file": "assets/AcsManagementPage-hEo1EqBj.js",
+    "file": "assets/AcsManagementPage-DqcVN1vR.js",
     "name": "AcsManagementPage",
     "src": "resources/js/pages/AcsManagementPage.vue",
     "isDynamicEntry": true,
@@ -36,12 +49,12 @@
       "resources/js/app.ts"
     ],
     "css": [
-      "assets/AcsManagementPage-BgF5cj5H.css",
+      "assets/AcsManagementPage-BXPVuRaQ.css",
       "assets/main-59iBUAnE.css"
     ]
   },
   "resources/js/pages/AuditLogPage.vue": {
-    "file": "assets/AuditLogPage-1UWlcSnn.js",
+    "file": "assets/AuditLogPage-Dok-_jKX.js",
     "name": "AuditLogPage",
     "src": "resources/js/pages/AuditLogPage.vue",
     "isDynamicEntry": true,
@@ -54,7 +67,7 @@
     ]
   },
   "resources/js/pages/InspectPage.vue": {
-    "file": "assets/InspectPage-06Yy_6Mj.js",
+    "file": "assets/InspectPage-BkfomX0J.js",
     "name": "InspectPage",
     "src": "resources/js/pages/InspectPage.vue",
     "isDynamicEntry": true,
@@ -66,8 +79,26 @@
       "assets/main-59iBUAnE.css"
     ]
   },
+  "resources/js/pages/NetworkMapPage.vue": {
+    "file": "assets/NetworkMapPage-ctEJufZW.js",
+    "name": "NetworkMapPage",
+    "src": "resources/js/pages/NetworkMapPage.vue",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.ts"
+    ],
+    "css": [
+      "assets/NetworkMapPage-BcWHmciA.css",
+      "assets/main-59iBUAnE.css"
+    ],
+    "assets": [
+      "assets/layers-BWBAp2CZ.png",
+      "assets/layers-2x-Bpkbi35X.png",
+      "assets/marker-icon-hN30_KVU.png"
+    ]
+  },
   "resources/js/pages/OltManagementPage.vue": {
-    "file": "assets/OltManagementPage-C7PxqVs5.js",
+    "file": "assets/OltManagementPage-P3z-CViM.js",
     "name": "OltManagementPage",
     "src": "resources/js/pages/OltManagementPage.vue",
     "isDynamicEntry": true,
@@ -80,7 +111,7 @@
     ]
   },
   "resources/js/pages/ProfilePage.vue": {
-    "file": "assets/ProfilePage-CL2hUB1G.js",
+    "file": "assets/ProfilePage-2wREpP5l.js",
     "name": "ProfilePage",
     "src": "resources/js/pages/ProfilePage.vue",
     "isDynamicEntry": true,
@@ -93,7 +124,7 @@
     ]
   },
   "resources/js/pages/RouterManagementPage.vue": {
-    "file": "assets/RouterManagementPage-D8Jc9um7.js",
+    "file": "assets/RouterManagementPage-DU1QpYnc.js",
     "name": "RouterManagementPage",
     "src": "resources/js/pages/RouterManagementPage.vue",
     "isDynamicEntry": true,
@@ -106,7 +137,7 @@
     ]
   },
   "resources/js/pages/StaffManagementPage.vue": {
-    "file": "assets/StaffManagementPage-4BBwPI9A.js",
+    "file": "assets/StaffManagementPage-C6W7eoHK.js",
     "name": "StaffManagementPage",
     "src": "resources/js/pages/StaffManagementPage.vue",
     "isDynamicEntry": true,

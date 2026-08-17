@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
+import api from '../utils/api'
 
 export interface NetworkNode {
   id: number
@@ -49,6 +49,7 @@ export const useNetworkMapStore = defineStore('networkMap', {
     nodes: [] as NetworkNode[],
     lines: [] as FiberLine[],
     geoJsonData: null as any,
+    unmappedDevices: null as any,
     
     // View state
     activeTab: 'map' as 'map' | 'list',
@@ -74,17 +75,26 @@ export const useNetworkMapStore = defineStore('networkMap', {
   actions: {
     async fetchStats() {
       try {
-        const { data } = await axios.get('/api/network-map/stats')
+        const { data } = await api.get('/network-map/stats')
         this.stats = data
       } catch (e: any) {
         console.error('Failed to fetch map stats', e)
       }
     },
 
+    async fetchUnmappedDevices(query: string = '') {
+      try {
+        const { data } = await api.get('/network-map/unmapped', { params: { q: query } })
+        this.unmappedDevices = data
+      } catch (e: any) {
+        console.error('Failed to fetch unmapped devices', e)
+      }
+    },
+
     async fetchGeoJson() {
       this.loading = true
       try {
-        const { data } = await axios.get('/api/network-map/geojson')
+        const { data } = await api.get('/network-map/geojson')
         this.geoJsonData = data
       } catch (e: any) {
         this.error = e.response?.data?.message || 'Gagal memuat data peta'
@@ -96,14 +106,14 @@ export const useNetworkMapStore = defineStore('networkMap', {
     async fetchNodes(page = 1) {
       this.loading = true
       try {
-        const { data } = await axios.get('/api/network-map/nodes', {
+        const { data } = await api.get('/network-map/nodes', {
           params: {
             page,
             type: this.filters.type,
             search: this.filters.search
           }
         })
-        // Store can hold paginated response if needed, for now just nodes data
+        this.nodes = data.data
         return data
       } catch (e: any) {
         this.error = e.response?.data?.message || 'Gagal memuat list node'
@@ -116,7 +126,7 @@ export const useNetworkMapStore = defineStore('networkMap', {
     async fetchLines(page = 1) {
       this.loading = true
       try {
-        const { data } = await axios.get('/api/network-map/lines', {
+        const { data } = await api.get('/network-map/lines', {
           params: {
             page,
             search: this.filters.search
@@ -134,7 +144,7 @@ export const useNetworkMapStore = defineStore('networkMap', {
     async getNodeDetail(id: number) {
       this.loading = true
       try {
-        const { data } = await axios.get(`/api/network-map/nodes/${id}`)
+        const { data } = await api.get(`/network-map/nodes/${id}`)
         return data
       } catch (e: any) {
         this.error = e.response?.data?.message || 'Gagal memuat detail node'
@@ -147,7 +157,7 @@ export const useNetworkMapStore = defineStore('networkMap', {
     async createNode(payload: any) {
       this.loading = true
       try {
-        const { data } = await axios.post('/api/network-map/nodes', payload)
+        const { data } = await api.post('/network-map/nodes', payload)
         this.fetchGeoJson()
         this.fetchStats()
         return data
@@ -161,7 +171,7 @@ export const useNetworkMapStore = defineStore('networkMap', {
     async updateNode(id: number, payload: any) {
       this.loading = true
       try {
-        const { data } = await axios.put(`/api/network-map/nodes/${id}`, payload)
+        const { data } = await api.put(`/network-map/nodes/${id}`, payload)
         this.fetchGeoJson()
         return data
       } catch (e: any) {
@@ -174,7 +184,7 @@ export const useNetworkMapStore = defineStore('networkMap', {
     async deleteNode(id: number) {
       this.loading = true
       try {
-        await axios.delete(`/api/network-map/nodes/${id}`)
+        await api.delete(`/network-map/nodes/${id}`)
         if (this.selectedNodeId === id) this.selectedNodeId = null
         this.fetchGeoJson()
         this.fetchStats()
@@ -188,7 +198,7 @@ export const useNetworkMapStore = defineStore('networkMap', {
     async createLine(payload: any) {
       this.loading = true
       try {
-        const { data } = await axios.post('/api/network-map/lines', payload)
+        const { data } = await api.post('/network-map/lines', payload)
         this.fetchGeoJson()
         this.fetchStats()
         return data

@@ -135,11 +135,50 @@ defineEmits(['edit'])
   display: flex;
   flex-direction: column;
   height: calc(100vh - 200px); /* Fill remaining space */
+  background: var(--surface-1);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
 }
 
 .table-responsive {
   flex: 1;
   overflow: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--surface-2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-1);
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background: var(--surface-2);
 }
 
 .type-icon {
@@ -178,7 +217,40 @@ defineEmits(['edit'])
 }
 
 .btn-icon.text-red:hover {
-  color: var(--accent-red);
+  color: #ef4444;
   background: rgba(239, 68, 68, 0.1);
 }
+
+/* Typography Helpers */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+.text-muted { color: var(--text-3); }
+.fw-bold { font-weight: 600; }
+.text-xs { font-size: 11px; }
+.text-sm { font-size: 13px; }
+.italic { font-style: italic; }
+.block { display: block; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.mb-1 { margin-bottom: 4px; }
+.mt-2 { margin-top: 8px; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-end { justify-content: flex-end; }
+.gap-2 { gap: 8px; }
+
+/* Badge mapping */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.badge--online, .badge--healthy { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+.badge--offline, .badge--critical { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+.badge--warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
 </style>

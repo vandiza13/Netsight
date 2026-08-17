@@ -1,8 +1,8 @@
 <template>
-  <div v-if="show" class="modal-backdrop">
-    <div class="modal-card modal-card--md slide-up">
+  <div v-if="show" class="modal-backdrop" @click.self="closeModal">
+    <div class="modal-container slide-up">
       <div class="modal-header">
-        <h3 class="modal-title">
+        <h3 class="modal-title flex items-center gap-2">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           {{ isEdit ? 'Edit Rute Kabel' : 'Tambah Rute Kabel' }}
         </h3>
@@ -14,13 +14,13 @@
       <div class="modal-body custom-scrollbar">
         <div class="form-group">
           <label>Nama Kabel *</label>
-          <input v-model="form.name" type="text" class="input-modern" required placeholder="Contoh: Kabel Feeder Utama">
+          <input v-model="form.name" type="text" class="form-input" required placeholder="Contoh: Kabel Feeder Utama">
         </div>
 
         <div class="grid-2">
           <div class="form-group">
             <label>Tipe Kabel *</label>
-            <select v-model="form.cable_type" class="input-modern" required>
+            <select v-model="form.cable_type" class="form-input" required>
               <option value="backbone">Backbone</option>
               <option value="feeder">Feeder</option>
               <option value="distribution">Distribusi</option>
@@ -29,7 +29,7 @@
           </div>
           <div class="form-group">
             <label>Kapasitas Core</label>
-            <select v-model="form.core_count" class="input-modern">
+            <select v-model="form.core_count" class="form-input">
               <option :value="1">1 Core</option>
               <option :value="2">2 Core</option>
               <option :value="4">4 Core</option>
@@ -47,7 +47,7 @@
         <div class="grid-2">
           <div class="form-group">
             <label>Titik Hulu (Source)</label>
-            <select v-model="form.source_node_id" class="input-modern">
+            <select v-model="form.source_node_id" class="form-input">
               <option :value="null">-- Tidak ada --</option>
               <option v-for="n in store.nodes" :key="'src-'+n.id" :value="n.id">
                 {{ n.name }} ({{ n.type.toUpperCase() }})
@@ -56,7 +56,7 @@
           </div>
           <div class="form-group">
             <label>Titik Hilir (Target)</label>
-            <select v-model="form.target_node_id" class="input-modern">
+            <select v-model="form.target_node_id" class="form-input">
               <option :value="null">-- Tidak ada --</option>
               <option v-for="n in store.nodes" :key="'tgt-'+n.id" :value="n.id">
                 {{ n.name }} ({{ n.type.toUpperCase() }})
@@ -67,7 +67,7 @@
 
         <div class="form-group">
           <label>Status Kabel</label>
-          <select v-model="form.status" class="input-modern">
+          <select v-model="form.status" class="form-input">
             <option value="active">Active (Normal)</option>
             <option value="damaged">Damaged (Putus/Rusak)</option>
             <option value="maintenance">Maintenance</option>
@@ -77,7 +77,7 @@
         
         <div class="form-group">
           <label>Warna Garis Peta</label>
-          <input v-model="form.color" type="color" class="input-modern h-10 w-full p-1 cursor-pointer">
+          <input v-model="form.color" type="color" class="form-input h-10 w-full p-1 cursor-pointer">
         </div>
       </div>
 

@@ -5,20 +5,20 @@
     <div class="dashboard__main">
       <TopBar @toggle-sidebar="sidebarOpen = !sidebarOpen" />
 
-      <main class="dashboard__content p-0 m-0 relative h-full flex flex-col">
-        <div class="p-4 flex-shrink-0">
+      <main class="dashboard__content map-page-layout">
+        <div class="map-page-header">
           <MapFilterBar 
             @addNode="showNodeModal = true"
             @addLine="showLineModal = true"
           />
         </div>
 
-        <div class="flex-1 relative mx-4 mb-4" v-show="store.activeTab === 'map'">
+        <div class="map-page-body" v-show="store.activeTab === 'map'">
           <MapCanvas />
           <MapNodeDrawer @edit="openEditNodeModal" />
         </div>
 
-        <div class="flex-1 relative mx-4 mb-4" v-show="store.activeTab === 'list'">
+        <div class="map-page-body" v-show="store.activeTab === 'list'">
           <NetworkListView @edit="openEditNodeModal" />
         </div>
       </main>
@@ -108,5 +108,28 @@ const closeLineModal = () => {
 .dashboard__content {
   height: calc(100vh - 64px);
   overflow: hidden;
+}
+
+.map-page-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  padding: 0;
+  margin: 0;
+}
+
+.map-page-header {
+  padding: 16px;
+  flex-shrink: 0;
+}
+
+.map-page-body {
+  flex: 1;
+  position: relative;
+  margin: 0 16px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Important for flex children to scroll */
 }
 </style>

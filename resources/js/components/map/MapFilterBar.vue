@@ -13,8 +13,8 @@
         >
       </div>
 
-      <!-- Filter Tipe -->
-      <select v-model="store.filters.type" class="input-modern" @change="handleSearch">
+      <!-- Filter Tipe (Hanya untuk List View) -->
+      <select v-if="store.activeTab === 'list'" v-model="store.filters.type" class="input-modern" @change="handleSearch">
         <option value="all">Semua Tipe</option>
         <option value="server">Server</option>
         <option value="olt">OLT</option>
@@ -32,8 +32,8 @@
         <option value="offline">Offline</option>
       </select>
       
-      <!-- Layer Toggle (Dropup) -->
-      <div class="layer-toggle">
+      <!-- Layer Toggle (Dropup - Hanya untuk Map View) -->
+      <div class="layer-toggle" v-if="store.activeTab === 'map'">
         <button class="btn btn-secondary layer-btn" @click="showLayers = !showLayers">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
           Layers

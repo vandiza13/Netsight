@@ -1,6 +1,6 @@
 <template>
   <div class="map-canvas-container">
-    <div id="netsight-leaflet-map" ref="mapRef" class="h-full w-full"></div>
+    <div id="netsight-leaflet-map" ref="mapRef" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"></div>
     
     <!-- Floating controls -->
     <div class="map-controls-overlay">
@@ -25,11 +25,15 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import 'leaflet.markercluster'
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import { useNetworkMapStore } from '../../stores/networkMapStore'
 
 const mapRef = ref<HTMLElement | null>(null)
 let map: L.Map | null = null
 let geoJsonLayer: L.GeoJSON | null = null
+let markersGroup: L.MarkerClusterGroup | null = null
 
 const store = useNetworkMapStore()
 const locating = ref(false)
@@ -134,6 +138,8 @@ const setTileLayer = () => {
   let url = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' // Dark Matter
   if (currentTheme.value === 'street') {
     url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+  } else if (currentTheme.value === 'satellite') {
+    url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
   }
 
   L.tileLayer(url, {
@@ -142,16 +148,31 @@ const setTileLayer = () => {
 }
 
 const toggleTheme = () => {
-  currentTheme.value = currentTheme.value === 'dark' ? 'street' : 'dark'
+  if (currentTheme.value === 'dark') currentTheme.value = 'street'
+  else if (currentTheme.value === 'street') currentTheme.value = 'satellite'
+  else currentTheme.value = 'dark'
+  
   setTileLayer()
 }
 
 const renderGeoJson = (data: any) => {
   if (!map) return
 
+  if (markersGroup) {
+    map.removeLayer(markersGroup)
+  }
   if (geoJsonLayer) {
     map.removeLayer(geoJsonLayer)
   }
+
+  // Use any to bypass strict type checking for the plugin
+  markersGroup = (L as any).markerClusterGroup({
+    disableClusteringAtZoom: 16,
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+    zoomToBoundsOnClick: true,
+    maxClusterRadius: 50
+  })
 
   geoJsonLayer = L.geoJSON(data, {
     filter: (feature) => {
@@ -202,7 +223,10 @@ const renderGeoJson = (data: any) => {
         })
       }
     }
-  }).addTo(map)
+  })
+
+  markersGroup.addLayer(geoJsonLayer)
+  map.addLayer(markersGroup)
 
   // Only fit bounds if we're not currently focusing on a node and not drawing
   if (!store.selectedNodeId && mapModeIsView()) {
