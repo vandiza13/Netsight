@@ -122,13 +122,13 @@ watch(() => route.path, (newPath) => {
 
 const navItems: NavItem[] = [
   { key: 'dashboard', label: 'Dashboard', svgIcon: icons.dashboard },
-  { key: 'routers', label: 'Routers', svgIcon: icons.routers },
-  { key: 'olts', label: 'OLT Management', svgIcon: icons.olts, requiresAdmin: true },
-  { key: 'acs', label: 'Modem ACS', svgIcon: icons.acs },
-  { key: 'mapping', label: 'Peta Jaringan', svgIcon: icons.mapping },
-  { key: 'inspect', label: 'Inspect', svgIcon: icons.inspect, requiresTier2: true, badge: 'T2+', badgeClass: 'sidebar__link-badge--warning' },
-  { key: 'staff', label: 'Staff Management', svgIcon: icons.staff, requiresAdmin: true, badge: 'ADM', badgeClass: 'sidebar__link-badge--danger' },
-  { key: 'audit', label: 'Audit Log', svgIcon: icons.audit, requiresAdmin: true, badge: 'ADM', badgeClass: 'sidebar__link-badge--danger' },
+  { key: 'mapping', label: 'Network Topology', svgIcon: icons.mapping },
+  { key: 'routers', label: 'Edge Routers', svgIcon: icons.routers },
+  { key: 'olts', label: 'OLT Infrastructure', svgIcon: icons.olts, requiresTier2: true, badge: 'T2+', badgeClass: 'sidebar__link-badge--warning' },
+  { key: 'acs', label: 'ACS Provisioning', svgIcon: icons.acs, requiresTier2: true, badge: 'T2+', badgeClass: 'sidebar__link-badge--warning' },
+  { key: 'inspect', label: 'Traffic Inspector', svgIcon: icons.inspect, requiresTier2: true, badge: 'T2+', badgeClass: 'sidebar__link-badge--warning' },
+  { key: 'staff', label: 'Staff & Roles', svgIcon: icons.staff, requiresAdmin: true, badge: 'ADM', badgeClass: 'sidebar__link-badge--danger' },
+  { key: 'audit', label: 'Audit & Security', svgIcon: icons.audit, requiresAdmin: true, badge: 'ADM', badgeClass: 'sidebar__link-badge--danger' },
 ]
 
 const visibleItems = computed(() =>
@@ -150,6 +150,8 @@ function handleNav(key: string) {
     router.push('/olts')
   } else if (key === 'acs') {
     router.push('/acs')
+  } else if (key === 'mapping') {
+    router.push('/mapping')
   } else if (key === 'staff') {
     router.push('/staff')
   } else if (key === 'audit') {
