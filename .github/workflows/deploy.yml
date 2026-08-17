@@ -137,8 +137,7 @@ jobs:
                 
                 # Update folder public dari dalam image terbaru
                 docker run --rm -v "$tenant_dir:/mnt" alpine rm -rf /mnt/public
-                docker run --rm -v "$tenant_dir:/mnt" netsight-app:latest cp -r /var/www/html/public /mnt/public
-                chmod -R 755 "$tenant_dir/public"
+                docker run --rm --user root -v "$tenant_dir:/mnt" netsight-app:latest sh -c "cp -r /var/www/html/public /mnt/public && chown -R 82:82 /mnt/public && chmod -R 755 /mnt/public"
                 
                 # Restart container dengan image baru
                 docker compose up -d --force-recreate --no-build
