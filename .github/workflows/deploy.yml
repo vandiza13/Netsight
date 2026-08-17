@@ -37,21 +37,29 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Dependencies & Build
+      - name: Install Dependencies & Build JS Assets
         run: |
           npm ci
           npm run build
 
-      - name: Compress Source Code
-        run: |
-          tar -czf ../netsight.tar.gz --exclude=.git --exclude=node_modules .
-          mv ../netsight.tar.gz ./netsight.tar.gz
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          name: netsight-build
-          path: netsight.tar.gz
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.NETSIGHT_CORE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/vandiza13/netsight-app:latest
+          build-args: |
+            GITHUB_TOKEN=${{ secrets.NETSIGHT_CORE_TOKEN || secrets.GITHUB_TOKEN }}
 
   deploy-demo:
     name: Deploy to VPS A (Demo)
@@ -59,30 +67,7 @@ jobs:
     needs: build
     if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'demo')
     steps:
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: netsight-build
-
-      - name: Deploy to VPS A
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            # Directory should already be owned by the SSH user
-            
-      - name: Copy Tarball to VPS A
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          source: "netsight.tar.gz"
-          target: "/var/www/netsight"
-
-      - name: Extract & Start VPS A Services
+      - name: Pull Image & Restart VPS A Services
         uses: appleboy/ssh-action@v1.0.3
         env:
           GITHUB_TOKEN: ${{ secrets.NETSIGHT_CORE_TOKEN || secrets.GITHUB_TOKEN }}
@@ -93,15 +78,24 @@ jobs:
           envs: GITHUB_TOKEN
           script: |
             set -e
+            echo "Login ke GHCR..."
+            echo "$GITHUB_TOKEN" | docker login ghcr.io -u vandiza13 --password-stdin
+            echo "Menarik Docker Image terbaru..."
+            docker pull ghcr.io/vandiza13/netsight-app:latest
+            
+            # Me-replace source code di host (jika diperlukan oleh volume) dari dalam image
             cd /var/www/netsight
-            mkdir -p /tmp/netsight_temp
-            tar -xzf netsight.tar.gz -C /tmp/netsight_temp
-            rsync -a --delete --exclude='.env*' --exclude='storage/' --exclude='docker/secrets/' --exclude='netsight.tar.gz' /tmp/netsight_temp/ ./
-            rm -rf /tmp/netsight_temp netsight.tar.gz
-            export GITHUB_TOKEN=$GITHUB_TOKEN
-            docker compose up -d --build --force-recreate
+            docker run --rm -v "/var/www/netsight:/mnt" ghcr.io/vandiza13/netsight-app:latest sh -c "cp -R /var/www/html/public /mnt/ && cp -R /var/www/html/resources /mnt/ 2>/dev/null || true"
+            
+            # Tagging agar docker-compose tidak bingung
+            docker tag ghcr.io/vandiza13/netsight-app:latest netsight-app:latest
+            
+            echo "Restarting Docker Compose..."
+            docker compose up -d --force-recreate --no-build
+            
             echo "Waiting for database to be ready..."
             for i in {1..15}; do docker compose exec -T db pg_isready -U netsight 2>/dev/null && break || sleep 2; done
+            
             docker compose exec -T app mkdir -p /var/www/html/storage/framework/views /var/www/html/storage/framework/cache/data /var/www/html/storage/framework/sessions /var/www/html/storage/logs
             docker compose exec -T app php artisan optimize:clear
             docker compose exec -T app php artisan migrate --force
@@ -115,30 +109,7 @@ jobs:
     needs: build
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
     steps:
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: netsight-build
-
-      - name: Deploy to VPS B Master Folder
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST_PROD }}
-          username: ${{ secrets.VPS_USERNAME_PROD }}
-          key: ${{ secrets.VPS_SSH_KEY_PROD }}
-          script: |
-            mkdir -p /var/www/netsight-saas/master
-            
-      - name: Copy Tarball to VPS B
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST_PROD }}
-          username: ${{ secrets.VPS_USERNAME_PROD }}
-          key: ${{ secrets.VPS_SSH_KEY_PROD }}
-          source: "netsight.tar.gz"
-          target: "/var/www/netsight-saas/master"
-
-      - name: Extract & Rolling Update Tenants
+      - name: Pull Image & Rolling Update Tenants
         uses: appleboy/ssh-action@v1.0.3
         env:
           GITHUB_TOKEN: ${{ secrets.NETSIGHT_CORE_TOKEN || secrets.GITHUB_TOKEN }}
@@ -149,33 +120,39 @@ jobs:
           envs: GITHUB_TOKEN
           script: |
             set -e
-            cd /var/www/netsight-saas/master
-            mkdir -p /tmp/netsight_temp
-            tar -xzf netsight.tar.gz -C /tmp/netsight_temp
-            rsync -a --delete --exclude='.env*' --exclude='storage/' --exclude='docker/secrets/' --exclude='netsight.tar.gz' /tmp/netsight_temp/ ./
-            rm -rf /tmp/netsight_temp netsight.tar.gz
+            echo "Login ke GHCR..."
+            echo "$GITHUB_TOKEN" | docker login ghcr.io -u vandiza13 --password-stdin
             
-            # Build new master image (tag as latest and prod to match tenant configurations)
-            docker build --build-arg GITHUB_TOKEN=$GITHUB_TOKEN -t netsight-app:latest -t netsight-app:prod .
+            echo "Menarik Docker Image terbaru..."
+            docker pull ghcr.io/vandiza13/netsight-app:latest
+            
+            # Tagging ke nama image lokal agar konfigurasi tenant tidak perlu diubah
+            docker tag ghcr.io/vandiza13/netsight-app:latest netsight-app:latest
+            docker tag ghcr.io/vandiza13/netsight-app:latest netsight-app:prod
             
             for tenant_dir in /var/www/netsight-saas/tenants/*; do
               if [ -d "$tenant_dir" ] && [ -f "$tenant_dir/docker-compose.yml" ]; then
                 echo "Updating tenant in $tenant_dir"
                 cd "$tenant_dir"
-                # Force delete public folder using docker to bypass any host permission/ownership issues
+                
+                # Update folder public dari dalam image terbaru
                 docker run --rm -v "$tenant_dir:/mnt" alpine rm -rf /mnt/public
-                cp -r /var/www/netsight-saas/master/public "$tenant_dir/"
+                docker run --rm -v "$tenant_dir:/mnt" netsight-app:latest cp -r /var/www/html/public /mnt/public
                 chmod -R 755 "$tenant_dir/public"
-                docker compose up -d --force-recreate
+                
+                # Restart container dengan image baru
+                docker compose up -d --force-recreate --no-build
+                
                 echo "Menunggu container aplikasi siap..."
                 sleep 5
+                
                 docker compose exec -T app mkdir -p /var/www/html/storage/framework/views /var/www/html/storage/framework/cache/data /var/www/html/storage/framework/sessions /var/www/html/storage/logs
                 docker compose exec -T app php artisan migrate --force
                 docker compose exec -T app php artisan queue:restart
                 docker compose exec -T app php artisan config:cache
                 docker compose exec -T app php artisan route:cache
                 docker compose exec -T app php artisan view:cache
-                docker compose exec -T app chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+                docker compose exec -T app chown -R 82:82 /var/www/html/storage /var/www/html/bootstrap/cache || true
               fi
             done
 
