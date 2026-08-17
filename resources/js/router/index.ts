@@ -55,6 +55,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, transition: 'slide' },
   },
   {
+    path: '/mapping',
+    name: 'Network Map',
+    component: () => import('../pages/NetworkMapPage.vue'),
+    meta: { requiresAuth: true, transition: 'slide' },
+  },
+  {
     path: '/audit',
     name: 'Audit',
     component: () => import('../pages/AuditLogPage.vue'),

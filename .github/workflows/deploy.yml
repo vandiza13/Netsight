@@ -139,6 +139,11 @@ jobs:
                 docker run --rm -v "$tenant_dir:/mnt" alpine rm -rf /mnt/public
                 docker run --rm --user root -v "$tenant_dir:/mnt" netsight-app:latest sh -c "cp -r /var/www/html/public /mnt/public && chown -R 82:82 /mnt/public && chmod -R 755 /mnt/public"
                 
+                # Pastikan file .env tenant memiliki permission yang benar jika ada
+                if [ -f "$tenant_dir/.env" ]; then
+                  chmod 666 "$tenant_dir/.env" || true
+                fi
+                
                 # Restart container dengan image baru
                 docker compose up -d --force-recreate --no-build
                 
