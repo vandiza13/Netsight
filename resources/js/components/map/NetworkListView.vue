@@ -1,7 +1,7 @@
 <template>
-  <div class="network-list-view premium-card panel-full fade-in">
-    <div class="table-container custom-scrollbar">
-      <table class="premium-table">
+  <div class="network-list-view glass-card panel fade-in">
+    <div class="panel-content table-responsive custom-scrollbar">
+      <table class="table">
         <thead>
           <tr>
             <th style="width: 5%;">TIPE</th>
@@ -137,7 +137,7 @@ defineEmits(['edit'])
   height: calc(100vh - 200px); /* Fill remaining space */
 }
 
-.table-container {
+.table-responsive {
   flex: 1;
   overflow: auto;
 }
@@ -149,7 +149,7 @@ defineEmits(['edit'])
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-tertiary);
+  background: var(--surface-2);
 }
 
 .icon-server { color: #3b82f6; }
@@ -173,7 +173,7 @@ defineEmits(['edit'])
 }
 
 .btn-icon:hover {
-  background: var(--bg-tertiary);
+  background: var(--surface-2);
   color: var(--text-1);
 }
 

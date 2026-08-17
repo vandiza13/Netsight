@@ -178,9 +178,9 @@ defineEmits(['edit'])
   left: 16px;
   bottom: 16px;
   width: 320px;
-  background: var(--bg-primary);
+  background: var(--surface-0);
   border-radius: 12px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
@@ -196,18 +196,18 @@ defineEmits(['edit'])
 
 .drawer__header {
   padding: 16px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  background: var(--bg-secondary);
+  background: var(--surface-1);
 }
 
 .drawer__icon {
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  background: var(--bg-tertiary);
+  background: var(--surface-2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -241,7 +241,7 @@ defineEmits(['edit'])
 }
 
 .drawer__close:hover {
-  background: var(--bg-tertiary);
+  background: var(--surface-2);
   color: var(--text-1);
 }
 
@@ -255,37 +255,37 @@ defineEmits(['edit'])
 }
 
 .drawer__section {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 12px;
 }
 
 .progress-bar-bg {
   height: 6px;
-  background: var(--bg-tertiary);
+  background: var(--surface-2);
   border-radius: 3px;
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
-  background: var(--accent-cyan);
+  background: var(--accent);
   transition: width 0.3s;
 }
 
 .device-card {
-  background: var(--bg-tertiary);
+  background: var(--surface-2);
   border-radius: 6px;
   padding: 10px;
   border: 1px solid rgba(255,255,255,0.05);
 }
 
 .signal-box {
-  background: var(--bg-primary);
+  background: var(--surface-0);
   padding: 6px 10px;
   border-radius: 4px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
   flex: 1;
 }
 
@@ -299,10 +299,10 @@ defineEmits(['edit'])
   display: flex;
   align-items: center;
   gap: 10px;
-  background: var(--bg-tertiary);
+  background: var(--surface-2);
   padding: 6px 10px;
   border-radius: 6px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
 }
 
 .port-slot--empty {
@@ -313,7 +313,7 @@ defineEmits(['edit'])
 .port-num {
   width: 20px;
   height: 20px;
-  background: var(--bg-primary);
+  background: var(--surface-0);
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -350,7 +350,7 @@ defineEmits(['edit'])
   align-items: flex-start;
   gap: 10px;
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border);
 }
 .line-item:last-child {
   border-bottom: none;
@@ -359,10 +359,10 @@ defineEmits(['edit'])
 
 .drawer__footer {
   padding: 12px 16px;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--border);
   display: flex;
   gap: 8px;
-  background: var(--bg-secondary);
+  background: var(--surface-1);
 }
 
 .drawer__loader {

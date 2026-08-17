@@ -102,14 +102,54 @@ defineEmits(['addNode', 'addLine'])
 
 <style scoped>
 .map-filter-bar {
-  background: var(--bg-secondary);
+  background: var(--surface-1);
   padding: 12px 16px;
   border-radius: 8px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
   margin-bottom: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.header-action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--text-3);
+}
+
+.search-input {
+  padding-left: 36px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  border-radius: 6px;
+  height: 36px;
+  width: 200px;
+}
+
+.input-modern {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-1);
+  border-radius: 6px;
+  height: 36px;
+  padding: 0 12px;
 }
 
 .layer-toggle {
@@ -117,7 +157,10 @@ defineEmits(['addNode', 'addLine'])
 }
 
 .layer-btn {
+  display: flex;
+  align-items: center;
   gap: 6px;
+  height: 36px;
 }
 
 .layer-menu {
@@ -125,8 +168,8 @@ defineEmits(['addNode', 'addLine'])
   top: 100%;
   left: 0;
   margin-top: 8px;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
   border-radius: 8px;
   padding: 8px;
   min-width: 180px;
@@ -143,28 +186,29 @@ defineEmits(['addNode', 'addLine'])
   gap: 8px;
   font-size: 13px;
   color: var(--text-2);
-  padding: 4px 8px;
+  padding: 6px 8px;
   cursor: pointer;
   border-radius: 4px;
 }
 
 .layer-item:hover {
-  background: var(--bg-primary);
+  background: var(--surface-1);
   color: var(--text-1);
 }
 
 .view-switcher {
   display: flex;
-  background: var(--bg-tertiary);
+  background: var(--surface-2);
   border-radius: 6px;
   padding: 2px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
+  height: 36px;
 }
 
 .switch-btn {
   background: transparent;
   border: none;
-  padding: 6px 12px;
+  padding: 0 12px;
   color: var(--text-3);
   border-radius: 4px;
   cursor: pointer;
@@ -179,15 +223,15 @@ defineEmits(['addNode', 'addLine'])
 }
 
 .switch-btn.active {
-  background: var(--bg-secondary);
-  color: var(--accent-cyan);
+  background: var(--surface-1);
+  color: var(--accent);
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .action-divider {
   width: 1px;
   height: 24px;
-  background: var(--border-color);
+  background: var(--border);
   margin: 0 4px;
 }
 </style>

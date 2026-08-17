@@ -262,9 +262,6 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-secondary);
-  border-radius: 50%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s;
   z-index: 10;
 }
@@ -280,9 +277,11 @@ onUnmounted(() => {
   left: -4px;
   right: -4px;
   bottom: -4px;
-  border: 2px solid;
   border-radius: 50%;
-  opacity: 0.5;
+  border: 2px solid transparent;
+  background: var(--surface-0);
+  opacity: 0.8;
+  z-index: 1;
   animation: pulse-ring 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -292,23 +291,28 @@ onUnmounted(() => {
 }
 
 .marker-icon {
+  position: relative;
   z-index: 2;
+  background: var(--surface-1);
+  border-radius: 50%;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 
 .marker-badge {
   position: absolute;
-  bottom: -6px;
+  top: -6px;
   right: -6px;
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: var(--surface-2);
+  color: var(--text-1);
   font-size: 10px;
   font-weight: 700;
   padding: 2px 4px;
   border-radius: 4px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
   z-index: 3;
 }
 
@@ -321,10 +325,10 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background: var(--bg-secondary);
+  background: var(--surface-1);
   padding: 8px;
   border-radius: 8px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
@@ -343,13 +347,13 @@ onUnmounted(() => {
 }
 
 .map-control-btn:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
+  background: var(--surface-2);
+  color: var(--text-1);
 }
 
 .map-control-separator {
   height: 1px;
-  background: var(--border-color);
+  background: var(--border);
   margin: 4px 0;
 }
 
@@ -364,18 +368,18 @@ onUnmounted(() => {
 
 /* Dark mode overrides for Leaflet popups */
 .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-  background: var(--bg-secondary) !important;
-  color: var(--text-primary) !important;
+  background: var(--surface-1) !important;
+  color: var(--text-1) !important;
   box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
 }
 .leaflet-container a.leaflet-popup-close-button {
   color: var(--text-3) !important;
 }
 .leaflet-tooltip {
-  background: var(--bg-secondary) !important;
-  border: 1px solid var(--border-color) !important;
-  color: var(--text-primary) !important;
+  background: var(--surface-1) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-1) !important;
   box-shadow: 0 2px 6px rgba(0,0,0,0.3) !important;
 }
 .leaflet-tooltip-top:before, 
