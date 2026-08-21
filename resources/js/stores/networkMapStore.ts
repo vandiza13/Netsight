@@ -44,6 +44,7 @@ export interface FiberLine {
 export const useNetworkMapStore = defineStore('networkMap', {
   state: () => ({
     loading: false,
+    drawerLoading: false,
     error: null as string | null,
     stats: null as any,
     nodes: [] as NetworkNode[],
@@ -123,6 +124,21 @@ export const useNetworkMapStore = defineStore('networkMap', {
       }
     },
 
+    /**
+     * Fetch ALL nodes (no pagination) for parent dropdown in modals.
+     * Ensures availableParents always has data regardless of active tab.
+     */
+    async fetchAllNodesForParent() {
+      try {
+        const { data } = await api.get('/network-map/nodes', {
+          params: { type: 'all', per_page: 500 }
+        })
+        this.nodes = data.data
+      } catch (e: any) {
+        console.error('Failed to fetch nodes for parent selection', e)
+      }
+    },
+
     async fetchLines(page = 1) {
       this.loading = true
       try {
@@ -142,7 +158,7 @@ export const useNetworkMapStore = defineStore('networkMap', {
     },
 
     async getNodeDetail(id: number) {
-      this.loading = true
+      this.drawerLoading = true
       try {
         const { data } = await api.get(`/network-map/nodes/${id}`)
         return data
@@ -150,7 +166,7 @@ export const useNetworkMapStore = defineStore('networkMap', {
         this.error = e.response?.data?.message || 'Gagal memuat detail node'
         return null
       } finally {
-        this.loading = false
+        this.drawerLoading = false
       }
     },
 
@@ -158,8 +174,12 @@ export const useNetworkMapStore = defineStore('networkMap', {
       this.loading = true
       try {
         const { data } = await api.post('/network-map/nodes', payload)
-        this.fetchGeoJson()
-        this.fetchStats()
+        // Refresh all relevant data after creation
+        await Promise.all([
+          this.fetchGeoJson(),
+          this.fetchStats(),
+          this.fetchAllNodesForParent()
+        ])
         return data
       } catch (e: any) {
         throw new Error(e.response?.data?.message || 'Gagal menyimpan node')
@@ -172,7 +192,11 @@ export const useNetworkMapStore = defineStore('networkMap', {
       this.loading = true
       try {
         const { data } = await api.put(`/network-map/nodes/${id}`, payload)
-        this.fetchGeoJson()
+        // Refresh all relevant data after update
+        await Promise.all([
+          this.fetchGeoJson(),
+          this.fetchAllNodesForParent()
+        ])
         return data
       } catch (e: any) {
         throw new Error(e.response?.data?.message || 'Gagal update node')
@@ -186,8 +210,11 @@ export const useNetworkMapStore = defineStore('networkMap', {
       try {
         await api.delete(`/network-map/nodes/${id}`)
         if (this.selectedNodeId === id) this.selectedNodeId = null
-        this.fetchGeoJson()
-        this.fetchStats()
+        await Promise.all([
+          this.fetchGeoJson(),
+          this.fetchStats(),
+          this.fetchAllNodesForParent()
+        ])
       } catch (e: any) {
         throw new Error(e.response?.data?.message || 'Gagal hapus node')
       } finally {

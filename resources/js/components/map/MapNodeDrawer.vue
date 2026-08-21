@@ -24,7 +24,7 @@
       </button>
     </div>
 
-    <div class="drawer__content custom-scrollbar" v-if="node && !store.loading">
+    <div class="drawer__content custom-scrollbar" v-if="node && !store.drawerLoading">
       <!-- Status Badge -->
       <div class="drawer__section flex items-center justify-between">
         <span class="text-xs text-muted">Status Live</span>
@@ -48,14 +48,14 @@
       </div>
 
       <!-- Live Device Link (OLT/ONU/ACS) -->
-      <div class="drawer__section" v-if="node.oltOnu || node.acsDevice">
+      <div class="drawer__section" v-if="node.olt_onu || node.acs_device">
         <div class="device-card">
           <div class="flex items-center justify-between mb-1">
             <span class="text-xs text-muted">Linked Device</span>
-            <span v-if="node.oltOnu" class="badge badge--cyan">OLT ONU</span>
-            <span v-if="node.acsDevice" class="badge badge--purple">GenieACS</span>
+            <span v-if="node.olt_onu" class="badge badge--cyan">OLT ONU</span>
+            <span v-if="node.acs_device" class="badge badge--purple">GenieACS</span>
           </div>
-          <p class="text-sm fw-bold">{{ node.acsDevice?.pppoe_username || node.oltOnu?.pppoe_username || 'Unknown' }}</p>
+          <p class="text-sm fw-bold">{{ node.acs_device?.pppoe_username || node.olt_onu?.pppoe_username || 'Unknown' }}</p>
           <div class="flex items-center gap-4 mt-2">
             <div class="signal-box">
               <span class="text-xs text-muted block">Optical Rx</span>
@@ -63,7 +63,7 @@
             </div>
             <div class="signal-box">
               <span class="text-xs text-muted block">Distance</span>
-              <span class="text-sm fw-bold">{{ node.oltOnu?.distance_meters || '-' }} m</span>
+              <span class="text-sm fw-bold">{{ node.olt_onu?.distance_meters || '-' }} m</span>
             </div>
           </div>
         </div>
@@ -115,7 +115,7 @@
 
     </div>
     
-    <div class="drawer__footer" v-if="node && !store.loading">
+    <div class="drawer__footer" v-if="node && !store.drawerLoading">
       <button class="btn btn-secondary flex-1" @click="$emit('edit', node)">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         Edit
@@ -125,29 +125,36 @@
       </button>
     </div>
     
-    <div class="drawer__loader" v-if="store.loading && store.selectedNodeId">
+    <div class="drawer__loader" v-if="store.drawerLoading && store.selectedNodeId">
       <svg class="spinning" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, watch } from 'vue'
 import { useNetworkMapStore } from '../../stores/networkMapStore'
 
 const store = useNetworkMapStore()
 
-const node = computed(() => {
-  return store.nodes.find(n => n.id === store.selectedNodeId) || null
-})
+const node = ref<any>(null)
+
+// Fetch full detail from API when a node is selected on the map
+watch(() => store.selectedNodeId, async (id) => {
+  if (id) {
+    node.value = await store.getNodeDetail(id)
+  } else {
+    node.value = null
+  }
+}, { immediate: true })
 
 const closeDrawer = () => {
   store.selectNode(null)
 }
 
 const getSignal = (n: any) => {
-  if (n.acsDevice) return n.acsDevice.rx_power_dbm
-  if (n.oltOnu) return n.oltOnu.rx_power_dbm
+  if (n.acs_device) return n.acs_device.rx_power_dbm
+  if (n.olt_onu) return n.olt_onu.rx_power_dbm
   return '-'
 }
 

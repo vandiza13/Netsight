@@ -15,11 +15,11 @@
         <div class="form-group">
           <label>Tipe Perangkat *</label>
           <select v-model="form.type" class="form-input" required :disabled="isEdit">
-            <option value="server">Server / NOC</option>
-            <option value="olt">OLT</option>
-            <option value="odc">ODC (Distribution Cabinet)</option>
-            <option value="odp">ODP (Distribution Point)</option>
-            <option value="ont">ONT / Modem Pelanggan</option>
+            <option value="server">Core Router</option>
+            <option value="olt">OLT (Optical Line Terminal)</option>
+            <option value="odc">ODC (Optical Distribution Cabinet)</option>
+            <option value="odp">ODP (Optical Distribution Point)</option>
+            <option value="ont">ONT / CPE (Customer Premises Equipment)</option>
           </select>
         </div>
 
@@ -214,10 +214,10 @@ const isEdit = computed(() => !!form.value.id)
 
 const getHierarchyLabel = (type: string) => {
   const map: Record<string, string> = {
-    server: '[L1] Server/Router',
+    server: '[L1] Core Router',
     olt: '[L2] OLT',
-    odc: '[L3] ODC (Splitter 1)',
-    odp: '[L4] ODP (Splitter 2)'
+    odc: '[L3] ODC',
+    odp: '[L4] ODP'
   }
   return map[type] || ''
 }
@@ -225,15 +225,15 @@ const getHierarchyLabel = (type: string) => {
 const formLabels = computed(() => {
   switch (form.value.type) {
     case 'server':
-      return { name: 'Hostname / Nama Server', namePlaceholder: 'Contoh: Core-Router-01', code: 'IP Address / Mac', codePlaceholder: 'Contoh: 192.168.1.1' }
+      return { name: 'Hostname', namePlaceholder: 'Contoh: Core-Router-01', code: 'Management IP', codePlaceholder: 'Contoh: 10.10.10.1' }
     case 'olt':
-      return { name: 'Nama OLT', namePlaceholder: 'Contoh: ZTE-C320-Utama', code: 'IP / Model', codePlaceholder: 'Contoh: 10.10.10.2' }
+      return { name: 'Nama OLT', namePlaceholder: 'Contoh: ZTE-C320-01', code: 'Management IP', codePlaceholder: 'Contoh: 10.10.10.2' }
     case 'odc':
-      return { name: 'Nama ODC', namePlaceholder: 'Contoh: ODC-KMY-01', code: 'Kode Kabinet / Lokasi', codePlaceholder: 'Contoh: KAB-01-Utara' }
+      return { name: 'Nama ODC', namePlaceholder: 'Contoh: ODC-KMY-01', code: 'Kode Lokasi', codePlaceholder: 'Contoh: KAB-01-UTARA' }
     case 'odp':
       return { name: 'Nama ODP', namePlaceholder: 'Contoh: ODP-KMY-01-08', code: 'Kode Tiang / Label', codePlaceholder: 'Contoh: TNG-123' }
     case 'ont':
-      return { name: 'Nama Pelanggan', namePlaceholder: 'Contoh: Budi Santoso', code: 'SN Modem / PPPoE', codePlaceholder: 'Contoh: ZTEGC1234567' }
+      return { name: 'ID Pelanggan / PPPoE', namePlaceholder: 'Contoh: pelanggan01@isp', code: 'Serial Number', codePlaceholder: 'Contoh: ZTEGC1234567' }
     default:
       return { name: 'Nama Node', namePlaceholder: 'Contoh: Node-01', code: 'Kode / Label', codePlaceholder: 'Contoh: LBL-01' }
   }
@@ -327,7 +327,7 @@ watch(selectedDeviceToLink, (newId) => {
   } else if (form.value.type === 'ont') {
     const a = store.unmappedDevices.acs_devices?.find((x: any) => x.id === newId)
     if (a) {
-      form.value.name = a.pppoe_username || 'Pelanggan ONT'
+      form.value.name = a.pppoe_username || 'CPE'
       form.value.code = a.serial_number
       form.value.acs_device_id = a.id
       if (a.rx_power_dbm) {
@@ -352,7 +352,13 @@ watch(() => form.value.type, () => {
 
 watch(() => props.show, (newVal) => {
   if (newVal) {
-    store.fetchUnmappedDevices() // Fetch fresh data each time modal opens
+    // Reset search state
+    searchQuery.value = ''
+    isSearching.value = false
+    
+    // Fetch fresh data each time modal opens
+    store.fetchUnmappedDevices()
+    store.fetchAllNodesForParent()
     
     if (props.editNode) {
       form.value = { 
@@ -374,9 +380,18 @@ watch(() => props.show, (newVal) => {
         }
       }
       // Determine selected link for edit mode
-      if (form.value.type === 'server') selectedDeviceToLink.value = form.value.router_id
-      if (form.value.type === 'olt') selectedDeviceToLink.value = form.value.olt_id
-      if (form.value.type === 'ont') selectedDeviceToLink.value = form.value.acs_device_id
+      if (form.value.type === 'server') {
+        selectedDeviceToLink.value = form.value.router_id
+        if (form.value.router_id) searchQuery.value = form.value.name
+      }
+      if (form.value.type === 'olt') {
+        selectedDeviceToLink.value = form.value.olt_id
+        if (form.value.olt_id) searchQuery.value = form.value.name
+      }
+      if (form.value.type === 'ont') {
+        selectedDeviceToLink.value = form.value.acs_device_id
+        if (form.value.acs_device_id) searchQuery.value = form.value.name
+      }
       
     } else {
       form.value = {

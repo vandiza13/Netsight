@@ -64,6 +64,7 @@ onMounted(() => {
   store.fetchGeoJson()
   store.fetchStats()
   store.fetchNodes()
+  store.fetchAllNodesForParent()
 })
 
 onUnmounted(() => {

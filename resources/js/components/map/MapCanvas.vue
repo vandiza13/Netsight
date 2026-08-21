@@ -108,7 +108,7 @@ watch(() => store.geoJsonData, (newData) => {
 
 // Filter watch
 watch(() => store.filters, () => {
-  if (store.geoJsonData) renderGeoJson(store.geoJsonData)
+  if (store.geoJsonData) renderGeoJson(JSON.parse(JSON.stringify(store.geoJsonData)))
 }, { deep: true })
 
 // Selection watch

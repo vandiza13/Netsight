@@ -16,7 +16,7 @@
       <!-- Filter Tipe (Hanya untuk List View) -->
       <select v-if="store.activeTab === 'list'" v-model="store.filters.type" class="input-modern" @change="handleSearch">
         <option value="all">Semua Tipe</option>
-        <option value="server">Server</option>
+        <option value="server">Core Router</option>
         <option value="olt">OLT</option>
         <option value="odc">ODC</option>
         <option value="odp">ODP</option>
@@ -39,11 +39,11 @@
           Layers
         </button>
         <div v-if="showLayers" class="layer-menu">
-          <label class="layer-item"><input type="checkbox" v-model="store.filters.layers.server"> Server NOC</label>
+          <label class="layer-item"><input type="checkbox" v-model="store.filters.layers.server"> Core Router</label>
           <label class="layer-item"><input type="checkbox" v-model="store.filters.layers.olt"> OLT</label>
           <label class="layer-item"><input type="checkbox" v-model="store.filters.layers.odc"> ODC</label>
           <label class="layer-item"><input type="checkbox" v-model="store.filters.layers.odp"> ODP</label>
-          <label class="layer-item"><input type="checkbox" v-model="store.filters.layers.ont"> ONT / Pelanggan</label>
+          <label class="layer-item"><input type="checkbox" v-model="store.filters.layers.ont"> ONT / CPE</label>
           <label class="layer-item"><input type="checkbox" v-model="store.filters.layers.lines"> Jalur Fiber</label>
         </div>
       </div>
