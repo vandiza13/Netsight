@@ -135,13 +135,10 @@ const setTileLayer = () => {
     }
   })
 
-  let url = 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
-  let attribution = '&copy; <a href="https://stadiamaps.com/">Stadia</a>'
+  let url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+  let attribution = '&copy; <a href="https://openstreetmap.org/">OSM</a>'
   
-  if (currentTheme.value === 'street') {
-    url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-    attribution = '&copy; <a href="https://openstreetmap.org/">OSM</a>'
-  } else if (currentTheme.value === 'satellite') {
+  if (currentTheme.value === 'satellite') {
     url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
     attribution = '&copy; <a href="https://www.esri.com/">Esri</a>'
   }
@@ -150,6 +147,16 @@ const setTileLayer = () => {
     maxZoom: 20,
     attribution
   }).addTo(map)
+
+  // Apply CSS filter for dark mode (invert OSM tiles)
+  const tilePane = map.getPane('tilePane')
+  if (tilePane) {
+    if (currentTheme.value === 'dark') {
+      tilePane.style.filter = 'invert(1) hue-rotate(180deg) brightness(0.8) contrast(1.2)'
+    } else {
+      tilePane.style.filter = 'none'
+    }
+  }
 }
 
 const toggleTheme = () => {
