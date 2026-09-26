@@ -135,15 +135,20 @@ const setTileLayer = () => {
     }
   })
 
-  let url = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' // Dark Matter
+  let url = 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png'
+  let attribution = '&copy; <a href="https://stadiamaps.com/">Stadia</a>'
+  
   if (currentTheme.value === 'street') {
     url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    attribution = '&copy; <a href="https://openstreetmap.org/">OSM</a>'
   } else if (currentTheme.value === 'satellite') {
     url = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+    attribution = '&copy; <a href="https://www.esri.com/">Esri</a>'
   }
 
   L.tileLayer(url, {
-    maxZoom: 20
+    maxZoom: 20,
+    attribution
   }).addTo(map)
 }
 
