@@ -5,6 +5,7 @@
  *
  * Semua angka guardrail dikumpulkan di sini.
  * JANGAN hardcode nilai-nilai ini di service/controller.
+ * Bandwidth agnostic: bandwidth_capacity_mbps null = unlimited, guard CPU-based bukan Gbps (bukan hard 1.5G).
  * @see AGENT.md Section 2
  */
 

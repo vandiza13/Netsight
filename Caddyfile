@@ -3,9 +3,9 @@
 }
 
 :80 {
-    # IP Whitelist - SECURITY.md Section 3.2
-    # Replace with actual NOC/VPN IPs
-    # @blocked not remote_ip 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 127.0.0.1
+    # IP Whitelist - disabled by default (set NOC_ALLOW_CIDR env to enable)
+    # To enable, set env NOC_ALLOW_CIDR="10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 127.0.0.1" and uncomment:
+    # @blocked not remote_ip {env.NOC_ALLOW_CIDR}
     # respond @blocked 403
 
     # Security Headers

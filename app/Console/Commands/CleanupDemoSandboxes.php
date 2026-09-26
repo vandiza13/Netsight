@@ -30,8 +30,13 @@ class CleanupDemoSandboxes extends Command
             ->get();
 
         foreach ($expired as $sandbox) {
+            if (!preg_match('/^demo_[a-z0-9_]+$/', $sandbox->schema_name)) {
+                $this->warn("Skipping invalid schema name: {$sandbox->schema_name}");
+                continue;
+            }
+            $quoted = '"' . str_replace('"', '""', $sandbox->schema_name) . '"';
             $this->info("Dropping schema {$sandbox->schema_name}...");
-            \Illuminate\Support\Facades\DB::statement("DROP SCHEMA IF EXISTS {$sandbox->schema_name} CASCADE");
+            \Illuminate\Support\Facades\DB::statement("DROP SCHEMA IF EXISTS {$quoted} CASCADE");
             
             \Illuminate\Support\Facades\DB::table('public.demo_sandboxes')
                 ->where('id', $sandbox->id)

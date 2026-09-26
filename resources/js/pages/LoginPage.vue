@@ -1,11 +1,9 @@
 <template>
   <div class="login-page">
-    <!-- Animated gradient mesh background -->
+    <!-- Animated 3D Network Background -->
     <div class="login-bg">
-      <div class="login-bg__orb login-bg__orb--1" />
-      <div class="login-bg__orb login-bg__orb--2" />
-      <div class="login-bg__orb login-bg__orb--3" />
-      <div class="login-bg__grid" />
+      <canvas ref="networkCanvas" class="network-canvas"></canvas>
+      <div class="login-bg__overlay" />
     </div>
 
     <!-- Login card -->
@@ -204,13 +202,163 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
 
 const auth = useAuthStore()
 const router = useRouter()
 const appConfig = typeof window !== 'undefined' ? (window as any).APP_CONFIG || {} : {}
+
+// ── Background Animation ─────────────────────────────────────────
+const networkCanvas = ref<HTMLCanvasElement | null>(null)
+let animationFrameId = 0
+let resizeHandler: () => void
+let mouseMoveHandler: (e: MouseEvent) => void
+
+onMounted(() => {
+  initNetworkAnimation()
+})
+
+onBeforeUnmount(() => {
+  if (animationFrameId) cancelAnimationFrame(animationFrameId)
+  if (resizeHandler) window.removeEventListener('resize', resizeHandler)
+  if (mouseMoveHandler) window.removeEventListener('mousemove', mouseMoveHandler)
+})
+
+function initNetworkAnimation() {
+  const canvas = networkCanvas.value
+  if (!canvas) return
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+
+  let width = canvas.width = window.innerWidth
+  let height = canvas.height = window.innerHeight
+
+  resizeHandler = () => {
+    width = canvas.width = window.innerWidth
+    height = canvas.height = window.innerHeight
+  }
+  window.addEventListener('resize', resizeHandler)
+
+  const points: {x: number, y: number, z: number, vx: number, vy: number, vz: number}[] = []
+  const numPoints = 280
+  
+  for (let i = 0; i < numPoints; i++) {
+    points.push({
+      x: (Math.random() - 0.5) * 2500,
+      y: (Math.random() - 0.5) * 2500,
+      z: (Math.random() - 0.5) * 2500,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: (Math.random() - 0.5) * 1.5,
+      vz: (Math.random() - 0.5) * 1.5,
+    })
+  }
+
+  let angleX = 0
+  let angleY = 0
+  let targetAngleX = 0
+  let targetAngleY = 0
+
+  mouseMoveHandler = (e: MouseEvent) => {
+    targetAngleY = (e.clientX - window.innerWidth / 2) * 0.0005
+    targetAngleX = (e.clientY - window.innerHeight / 2) * 0.0005
+  }
+  window.addEventListener('mousemove', mouseMoveHandler)
+
+  function animate() {
+    ctx!.fillStyle = 'rgba(11, 15, 25, 0.4)'
+    ctx!.fillRect(0, 0, width, height)
+    
+    const focalLength = 1200
+    const centerX = width / 2
+    const centerY = height / 2
+
+    angleX += (targetAngleX - angleX) * 0.05 + 0.0003
+    angleY += (targetAngleY - angleY) * 0.05 + 0.0006
+
+    const cosX = Math.cos(angleX)
+    const sinX = Math.sin(angleX)
+    const cosY = Math.cos(angleY)
+    const sinY = Math.sin(angleY)
+
+    const projectedPoints = []
+
+    for (let i = 0; i < numPoints; i++) {
+      let p = points[i]
+      
+      p.x += p.vx
+      p.y += p.vy
+      p.z += p.vz
+      
+      const bounds = 1250
+      if (p.x > bounds || p.x < -bounds) p.vx *= -1
+      if (p.y > bounds || p.y < -bounds) p.vy *= -1
+      if (p.z > bounds || p.z < -bounds) p.vz *= -1
+
+      let x1 = p.x * cosY - p.z * sinY
+      let z1 = p.z * cosY + p.x * sinY
+      
+      let y2 = p.y * cosX - z1 * sinX
+      let z2 = z1 * cosX + p.y * sinX
+
+      let scale = focalLength / (focalLength + z2)
+      let px = centerX + x1 * scale
+      let py = centerY + y2 * scale
+
+      projectedPoints.push({ x: px, y: py, scale: scale, z: z2 })
+    }
+
+    ctx!.lineWidth = 1.2
+    for (let i = 0; i < numPoints; i++) {
+      let p1 = projectedPoints[i]
+      if (p1.z < -focalLength) continue
+
+      for (let j = i + 1; j < numPoints; j++) {
+        let p2 = projectedPoints[j]
+        if (p2.z < -focalLength) continue
+
+        let dx = p1.x - p2.x
+        let dy = p1.y - p2.y
+        let dist = Math.sqrt(dx * dx + dy * dy)
+        
+        if (dist < 220) {
+          let opacity = (1 - dist / 220) * Math.min(p1.scale, p2.scale) * 0.6
+          ctx!.strokeStyle = `rgba(14, 165, 233, ${opacity})`
+          ctx!.beginPath()
+          ctx!.moveTo(p1.x, p1.y)
+          ctx!.lineTo(p2.x, p2.y)
+          ctx!.stroke()
+        }
+      }
+    }
+
+    for (let i = 0; i < numPoints; i++) {
+      let p = projectedPoints[i]
+      if (p.z > -focalLength) {
+        let size = Math.max(0.5, 3.5 * p.scale)
+        let opacity = Math.min(1, p.scale * 1.2)
+        ctx!.fillStyle = `rgba(56, 189, 248, ${opacity})`
+        
+        if (p.scale > 0.9) {
+          ctx!.shadowBlur = 12
+          ctx!.shadowColor = 'rgba(56, 189, 248, 0.8)'
+        } else {
+          ctx!.shadowBlur = 0
+        }
+
+        ctx!.beginPath()
+        ctx!.arc(p.x, p.y, size, 0, Math.PI * 2)
+        ctx!.fill()
+        ctx!.shadowBlur = 0
+      }
+    }
+
+    animationFrameId = requestAnimationFrame(animate)
+  }
+
+  animate()
+}
 
 // ── Step 1 State ─────────────────────────────────────────────────
 const email = ref('')
@@ -348,67 +496,29 @@ function triggerShake() {
   padding: 24px;
 }
 
-/* ── Animated Background ───────────────────────────────────────── */
+/* ── Animated 3D Network Background ────────────────────────────── */
 .login-bg {
   position: fixed;
   inset: 0;
   z-index: 0;
   overflow: hidden;
+  background-color: #0b0f19;
 }
 
-.login-bg__orb {
+.network-canvas {
   position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.04;
-  animation: orbFloat 30s ease-in-out infinite;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
-.login-bg__orb--1 {
-  width: 500px;
-  height: 500px;
-  background: var(--accent-cyan);
-  top: -10%;
-  right: -5%;
-  animation-duration: 18s;
-}
-
-.login-bg__orb--2 {
-  width: 400px;
-  height: 400px;
-  background: var(--accent-blue);
-  bottom: -10%;
-  left: -5%;
-  animation-duration: 22s;
-  animation-delay: -5s;
-}
-
-.login-bg__orb--3 {
-  width: 300px;
-  height: 300px;
-  background: var(--accent-green);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation-duration: 40s;
-  animation-delay: -10s;
-  opacity: 0.02;
-}
-
-@keyframes orbFloat {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  25%      { transform: translate(30px, -40px) scale(1.05); }
-  50%      { transform: translate(-20px, 20px) scale(0.95); }
-  75%      { transform: translate(10px, 30px) scale(1.02); }
-}
-
-.login-bg__grid {
+.login-bg__overlay {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(6, 182, 212, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(6, 182, 212, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
+  background: radial-gradient(circle at center, transparent 0%, #0b0f19 90%);
+  pointer-events: none;
 }
 
 /* ── Card ──────────────────────────────────────────────────────── */

@@ -149,10 +149,10 @@
 
             <div class="form-group">
               <label>
-                Bandwidth Capacity (Mbps)
-                <span class="info-icon" title="Kapasitas total bandwidth langganan (misal: 1500 untuk 1.5 Gbps). Digunakan untuk membuat garis batas peringatan di grafik.">ℹ️</span>
+                Bandwidth Capacity (Mbps) — agnostic, kosong = unlimited
+                <span class="info-icon" title="Agnostic: kosong = unlimited (CPU guard only). Isi misal 1500 untuk 1.5Gbps hanya untuk garis warning di grafik.">ℹ️</span>
               </label>
-              <input type="number" v-model="form.bandwidth_capacity_mbps" class="form-input" min="1" placeholder="e.g. 1000 or 1500" />
+              <input type="number" v-model="form.bandwidth_capacity_mbps" class="form-input" min="1" placeholder="Kosong = unlimited (CPU guard only)" />
             </div>
 
             <div class="form-group">
