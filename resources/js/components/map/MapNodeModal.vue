@@ -53,15 +53,13 @@
             <!-- Dropdown List -->
             <div 
               v-if="!selectedDeviceToLink && searchQuery && availableDevicesToLink.length > 0" 
-              style="position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 6px; margin-top: 4px; max-height: 200px; overflow-y: auto; z-index: 50; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);"
+              class="smart-sync-dropdown"
             >
               <div 
                 v-for="dev in availableDevicesToLink" 
                 :key="dev.id"
                 @click="selectDevice(dev)"
-                style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid var(--border-color); font-size: 13px;"
-                onmouseover="this.style.background='rgba(59,130,246,0.1)'"
-                onmouseout="this.style.background='transparent'"
+                class="smart-sync-item"
               >
                 <div style="font-weight: 500;">{{ dev.name || dev.pppoe_username }}</div>
                 <div style="font-size: 11px; color: var(--text-3);">{{ dev.host || dev.ip_address || dev.serial_number }}</div>
@@ -551,5 +549,35 @@ const closeModal = () => emit('close')
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+
+/* Smart Sync Dropdown Fixes */
+.smart-sync-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #1e1e24; /* Solid dark background */
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-top: 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 9999 !important; /* Force top */
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.smart-sync-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  background: transparent;
+  color: #fff;
+  transition: background 0.2s;
+}
+
+.smart-sync-item:hover {
+  background: rgba(59,130,246,0.2); /* Highlight */
 }
 </style>
