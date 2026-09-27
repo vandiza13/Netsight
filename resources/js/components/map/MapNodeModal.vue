@@ -24,7 +24,7 @@
         </div>
 
         <!-- Smart Link Autocomplete -->
-        <div class="form-group" v-if="['server', 'olt', 'ont'].includes(form.type)">
+        <div class="form-group" v-if="['server', 'olt', 'ont'].includes(form.type)" style="position: relative; z-index: 50;">
           <label style="display: flex; align-items: center; justify-content: space-between; color: #3b82f6;">
             <span>Tautkan ke Perangkat Riil (Opsional)</span>
             <span style="font-size: 10px; background: rgba(59,130,246,0.1); padding: 2px 6px; border-radius: 4px;">Smart Sync</span>
@@ -54,12 +54,16 @@
             <div 
               v-if="!selectedDeviceToLink && searchQuery && availableDevicesToLink.length > 0" 
               class="smart-sync-dropdown"
+              style="position: absolute; top: 100%; left: 0; right: 0; background-color: #1e1e24 !important; border: 1px solid var(--border); border-radius: 6px; margin-top: 4px; max-height: 200px; overflow-y: auto; z-index: 99999; box-shadow: 0 10px 25px rgba(0,0,0,0.5);"
             >
               <div 
                 v-for="dev in availableDevicesToLink" 
                 :key="dev.id"
                 @click="selectDevice(dev)"
                 class="smart-sync-item"
+                style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 13px; color: #f8fafc; background-color: #1e1e24;"
+                onmouseover="this.style.backgroundColor='#2d2d36'"
+                onmouseout="this.style.backgroundColor='#1e1e24'"
               >
                 <div style="font-weight: 500;">{{ dev.name || dev.pppoe_username }}</div>
                 <div style="font-size: 11px; color: var(--text-3);">{{ dev.host || dev.ip_address || dev.serial_number }}</div>
