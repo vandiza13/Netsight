@@ -318,6 +318,8 @@ watch(selectedDeviceToLink, (newId) => {
       form.value.name = r.name
       form.value.code = r.host
       form.value.router_id = r.id
+      const s = (r.status || '').toLowerCase()
+      form.value.status = ['online', 'healthy', 'active', 'up'].includes(s) ? 'active' : 'offline'
     }
   } else if (form.value.type === 'olt') {
     const o = store.unmappedDevices.olts?.find((x: any) => x.id === newId)
@@ -325,6 +327,8 @@ watch(selectedDeviceToLink, (newId) => {
       form.value.name = o.name
       form.value.code = o.ip_address
       form.value.olt_id = o.id
+      const s = (o.status || '').toLowerCase()
+      form.value.status = ['online', 'healthy', 'active', 'up'].includes(s) ? 'active' : 'offline'
     }
   } else if (form.value.type === 'ont') {
     const a = store.unmappedDevices.acs_devices?.find((x: any) => x.id === newId)
@@ -335,8 +339,8 @@ watch(selectedDeviceToLink, (newId) => {
       if (a.rx_power_dbm) {
         form.value.metadata.optical_power = a.rx_power_dbm
       }
-      if (a.status === 'online') form.value.status = 'active'
-      else form.value.status = 'offline'
+      const s = (a.status || '').toLowerCase()
+      form.value.status = ['online', 'healthy', 'active', 'up'].includes(s) ? 'active' : 'offline'
     }
   }
 })
