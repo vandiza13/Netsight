@@ -64,7 +64,7 @@
                 onmouseout="this.style.background='transparent'"
               >
                 <div style="font-weight: 500;">{{ dev.name || dev.pppoe_username }}</div>
-                <div style="font-size: 11px; color: var(--text-3);">{{ dev.host || dev.serial_number }}</div>
+                <div style="font-size: 11px; color: var(--text-3);">{{ dev.host || dev.ip_address || dev.serial_number }}</div>
               </div>
             </div>
             
@@ -288,7 +288,7 @@ const onSearchInput = () => {
 
 const selectDevice = (dev: any) => {
   selectedDeviceToLink.value = dev.id
-  searchQuery.value = dev.name || dev.pppoe_username || dev.host || dev.serial_number
+  searchQuery.value = dev.name || dev.pppoe_username || dev.host || dev.ip_address || dev.serial_number
 }
 
 const clearDeviceSelection = () => {
@@ -321,7 +321,7 @@ watch(selectedDeviceToLink, (newId) => {
     const o = store.unmappedDevices.olts?.find((x: any) => x.id === newId)
     if (o) {
       form.value.name = o.name
-      form.value.code = o.host
+      form.value.code = o.ip_address
       form.value.olt_id = o.id
     }
   } else if (form.value.type === 'ont') {
