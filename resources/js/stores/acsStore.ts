@@ -195,6 +195,27 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
+  const bulkAction = async (deviceIds: number[], action: string) => {
+    try {
+      const response = await api.post('/acs/bulk-action', {
+        device_ids: deviceIds,
+        action: action
+      })
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal menjalankan aksi massal.' }
+    }
+  }
+
+  const fetchDeviceTasks = async (deviceId: number) => {
+    try {
+      const response = await api.get(`/acs/devices/${deviceId}/tasks`)
+      return response.data.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal mengambil riwayat antrean tugas.' }
+    }
+  }
+
   return {
     devices,
     stats,
@@ -219,6 +240,8 @@ export const useAcsStore = defineStore('acs', () => {
     fetchAdvancedWifi,
     updateAdvancedWifi,
     updateRadioConfig,
-    deleteDevice
+    deleteDevice,
+    bulkAction,
+    fetchDeviceTasks
   }
 })

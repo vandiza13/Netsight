@@ -22,6 +22,7 @@
           <button type="button" :class="['tab-btn', { active: activeTab === 'wifi' }]" @click="activeTab = 'wifi'">WiFi Config</button>
           <button type="button" :class="['tab-btn', { active: activeTab === 'hosts' }]" @click="activeTab = 'hosts'">Devices</button>
           <button type="button" :class="['tab-btn', { active: activeTab === 'diag' }]" @click="activeTab = 'diag'">Diagnostics</button>
+          <button type="button" :class="['tab-btn', { active: activeTab === 'tasks' }]" @click="activeTab = 'tasks'; loadTasks()">Tasks</button>
         </div>
 
         <!-- TAB: OVERVIEW -->
@@ -454,6 +455,43 @@
           </div>
         </div>
 
+        <!-- TAB: TASKS (HISTORY) -->
+        <div v-if="activeTab === 'tasks'" class="tab-pane fade-in">
+          <div class="flex-between align-center mb-4">
+            <h4 class="drawer-section-title mb-0">Command History</h4>
+            <button @click="loadTasks" :disabled="isLoadingTasks" class="btn btn-sm btn-glass">
+              <span v-if="isLoadingTasks" class="spinning mr-2">⟳</span> Refresh
+            </button>
+          </div>
+
+          <div v-if="isLoadingTasks" class="skeleton-loader-container">
+             <div class="skeleton-card mini" v-for="i in 3" :key="i"></div>
+          </div>
+          <div v-else-if="tasksError" class="alert-box alert-box--danger">{{ tasksError }}</div>
+          <div v-else-if="deviceTasks.length === 0" class="empty-glass-state">No tasks recorded yet.</div>
+          
+          <div v-else class="tasks-timeline">
+            <div class="host-card" v-for="task in deviceTasks" :key="task.id" :class="{'opacity-75': task.status === 'pending'}">
+              <div class="host-info flex-1">
+                <div class="flex align-center gap-2 mb-1">
+                  <div class="host-name capitalize">{{ task.action.replace(/_/g, ' ') }}</div>
+                  <span v-if="task.status === 'pending'" class="badge-glass warning text-xs">Pending</span>
+                  <span v-else-if="task.status === 'success'" class="badge-glass good text-xs">Success</span>
+                  <span v-else class="badge-glass critical text-xs">Failed</span>
+                </div>
+                <div class="text-xs text-muted mb-1">{{ new Date(task.created_at).toLocaleString('id-ID') }}</div>
+                <div class="text-xs mt-2" v-if="task.error_message">
+                  <span class="text-critical">{{ task.error_message }}</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-xs text-muted">by {{ task.creator?.name || 'System' }}</div>
+                <div class="text-xs text-muted mt-1">{{ task.execution_type }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -512,7 +550,9 @@ const isFetchingSpeedtest = ref(false)
 const speedtestError = ref('')
 const speedtestResult = ref<any>(null)
 
-
+const deviceTasks = ref<any[]>([])
+const isLoadingTasks = ref(false)
+const tasksError = ref('')
 
 const pppoeForm = reactive({
   username: '',
@@ -535,6 +575,8 @@ watch(() => props.show, (newVal) => {
     tracerouteResult.value = null
     speedtestError.value = ''
     speedtestResult.value = null
+    tasksError.value = ''
+    deviceTasks.value = []
     showPppoePassword.value = false
     activeTab.value = 'config'
     hosts.value = []
@@ -543,12 +585,26 @@ watch(() => props.show, (newVal) => {
     // Auto load data
     loadHosts()
     loadAdvancedWifi()
+    loadTasks()
 
     // PPPoE Pre-fill
     pppoeForm.username = props.device.pppoe_username || ''
     pppoeForm.password = ''
   }
 })
+
+const loadTasks = async () => {
+  if (!props.device) return
+  isLoadingTasks.value = true
+  tasksError.value = ''
+  try {
+    deviceTasks.value = await store.fetchDeviceTasks(props.device.id)
+  } catch (err: any) {
+    tasksError.value = err.message
+  } finally {
+    isLoadingTasks.value = false
+  }
+}
 
 const loadHosts = async () => {
   if (!props.device) return
@@ -569,6 +625,7 @@ const refreshHosts = async () => {
   hostsError.value = ''
   try {
     await store.refreshDeviceHosts(props.device.id)
+    loadTasks()
     // Re-load hosts after refresh task is sent
     // Note: TR-069 tasks are async. Data might not change instantly.
     setTimeout(loadHosts, 3000)
@@ -670,6 +727,7 @@ const saveRadio = async (radioIndex: number) => {
       transmit_power: targetRadio.transmit_power,
       bandwidth: targetRadio.bandwidth
     }
+    loadTasks()
     const successMsg = res.message || `Perintah simpan pengaturan Radio ${band} telah dikirim ke modem.`;
     emit('updated', successMsg)
     
@@ -727,6 +785,7 @@ const saveSsid = async (ssidObj: any) => {
       max_clients: ssidObj.max_clients,
       passkey: ssidObj.passkey
     }
+    loadTasks()
     const successMsg = res.message || `Perintah simpan SSID ${ssidObj.index} (${ssidObj.name}) telah dikirim ke modem.`;
     emit('updated', successMsg)
     
@@ -760,6 +819,7 @@ const savePppoe = async () => {
   isSavingPppoe.value = true
   try {
     const res = await store.updatePppoeConfig(props.device.id, pppoeForm)
+    loadTasks()
     const successMsg = res.message || 'Perintah ubah PPPoE telah dikirim ke modem. Modem mungkin akan terputus sesaat.'
     emit('updated', successMsg)
     
@@ -796,6 +856,7 @@ const triggerPing = async () => {
   
   try {
     await store.triggerPing(props.device.id, pingForm.host)
+    loadTasks()
     // Auto fetch result after 10 seconds
     setTimeout(() => {
       fetchPingResult()
@@ -836,6 +897,7 @@ const triggerTraceroute = async () => {
   
   try {
     await store.triggerTraceroute(props.device.id, tracerouteForm.host)
+    loadTasks()
     setTimeout(() => {
       fetchTracerouteResult()
     }, 15000)
@@ -875,6 +937,7 @@ const triggerSpeedtest = async () => {
   
   try {
     await store.triggerSpeedtest(props.device.id, speedtestForm.url, speedtestForm.type)
+    loadTasks()
     setTimeout(() => {
       fetchSpeedtestResult()
     }, 15000)

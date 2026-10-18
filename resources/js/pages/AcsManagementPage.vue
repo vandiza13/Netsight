@@ -97,6 +97,9 @@
               <table class="premium-table">
                 <thead>
                   <tr>
+                    <th style="width: 4%;">
+                      <input type="checkbox" @change="toggleAll" :checked="isAllSelected" class="checkbox-glass">
+                    </th>
                     <th style="width: 10%;">STATUS</th>
                     <th style="width: 22%;">DEVICE INFO</th>
                     <th style="width: 15%;">PPPoE</th>
@@ -109,18 +112,22 @@
                 <tbody>
                   <!-- Loading State -->
                   <tr v-if="store.loading && store.devices.length === 0">
-                    <td colspan="6" class="loading-state">
+                    <td colspan="7" class="loading-state">
                       <span class="spinning">🔄</span> Fetching TR-069 Devices...
                     </td>
                   </tr>
                   <!-- Empty State -->
                   <tr v-else-if="store.devices.length === 0">
-                    <td colspan="6" class="empty-state">
+                    <td colspan="7" class="empty-state">
                       Belum ada perangkat ACS yang tersinkronisasi.
                     </td>
                   </tr>
                   <!-- Data Rows -->
-                  <tr v-for="device in store.devices" :key="device.id" class="table-row-hover">
+                  <tr v-for="device in store.devices" :key="device.id" class="table-row-hover" :class="{ 'row-selected': selectedDevices.includes(device.id) }">
+                    <!-- Checkbox -->
+                    <td>
+                      <input type="checkbox" :value="device.id" v-model="selectedDevices" class="checkbox-glass">
+                    </td>
                     <!-- Status -->
                     <td>
                       <div class="status-cell">
@@ -216,6 +223,18 @@
           @close="isModalOpen = false"
           @updated="onDeviceUpdated"
         />
+
+        <!-- Bulk Action Bar -->
+        <div v-if="selectedDevices.length > 0" class="bulk-action-bar fade-in-up">
+          <div class="bulk-info">
+            <span class="bulk-count">{{ selectedDevices.length }}</span> perangkat terpilih
+          </div>
+          <div class="bulk-actions">
+            <button class="btn btn-secondary btn-sm" @click="handleBulkAction('refresh')">🔄 Refresh (Sync)</button>
+            <button class="btn btn-danger-outline btn-sm" @click="handleBulkAction('reboot')">⚡ Reboot Massal</button>
+            <button class="btn btn-danger btn-sm" @click="handleBulkAction('factory_reset')">⚠️ Factory Reset</button>
+          </div>
+        </div>
       </main>
     </div>
   </div>
@@ -227,6 +246,7 @@ import { useAcsStore } from '../stores/acsStore'
 import SidebarNav from '../components/SidebarNav.vue'
 import TopBar from '../components/TopBar.vue'
 import AcsDeviceModal from '../components/AcsDeviceModal.vue'
+import { computed } from 'vue'
 
 const store = useAcsStore()
 const sidebarOpen = ref(false)
@@ -235,6 +255,39 @@ const notification = ref('')
 const notificationType = ref('success')
 const isModalOpen = ref(false)
 const selectedDevice = ref(null)
+
+const selectedDevices = ref<number[]>([])
+
+const isAllSelected = computed(() => {
+  if (store.devices.length === 0) return false
+  return selectedDevices.value.length === store.devices.length
+})
+
+const toggleAll = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  if (target.checked) {
+    selectedDevices.value = store.devices.map((d: any) => d.id)
+  } else {
+    selectedDevices.value = []
+  }
+}
+
+const handleBulkAction = async (action: string) => {
+  let actionName = ''
+  if (action === 'reboot') actionName = 'Reboot'
+  if (action === 'refresh') actionName = 'Refresh'
+  if (action === 'factory_reset') actionName = 'Factory Reset'
+  
+  if (confirm(`Apakah Anda yakin ingin melakukan ${actionName} pada ${selectedDevices.value.length} perangkat?`)) {
+    try {
+      await store.bulkAction(selectedDevices.value, action)
+      showNotification(`${selectedDevices.value.length} perangkat berhasil dimasukkan ke antrean ${actionName}.`)
+      selectedDevices.value = [] // Clear selection
+    } catch (err: any) {
+      showNotification(err.message || `Gagal menjalankan aksi massal.`, 'error')
+    }
+  }
+}
 
 onMounted(() => {
   store.fetchStats()
@@ -828,5 +881,46 @@ const deleteDeviceConfirm = async (deviceId: number, serialNumber: string) => {
     gap: 12px;
     align-items: flex-start;
   }
+}
+/* ── Bulk Action Bar ────────────────────────────────────── */
+.bulk-action-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.1);
+  padding: 12px 24px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  z-index: 100;
+}
+.bulk-info {
+  font-size: 0.9rem;
+  color: var(--text-2);
+}
+.bulk-count {
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-right: 4px;
+}
+.bulk-actions {
+  display: flex;
+  gap: 12px;
+}
+.fade-in-up {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
 }
 </style>

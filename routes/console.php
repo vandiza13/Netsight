@@ -81,3 +81,9 @@ Schedule::command('netsight:aggregate-traffic')
     ->everyFiveMinutes()
     ->name('traffic-aggregator')
     ->withoutOverlapping();
+
+// ACS Task Poller (Check status of pending tasks in GenieACS)
+Schedule::job(new \Vandiza\NetsightCore\Jobs\SyncAcsTasksJob())
+    ->everyMinute()
+    ->name('acs-task-poller')
+    ->withoutOverlapping();
