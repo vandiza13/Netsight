@@ -257,6 +257,16 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
+  const fetchDeviceMetrics = async (deviceId: number, days: number = 7) => {
+    try {
+      const response = await api.get(`/acs/devices/${deviceId}/metrics`, { params: { days } })
+      return response.data.data || []
+    } catch (err: any) {
+      console.error('Failed to fetch device metrics', err)
+      return []
+    }
+  }
+
   return {
     devices,
     stats,
@@ -286,6 +296,7 @@ export const useAcsStore = defineStore('acs', () => {
     fetchDeviceTasks,
     syncing,
     syncStatus,
-    triggerSync
+    triggerSync,
+    fetchDeviceMetrics
   }
 })
