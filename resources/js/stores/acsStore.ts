@@ -4,7 +4,17 @@ import api from '../utils/api'
 
 export const useAcsStore = defineStore('acs', () => {
   const devices = ref([])
-  const stats = ref({ total: 0, online: 0, offline: 0, critical_rx: 0 })
+  const stats = ref<any>({
+    total: 0,
+    online: 0,
+    offline: 0,
+    critical_rx: 0,
+    unlinked: 0,
+    stale: 0,
+    new_ont: 0,
+    vendors: [],
+    sync: null
+  })
   const loading = ref(false)
   const syncing = ref(false)
   const syncStatus = ref<any>(null)
@@ -40,13 +50,22 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
-  const fetchDevices = async (page = 1, search = '') => {
+  const fetchDevices = async (
+    page = 1,
+    search = '',
+    filters: { status?: string; vendor?: string; per_page?: number; sort_by?: string; sort_order?: string } = {}
+  ) => {
     loading.value = true
     error.value = null
     try {
-      const response = await api.get('/acs/devices', {
-        params: { page, search }
-      })
+      const params: any = { page, search }
+      if (filters.status && filters.status !== 'all') params.status = filters.status
+      if (filters.vendor && filters.vendor !== 'all') params.vendor = filters.vendor
+      if (filters.per_page) params.per_page = filters.per_page
+      if (filters.sort_by) params.sort_by = filters.sort_by
+      if (filters.sort_order) params.sort_order = filters.sort_order
+
+      const response = await api.get('/acs/devices', { params })
       devices.value = response.data.data.data
       pagination.value = {
         current_page: response.data.data.current_page,
