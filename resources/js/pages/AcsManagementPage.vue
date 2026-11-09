@@ -14,6 +14,10 @@
             </h2>
             <p class="dashboard__heading-sub">
               Remote management modem pelanggan via Auto Configuration Server (GenieACS)
+              <span v-if="store.syncStatus?.last_sync_at" class="sync-badge">
+                <span class="sync-dot" :class="{ 'sync-dot--ok': store.syncStatus.status === 'success', 'sync-dot--err': store.syncStatus.status === 'error' }"></span>
+                {{ store.syncStatus.status === 'success' ? `Sinkron: ${formatRelativeTime(store.syncStatus.last_sync_at)}` : 'Sinkron bermasalah' }}
+              </span>
             </p>
           </div>
 
@@ -28,12 +32,21 @@
                 class="input-modern search-input"
               >
             </div>
-            <button class="btn btn-secondary" @click="fetchData(1)" :disabled="store.loading">
-              <svg :class="{ spinning: store.loading }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
-              Refresh
+            <button class="btn btn-secondary" @click="handleManualSync" :disabled="store.syncing || store.loading" :title="store.syncing ? 'Menyinkronkan data dari GenieACS NBI...' : 'Tarik data terbaru dari GenieACS NBI'">
+              <svg :class="{ spinning: store.syncing || store.loading }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+              <span>{{ store.syncing ? 'Menyinkronkan...' : 'Sinkronkan' }}</span>
             </button>
           </div>
         </section>
+
+        <!-- Sync Error Alert Banner -->
+        <div v-if="store.syncStatus?.status === 'error'" class="alert-box alert-box--warning fade-in">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div>
+            <strong>Peringatan Sinkronisasi GenieACS</strong>
+            <p>{{ store.syncStatus.error }}. Data terakhir berhasil disinkronkan: {{ formatRelativeTime(store.syncStatus.last_sync_at) }}</p>
+          </div>
+        </div>
 
         <!-- Analytics Cards -->
         <section class="analytics-grid" v-if="store.stats">
@@ -298,6 +311,15 @@ const handleSearch = () => {
   fetchData(1)
 }
 
+const handleManualSync = async () => {
+  try {
+    const res = await store.triggerSync()
+    showNotification(res?.message || 'Sinkronisasi dengan GenieACS selesai.')
+  } catch (err: any) {
+    showNotification(err?.message || 'Gagal melakukan sinkronisasi dengan GenieACS.', 'error')
+  }
+}
+
 const fetchData = (page: number) => {
   store.fetchDevices(page, searchQuery.value)
 }
@@ -414,6 +436,35 @@ const deleteDeviceConfirm = async (deviceId: number, serialNumber: string) => {
 .dashboard__heading-sub {
   font-size: 0.875rem;
   color: var(--text-2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: var(--text-2);
+}
+.sync-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #9ca3af;
+}
+.sync-dot--ok {
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
+}
+.sync-dot--err {
+  background: #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
 }
 .dashboard__welcome { margin-bottom: 32px; }
 

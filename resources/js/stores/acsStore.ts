@@ -6,6 +6,8 @@ export const useAcsStore = defineStore('acs', () => {
   const devices = ref([])
   const stats = ref({ total: 0, online: 0, offline: 0, critical_rx: 0 })
   const loading = ref(false)
+  const syncing = ref(false)
+  const syncStatus = ref<any>(null)
   const pagination = ref({ current_page: 1, last_page: 1, total: 0 })
   const error = ref<string | null>(null)
 
@@ -13,8 +15,28 @@ export const useAcsStore = defineStore('acs', () => {
     try {
       const response = await api.get('/acs/stats')
       stats.value = response.data.data
+      if (response.data.data?.sync) {
+        syncStatus.value = response.data.data.sync
+      }
     } catch (err: any) {
       console.error('Failed to fetch ACS stats', err)
+    }
+  }
+
+  const triggerSync = async () => {
+    syncing.value = true
+    try {
+      const response = await api.post('/acs/sync')
+      if (response.data?.data) {
+        syncStatus.value = response.data.data
+      }
+      await fetchStats()
+      await fetchDevices(pagination.value.current_page)
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal melakukan sinkronisasi dengan GenieACS.' }
+    } finally {
+      syncing.value = false
     }
   }
 
@@ -242,6 +264,9 @@ export const useAcsStore = defineStore('acs', () => {
     updateRadioConfig,
     deleteDevice,
     bulkAction,
-    fetchDeviceTasks
+    fetchDeviceTasks,
+    syncing,
+    syncStatus,
+    triggerSync
   }
 })
