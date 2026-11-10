@@ -236,15 +236,94 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
-  const bulkAction = async (deviceIds: number[], action: string) => {
+  const profiles = ref<any[]>([])
+
+  const fetchProfiles = async () => {
+    try {
+      const response = await api.get('/acs/profiles')
+      profiles.value = response.data.data || []
+      return profiles.value
+    } catch (err: any) {
+      console.error('Failed to fetch ACS profiles', err)
+      return []
+    }
+  }
+
+  const saveProfile = async (data: any) => {
+    try {
+      let response
+      if (data.id) {
+        response = await api.put(`/acs/profiles/${data.id}`, data)
+      } else {
+        response = await api.post('/acs/profiles', data)
+      }
+      await fetchProfiles()
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal menyimpan profil provisioning.' }
+    }
+  }
+
+  const deleteProfile = async (id: number) => {
+    try {
+      const response = await api.delete(`/acs/profiles/${id}`)
+      await fetchProfiles()
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal menghapus profil provisioning.' }
+    }
+  }
+
+  const bulkAction = async (payload: {
+    deviceIds?: number[]
+    action: string
+    params?: any
+    selectAllMatching?: boolean
+    filterSearch?: string
+    filterVendor?: string
+    filterStatus?: string
+  }) => {
     try {
       const response = await api.post('/acs/bulk-action', {
-        device_ids: deviceIds,
-        action: action
+        device_ids: payload.deviceIds || [],
+        action: payload.action,
+        params: payload.params || {},
+        select_all_matching: payload.selectAllMatching || false,
+        filter_search: payload.filterSearch || '',
+        filter_vendor: payload.filterVendor || '',
+        filter_status: payload.filterStatus || ''
       })
       return response.data
     } catch (err: any) {
       throw err.response?.data || { message: 'Gagal menjalankan aksi massal.' }
+    }
+  }
+
+  const fetchBatchStatus = async (batchId: string) => {
+    try {
+      const response = await api.get(`/acs/batches/${batchId}`)
+      return response.data.data
+    } catch (err: any) {
+      console.error('Failed to fetch batch status', err)
+      return null
+    }
+  }
+
+  const provisionDevice = async (deviceId: number, profileId: number) => {
+    try {
+      const response = await api.post(`/acs/devices/${deviceId}/provision`, { profile_id: profileId })
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal menerapkan profil provisioning.' }
+    }
+  }
+
+  const updateDeviceTag = async (deviceId: number, areaTag: string) => {
+    try {
+      const response = await api.post(`/acs/devices/${deviceId}/tag`, { area_tag: areaTag })
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal memperbarui tag area.' }
     }
   }
 
@@ -297,6 +376,13 @@ export const useAcsStore = defineStore('acs', () => {
     syncing,
     syncStatus,
     triggerSync,
-    fetchDeviceMetrics
+    fetchDeviceMetrics,
+    profiles,
+    fetchProfiles,
+    saveProfile,
+    deleteProfile,
+    fetchBatchStatus,
+    provisionDevice,
+    updateDeviceTag
   }
 })

@@ -22,6 +22,10 @@
           </div>
 
           <div class="header-action-buttons">
+            <button class="btn btn-secondary" @click="isProfilesModalOpen = true" title="Kelola Profil Provisioning TR-069 & Zero-Touch">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Profil ACS
+            </button>
             <button class="btn btn-outline" @click="exportCsv" :disabled="store.devices.length === 0" title="Ekspor data tabel ke file CSV">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Ekspor CSV
@@ -146,6 +150,22 @@
             </div>
             <span v-if="activeStatusFilter === 'stale'" class="filter-active-pill">Aktif</span>
           </div>
+
+          <!-- Unprovisioned Card -->
+          <div
+            :class="['stat-card', 'stat-unprovisioned', 'stat-card--clickable', { 'stat-card--active': activeStatusFilter === 'unprovisioned' }]"
+            @click="setStatusFilter('unprovisioned')"
+            title="Klik untuk filter ONT Baru yang belum diprovisioning"
+          >
+            <div class="stat-icon-wrap" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-title">Belum Provision</span>
+              <span class="stat-value text-amber">{{ store.stats.unprovisioned ?? 0 }}</span>
+            </div>
+            <span v-if="activeStatusFilter === 'unprovisioned'" class="filter-active-pill">Aktif</span>
+          </div>
         </section>
 
         <!-- Filter Control Bar -->
@@ -176,6 +196,8 @@
                 <option value="unlinked">Tanpa Akun PPPoE</option>
                 <option value="stale">Stale (Tidak Melapor &gt; 24 Jam)</option>
                 <option value="new_ont">ONT Baru (24 Jam Terakhir)</option>
+                <option value="unprovisioned">Belum Provisioning</option>
+                <option value="provisioned">Sudah Provisioning</option>
               </select>
             </div>
 
@@ -316,6 +338,19 @@
                           <span class="separator">/</span>
                           <span class="model-name">{{ device.model || 'ONT' }}</span>
                         </div>
+
+                        <!-- Area Tag & Provision Badge -->
+                        <div class="device-meta-pills">
+                          <span v-if="device.area_tag" class="pill-area" :title="'Wilayah: ' + device.area_tag">
+                            📍 {{ device.area_tag }}
+                          </span>
+                          <span v-if="device.provisioned_at" class="pill-prov" :title="'Diprovisioning: ' + formatRelativeTime(device.provisioned_at)">
+                            ⚡ {{ device.profile?.name || 'Provisioned' }}
+                          </span>
+                          <span v-else class="pill-unprov" title="Belum diprovisioning">
+                            ⏳ Belum Provision
+                          </span>
+                        </div>
                       </div>
                     </td>
 
@@ -396,6 +431,14 @@
                     <!-- Actions -->
                     <td class="td-actions text-right">
                       <div class="action-buttons-row">
+                        <button
+                          v-if="!device.provisioned_at"
+                          class="btn-action-icon btn-action-icon--amber"
+                          @click="openQuickProvision(device)"
+                          title="Terapkan Profil Provisioning Cepat"
+                        >
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        </button>
                         <button
                           class="btn-action-icon btn-action-icon--primary"
                           @click="openModal(device)"
@@ -478,13 +521,131 @@
         <!-- Bulk Action Floating Bar -->
         <div v-if="selectedDevices.length > 0" class="bulk-action-bar fade-in-up">
           <div class="bulk-info">
-            <span class="bulk-count">{{ selectedDevices.length }}</span> modem terpilih
+            <span class="bulk-count">{{ selectAllMatching ? store.pagination.total : selectedDevices.length }}</span> modem terpilih
+            <span v-if="selectAllMatching" class="badge-all-matching">(Semua yang cocok filter)</span>
           </div>
+
+          <div class="bulk-select-matching-banner" v-if="!selectAllMatching && selectedDevices.length === store.devices.length && store.pagination.total > store.devices.length">
+            <button class="btn-link text-xs" @click="selectAllMatching = true">
+              Pilih semua <strong>{{ store.pagination.total }}</strong> modem yang cocok dengan filter saat ini
+            </button>
+          </div>
+
           <div class="bulk-actions">
-            <button class="btn btn-secondary btn-sm" @click="handleBulkAction('refresh')">🔄 Tarik Data (Sync)</button>
-            <button class="btn btn-danger-outline btn-sm" @click="handleBulkAction('reboot')">⚡ Reboot Massal</button>
-            <button class="btn btn-danger btn-sm" @click="handleBulkAction('factory_reset')">⚠️ Factory Reset</button>
-            <button class="btn btn-outline btn-sm" @click="selectedDevices = []">Batal</button>
+            <button class="btn btn-secondary btn-sm" @click="handleBulkAction('refresh')" title="Tarik parameter terbaru dari perangkat terpilih">
+              🔄 Sync
+            </button>
+            <button class="btn btn-info-outline btn-sm" @click="openBulkPrompt('apply_profile')" title="Terapkan profil provisioning TR-069 massal">
+              📑 Terapkan Profil
+            </button>
+            <button class="btn btn-info-outline btn-sm" @click="openBulkPrompt('set_admin_password')" title="Ubah kata sandi web admin modem massal">
+              🔒 Ganti Sandi Admin
+            </button>
+            <button class="btn btn-info-outline btn-sm" @click="openBulkPrompt('set_inform_interval')" title="Ubah interval inform CWMP berkala">
+              ⏱️ Atur Inform
+            </button>
+            <button class="btn btn-danger-outline btn-sm" @click="handleBulkAction('reboot')" title="Reboot perangkat terpilih">
+              ⚡ Reboot Massal
+            </button>
+            <button class="btn btn-danger btn-sm" @click="handleBulkAction('factory_reset')" title="Reset ke setelan pabrik">
+              ⚠️ Factory Reset
+            </button>
+            <button class="btn btn-outline btn-sm" @click="cancelBulkSelection">Batal</button>
+          </div>
+        </div>
+
+        <!-- Modals: Profiles & Batch Progress -->
+        <AcsProfilesModal
+          :show="isProfilesModalOpen"
+          @close="isProfilesModalOpen = false"
+          @updated="onProfilesUpdated"
+        />
+
+        <AcsBatchModal
+          :show="isBatchModalOpen"
+          :batch-id="activeBatchId"
+          :action="activeBatchAction"
+          @close="isBatchModalOpen = false"
+          @finished="onBatchFinished"
+        />
+
+        <!-- Parameter Prompt Modal for Bulk Operations -->
+        <div v-if="bulkPromptModal.open" class="prompt-overlay" @click.self="bulkPromptModal.open = false">
+          <div class="prompt-modal slide-in-down">
+            <div class="prompt-header">
+              <h4>{{ bulkPromptModal.title }}</h4>
+              <button class="close-btn" @click="bulkPromptModal.open = false">×</button>
+            </div>
+            <div class="prompt-body">
+              <p class="prompt-desc">{{ bulkPromptModal.desc }}</p>
+
+              <!-- Admin Password Input -->
+              <div v-if="bulkPromptModal.action === 'set_admin_password'" class="form-group mb-3">
+                <label class="block text-xs font-bold text-slate mb-1">Kata Sandi Web Admin Baru <span class="text-rose">*</span></label>
+                <input v-model="bulkPromptModal.inputValue" type="text" class="input-modern font-mono w-full" placeholder="Masukkan password baru..." required />
+              </div>
+
+              <!-- Inform Interval Input -->
+              <div v-if="bulkPromptModal.action === 'set_inform_interval'" class="form-group mb-3">
+                <label class="block text-xs font-bold text-slate mb-1">Interval Inform (Detik) <span class="text-rose">*</span></label>
+                <input v-model.number="bulkPromptModal.inputValue" type="number" min="30" max="86400" class="input-modern w-full" placeholder="300" required />
+                <small class="text-xs text-muted mt-1 block">Rekomendasi: 300 detik (5 menit).</small>
+              </div>
+
+              <!-- Select Provisioning Profile -->
+              <div v-if="bulkPromptModal.action === 'apply_profile'" class="form-group mb-3">
+                <label class="block text-xs font-bold text-slate mb-1">Pilih Profil Provisioning <span class="text-rose">*</span></label>
+                <select v-model="bulkPromptModal.selectedProfileId" class="select-modern w-full" required>
+                  <option :value="null" disabled>-- Pilih Profil --</option>
+                  <option v-for="p in store.profiles" :key="p.id" :value="p.id">
+                    {{ p.name }} ({{ p.vendor || 'Semua Vendor' }})
+                  </option>
+                </select>
+                <p v-if="store.profiles.length === 0" class="text-xs text-rose mt-2">
+                  Belum ada profil provisioning. Silakan buat di menu Profil ACS terlebih dahulu.
+                </p>
+              </div>
+            </div>
+            <div class="prompt-footer">
+              <button class="btn btn-secondary btn-sm" @click="bulkPromptModal.open = false">Batal</button>
+              <button
+                class="btn btn-primary btn-sm"
+                :disabled="bulkPromptModal.action === 'apply_profile' && !bulkPromptModal.selectedProfileId"
+                @click="executeBulkPrompt"
+              >
+                Eksekusi Massal
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Single Device Provision Modal -->
+        <div v-if="quickProvisionModal.open" class="prompt-overlay" @click.self="quickProvisionModal.open = false">
+          <div class="prompt-modal slide-in-down">
+            <div class="prompt-header">
+              <h4>⚡ Provisioning Cepat: {{ quickProvisionModal.device?.serial_number }}</h4>
+              <button class="close-btn" @click="quickProvisionModal.open = false">×</button>
+            </div>
+            <div class="prompt-body">
+              <p class="prompt-desc">
+                Pilih profil provisioning untuk dikirimkan ke modem <strong>{{ quickProvisionModal.device?.vendor }} {{ quickProvisionModal.device?.model }}</strong>:
+              </p>
+              <div class="form-group mb-3">
+                <label class="block text-xs font-bold text-slate mb-1">Pilih Profil Provisioning</label>
+                <select v-model="quickProvisionModal.selectedProfileId" class="select-modern w-full">
+                  <option :value="null" disabled>-- Pilih Profil --</option>
+                  <option v-for="p in store.profiles" :key="p.id" :value="p.id">
+                    {{ p.name }} ({{ p.vendor || 'Semua' }})
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="prompt-footer">
+              <button class="btn btn-secondary btn-sm" @click="quickProvisionModal.open = false">Batal</button>
+              <button class="btn btn-primary btn-sm" :disabled="!quickProvisionModal.selectedProfileId" @click="executeQuickProvision">
+                Kirim Perintah
+              </button>
+            </div>
           </div>
         </div>
       </main>
@@ -498,6 +659,9 @@ import { useAcsStore } from '../stores/acsStore'
 import SidebarNav from '../components/SidebarNav.vue'
 import TopBar from '../components/TopBar.vue'
 import AcsDeviceModal from '../components/AcsDeviceModal.vue'
+import AcsProfilesModal from '../components/AcsProfilesModal.vue'
+import AcsBatchModal from '../components/AcsBatchModal.vue'
+import { reactive } from 'vue'
 
 const store = useAcsStore()
 const sidebarOpen = ref(false)
@@ -511,6 +675,27 @@ const notificationType = ref('success')
 const isModalOpen = ref(false)
 const selectedDevice = ref<any>(null)
 const selectedDevices = ref<number[]>([])
+const selectAllMatching = ref(false)
+
+const isProfilesModalOpen = ref(false)
+const isBatchModalOpen = ref(false)
+const activeBatchId = ref('')
+const activeBatchAction = ref('')
+
+const bulkPromptModal = reactive({
+  open: false,
+  action: '',
+  title: '',
+  desc: '',
+  inputValue: '' as any,
+  selectedProfileId: null as number | null
+})
+
+const quickProvisionModal = reactive({
+  open: false,
+  device: null as any,
+  selectedProfileId: null as number | null
+})
 
 // Check if any filter is active
 const isFiltered = computed(() => {
@@ -631,23 +816,145 @@ const deleteDeviceConfirm = async (deviceId: number, serialNumber: string) => {
   }
 }
 
-// Bulk Actions
+// Cancel bulk selection
+const cancelBulkSelection = () => {
+  selectedDevices.value = []
+  selectAllMatching.value = false
+}
+
+// Open Prompt for bulk operations requiring user input
+const openBulkPrompt = (action: string) => {
+  bulkPromptModal.action = action
+  bulkPromptModal.inputValue = ''
+  bulkPromptModal.selectedProfileId = store.profiles[0]?.id || null
+
+  const targetCount = selectAllMatching.value ? store.pagination.total : selectedDevices.value.length
+
+  if (action === 'set_admin_password') {
+    bulkPromptModal.title = '🔒 Ganti Sandi Web Admin Massal'
+    bulkPromptModal.desc = `Masukkan kata sandi baru untuk ${targetCount} modem terpilih:`
+  } else if (action === 'set_inform_interval') {
+    bulkPromptModal.title = '⏱️ Atur Interval Inform CWMP'
+    bulkPromptModal.desc = `Atur interval lapor berkala untuk ${targetCount} modem (dalam detik):`
+    bulkPromptModal.inputValue = 300
+  } else if (action === 'apply_profile') {
+    bulkPromptModal.title = '📑 Terapkan Profil Provisioning'
+    bulkPromptModal.desc = `Pilih profil yang akan dipush ke ${targetCount} modem terpilih:`
+  }
+
+  bulkPromptModal.open = true
+}
+
+// Execute prompt modal action
+const executeBulkPrompt = async () => {
+  const action = bulkPromptModal.action
+  const params: any = {}
+
+  if (action === 'set_admin_password') {
+    if (!bulkPromptModal.inputValue.trim()) {
+      alert('Kata sandi baru wajib diisi.')
+      return
+    }
+    params.admin_password = bulkPromptModal.inputValue.trim()
+  } else if (action === 'set_inform_interval') {
+    params.inform_interval = Number(bulkPromptModal.inputValue) || 300
+  } else if (action === 'apply_profile') {
+    if (!bulkPromptModal.selectedProfileId) {
+      alert('Pilih profil provisioning terlebih dahulu.')
+      return
+    }
+    params.profile_id = bulkPromptModal.selectedProfileId
+  }
+
+  bulkPromptModal.open = false
+
+  try {
+    const res = await store.bulkAction({
+      deviceIds: selectAllMatching.value ? [] : selectedDevices.value,
+      action: action,
+      params: params,
+      selectAllMatching: selectAllMatching.value,
+      filterSearch: searchQuery.value,
+      filterVendor: activeVendorFilter.value,
+      filterStatus: activeStatusFilter.value
+    })
+
+    if (res.batch_id) {
+      activeBatchId.value = res.batch_id
+      activeBatchAction.value = action
+      isBatchModalOpen.value = true
+    }
+
+    showNotification(res.message || 'Operasi massal berhasil dimasukkan ke antrean.')
+    cancelBulkSelection()
+  } catch (err: any) {
+    showNotification(err.message || 'Gagal menjalankan aksi massal.', 'error')
+  }
+}
+
+// Direct bulk actions (reboot, refresh, factory_reset)
 const handleBulkAction = async (action: string) => {
   let actionName = ''
   if (action === 'reboot') actionName = 'Reboot'
-  if (action === 'refresh') actionName = 'Tarik Parameter'
+  if (action === 'refresh') actionName = 'Tarik Parameter (Sync)'
   if (action === 'factory_reset') actionName = 'Factory Reset'
 
-  if (confirm(`Apakah Anda yakin ingin melakukan ${actionName} pada ${selectedDevices.value.length} perangkat?`)) {
+  const targetCount = selectAllMatching.value ? store.pagination.total : selectedDevices.value.length
+
+  if (confirm(`Apakah Anda yakin ingin melakukan ${actionName} pada ${targetCount} perangkat?`)) {
     try {
-      await store.bulkAction(selectedDevices.value, action)
-      showNotification(`${selectedDevices.value.length} perangkat berhasil dimasukkan ke antrean ${actionName}.`)
-      selectedDevices.value = []
-      setTimeout(() => fetchData(store.pagination.current_page), 2000)
+      const res = await store.bulkAction({
+        deviceIds: selectAllMatching.value ? [] : selectedDevices.value,
+        action: action,
+        selectAllMatching: selectAllMatching.value,
+        filterSearch: searchQuery.value,
+        filterVendor: activeVendorFilter.value,
+        filterStatus: activeStatusFilter.value
+      })
+
+      if (res.batch_id) {
+        activeBatchId.value = res.batch_id
+        activeBatchAction.value = action
+        isBatchModalOpen.value = true
+      }
+
+      showNotification(res.message || `${targetCount} perangkat dimasukkan ke antrean ${actionName}.`)
+      cancelBulkSelection()
     } catch (err: any) {
       showNotification(err.message || 'Gagal menjalankan aksi massal.', 'error')
     }
   }
+}
+
+// Quick single device provision modal
+const openQuickProvision = (device: any) => {
+  quickProvisionModal.device = device
+  quickProvisionModal.selectedProfileId = device.acs_profile_id || store.profiles[0]?.id || null
+  quickProvisionModal.open = true
+}
+
+const executeQuickProvision = async () => {
+  if (!quickProvisionModal.device || !quickProvisionModal.selectedProfileId) return
+
+  try {
+    const res = await store.provisionDevice(quickProvisionModal.device.id, quickProvisionModal.selectedProfileId)
+    showNotification(res.message || 'Profil berhasil diterapkan.')
+    quickProvisionModal.open = false
+    setTimeout(() => fetchData(store.pagination.current_page), 1500)
+    store.fetchStats()
+  } catch (err: any) {
+    showNotification(err.message || 'Gagal menerapkan profil.', 'error')
+  }
+}
+
+const onProfilesUpdated = () => {
+  store.fetchProfiles()
+  store.fetchStats()
+}
+
+const onBatchFinished = () => {
+  fetchData(store.pagination.current_page)
+  store.fetchStats()
 }
 
 // CSV Export
@@ -751,6 +1058,7 @@ const getInformClass = (dateStr: string | null) => {
 onMounted(() => {
   store.fetchStats()
   fetchData(1)
+  store.fetchProfiles()
 })
 </script>
 
@@ -1425,6 +1733,156 @@ onMounted(() => {
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 4px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
+
+/* Phase 3 Styles */
+.stat-unprovisioned .stat-icon-wrap {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+.device-meta-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.pill-area {
+  font-size: 0.6875rem;
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.pill-prov {
+  font-size: 0.6875rem;
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.pill-unprov {
+  font-size: 0.6875rem;
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.btn-action-icon--amber {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+.btn-action-icon--amber:hover {
+  background: #f59e0b;
+  color: #0f172a;
+}
+
+.btn-info-outline {
+  background: transparent;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+}
+
+.btn-info-outline:hover {
+  background: rgba(56, 189, 248, 0.15);
+  color: #fff;
+}
+
+.badge-all-matching {
+  font-size: 0.75rem;
+  color: #38bdf8;
+  font-weight: 600;
+  margin-left: 0.35rem;
+}
+
+.bulk-select-matching-banner {
+  padding: 0.35rem 0.75rem;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px dashed rgba(56, 189, 248, 0.3);
+  border-radius: 0.375rem;
+  margin-right: 0.75rem;
+}
+
+.btn-link {
+  background: transparent;
+  border: none;
+  color: #38bdf8;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  font-size: 0.75rem;
+}
+
+.btn-link:hover {
+  color: #7dd3fc;
+}
+
+.prompt-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1060;
+  padding: 1.5rem;
+}
+
+.prompt-modal {
+  width: 100%;
+  max-width: 480px;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.prompt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(30, 41, 59, 0.5);
+}
+
+.prompt-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.prompt-body {
+  padding: 1.25rem;
+}
+
+.prompt-desc {
+  font-size: 0.8125rem;
+  color: #94a3b8;
+  margin-bottom: 1rem;
+}
+
+.prompt-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.875rem 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(30, 41, 59, 0.4);
+}
 
 /* Responsive */
 @media (max-width: 1200px) {
