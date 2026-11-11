@@ -22,6 +22,17 @@
           </div>
 
           <div class="header-action-buttons">
+            <button class="btn btn-secondary relative" @click="isAnalyticsModalOpen = true" title="Analitik Kesehatan Optik & Feed Peringatan">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <span>Alert & Analitik</span>
+              <span v-if="(store.stats?.unresolved_alerts ?? 0) > 0" class="badge-alert-count">
+                {{ store.stats?.unresolved_alerts }}
+              </span>
+            </button>
+            <button class="btn btn-outline" @click="isAlertSettingsModalOpen = true" title="Konfigurasi Notifikasi Bot Telegram & WhatsApp Gateway">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              <span>Notifikasi</span>
+            </button>
             <button class="btn btn-secondary" @click="isProfilesModalOpen = true" title="Kelola Profil Provisioning TR-069 & Zero-Touch">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               Profil ACS
@@ -36,6 +47,16 @@
             </button>
           </div>
         </section>
+
+        <!-- Active Alerts Banner -->
+        <div v-if="(store.stats?.unresolved_alerts ?? 0) > 0" class="alert-box alert-box--critical fade-in" @click="isAnalyticsModalOpen = true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div class="alert-content-flex">
+            <strong>Terdeteksi {{ store.stats.unresolved_alerts }} Peringatan Jaringan Aktif!</strong>
+            <p>Terdapat redaman kritis (&lt; -27 dBm), penurunan optik drastis, atau inform TR-069 macet. Klik untuk melihat rincian.</p>
+          </div>
+          <button class="btn btn-sm btn-outline-white" @click.stop="isAnalyticsModalOpen = true">Lihat Rincian &rarr;</button>
+        </div>
 
         <!-- Sync Error Alert Banner -->
         <div v-if="store.syncStatus?.status === 'error'" class="alert-box alert-box--warning fade-in">
@@ -569,6 +590,20 @@
           @finished="onBatchFinished"
         />
 
+        <!-- Alert Settings Modal (Telegram / WhatsApp) -->
+        <AcsAlertSettingsModal
+          :show="isAlertSettingsModalOpen"
+          @close="isAlertSettingsModalOpen = false"
+          @updated="onAlertsConfigUpdated"
+        />
+
+        <!-- Analytics & Active Alerts Modal -->
+        <AcsAnalyticsModal
+          :show="isAnalyticsModalOpen"
+          @close="isAnalyticsModalOpen = false"
+          @updated="onAlertsUpdated"
+        />
+
         <!-- Parameter Prompt Modal for Bulk Operations -->
         <div v-if="bulkPromptModal.open" class="prompt-overlay" @click.self="bulkPromptModal.open = false">
           <div class="prompt-modal slide-in-down">
@@ -661,6 +696,8 @@ import TopBar from '../components/TopBar.vue'
 import AcsDeviceModal from '../components/AcsDeviceModal.vue'
 import AcsProfilesModal from '../components/AcsProfilesModal.vue'
 import AcsBatchModal from '../components/AcsBatchModal.vue'
+import AcsAlertSettingsModal from '../components/AcsAlertSettingsModal.vue'
+import AcsAnalyticsModal from '../components/AcsAnalyticsModal.vue'
 import { reactive } from 'vue'
 
 const store = useAcsStore()
@@ -679,6 +716,8 @@ const selectAllMatching = ref(false)
 
 const isProfilesModalOpen = ref(false)
 const isBatchModalOpen = ref(false)
+const isAlertSettingsModalOpen = ref(false)
+const isAnalyticsModalOpen = ref(false)
 const activeBatchId = ref('')
 const activeBatchAction = ref('')
 
@@ -957,6 +996,16 @@ const onBatchFinished = () => {
   store.fetchStats()
 }
 
+const onAlertsConfigUpdated = () => {
+  store.fetchAlertRules()
+  store.fetchNotificationConfig()
+}
+
+const onAlertsUpdated = () => {
+  store.fetchStats()
+  fetchData(store.pagination.current_page)
+}
+
 // CSV Export
 const exportCsv = () => {
   if (store.devices.length === 0) return
@@ -1059,6 +1108,7 @@ onMounted(() => {
   store.fetchStats()
   fetchData(1)
   store.fetchProfiles()
+  store.fetchAlertRules()
 })
 </script>
 
@@ -1345,6 +1395,45 @@ onMounted(() => {
   background: rgba(244, 63, 94, 0.08);
   border: 1px solid rgba(244, 63, 94, 0.25);
   color: #f43f5e;
+}
+.alert-box--critical {
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  color: #fda4af;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s;
+}
+.alert-box--critical:hover {
+  background: rgba(244, 63, 94, 0.18);
+  border-color: rgba(244, 63, 94, 0.55);
+}
+.alert-content-flex {
+  flex: 1;
+}
+.badge-alert-count {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #f43f5e;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  border: 2px solid #0f172a;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+.btn-outline-white {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  white-space: nowrap;
+}
+.btn-outline-white:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* ── Premium Table ──────────────────────────────────────── */

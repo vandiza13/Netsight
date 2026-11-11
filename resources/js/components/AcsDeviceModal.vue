@@ -36,6 +36,9 @@
           <button type="button" :class="['tab-btn', { active: activeTab === 'tasks' }]" @click="activeTab = 'tasks'; loadTasks()">
             Riwayat Task
           </button>
+          <button type="button" :class="['tab-btn', { active: activeTab === 'correlation' }]" @click="activeTab = 'correlation'; loadCorrelation()">
+            🔗 Korelasi Lintas Modul
+          </button>
         </div>
 
         <!-- TAB 1: OVERVIEW & OPTIK -->
@@ -557,6 +560,131 @@
           </div>
         </div>
 
+        <!-- TAB 6: CORRELATION (CROSS-MODULE) -->
+        <div v-if="activeTab === 'correlation'" class="tab-pane fade-in">
+          <div class="flex-between align-center mb-4">
+            <div>
+              <h4 class="drawer-section-title mb-0">Korelasi Lintas Modul (ONT ↔ MikroTik ↔ OLT)</h4>
+              <p class="text-xs text-muted mt-1">
+                Pencocokan data telemetri TR-069 dengan OLT PON fisik dan sesi pelanggan MikroTik.
+              </p>
+            </div>
+            <button @click="loadCorrelation" :disabled="isLoadingCorrelation" class="btn btn-sm btn-glass">
+              <span v-if="isLoadingCorrelation" class="spinning mr-1">⟳</span> Refresh
+            </button>
+          </div>
+
+          <div v-if="isLoadingCorrelation" class="loading-state text-center py-5">
+            <span class="spinning text-2xl">🔄</span>
+            <p class="text-xs text-muted mt-2">Menganalisis korelasi lintas modul...</p>
+          </div>
+
+          <div v-else class="correlation-grid">
+            <!-- 1. OLT PON Correlation Card -->
+            <div class="glass-card mb-3">
+              <div class="flex align-center gap-2 mb-3">
+                <span class="text-lg">📡</span>
+                <div>
+                  <h5 class="text-sm font-bold text-white mb-0">Infrastruktur OLT PON</h5>
+                  <span class="text-xs text-muted">Data fisik optik dari SFP OLT</span>
+                </div>
+              </div>
+
+              <div v-if="correlationData?.olt_onu" class="grid grid-cols-2 gap-3 text-xs">
+                <div class="info-cell">
+                  <span class="info-label">Nama OLT:</span>
+                  <span class="info-value font-bold text-white">{{ correlationData.olt_onu.olt_name || 'OLT Terhubung' }}</span>
+                </div>
+                <div class="info-cell">
+                  <span class="info-label">Port PON &amp; Index:</span>
+                  <span class="info-value font-mono text-cyan">{{ correlationData.olt_onu.pon_port }}:{{ correlationData.olt_onu.onu_index }}</span>
+                </div>
+                <div class="info-cell">
+                  <span class="info-label">Daya Terima OLT (RX):</span>
+                  <span class="info-value font-bold" :class="correlationData.olt_onu.rx_power_dbm < -27 ? 'text-rose' : 'text-emerald'">
+                    {{ correlationData.olt_onu.rx_power_dbm !== null ? correlationData.olt_onu.rx_power_dbm + ' dBm' : 'N/A' }}
+                  </span>
+                </div>
+                <div class="info-cell">
+                  <span class="info-label">Estimasi Jarak Fiber:</span>
+                  <span class="info-value font-bold text-white">{{ correlationData.olt_onu.distance_meters ? correlationData.olt_onu.distance_meters + ' meter' : 'N/A' }}</span>
+                </div>
+                <div class="info-cell col-span-2" v-if="correlationData.olt_onu.optical_discrepancy_db !== null">
+                  <span class="info-label">Discrepancy (Selisih RX ONT vs OLT):</span>
+                  <span class="info-value font-mono" :class="correlationData.olt_onu.optical_discrepancy_db > 3 ? 'text-rose font-bold' : 'text-good'">
+                    {{ correlationData.olt_onu.optical_discrepancy_db }} dB
+                    <small v-if="correlationData.olt_onu.optical_discrepancy_db <= 3">(Normal)</small>
+                    <small v-else>(Selisih tinggi: periksa splitter / redaman asimetris)</small>
+                  </span>
+                </div>
+              </div>
+              <div v-else class="empty-glass-state text-xs py-3">
+                Perangkat ini belum terdaftar pada modul OLT Infrastructure atau Serial Number berbeda.
+              </div>
+            </div>
+
+            <!-- 2. MikroTik PPPoE Session Card -->
+            <div class="glass-card mb-3">
+              <div class="flex align-center gap-2 mb-3">
+                <span class="text-lg">🌐</span>
+                <div>
+                  <h5 class="text-sm font-bold text-white mb-0">Sesi Pelanggan MikroTik</h5>
+                  <span class="text-xs text-muted">Status sesi PPPoE dan router edge gateway</span>
+                </div>
+              </div>
+
+              <div v-if="correlationData?.pppoe" class="grid grid-cols-2 gap-3 text-xs">
+                <div class="info-cell">
+                  <span class="info-label">Username PPPoE:</span>
+                  <span class="info-value font-mono text-cyan">{{ correlationData.pppoe.username }}</span>
+                </div>
+                <div class="info-cell">
+                  <span class="info-label">Status Sesi:</span>
+                  <span class="info-value font-bold" :class="correlationData.pppoe.is_active ? 'text-emerald' : 'text-slate'">
+                    {{ correlationData.pppoe.is_active ? '● Aktif (Online)' : '○ Terputus' }}
+                  </span>
+                </div>
+                <div class="info-cell">
+                  <span class="info-label">Router MikroTik:</span>
+                  <span class="info-value font-bold text-white">{{ correlationData.pppoe.router_name || '-' }}</span>
+                </div>
+                <div class="info-cell">
+                  <span class="info-label">Profil Paket:</span>
+                  <span class="info-value text-white">{{ correlationData.pppoe.profile || '-' }} ({{ correlationData.pppoe.package_limit_mbps }} Mbps)</span>
+                </div>
+              </div>
+              <div v-else class="empty-glass-state text-xs py-3">
+                Tidak ada data akun PPPoE yang cocok di MikroTik router cache.
+              </div>
+            </div>
+
+            <!-- 3. Network Topology Node Card -->
+            <div class="glass-card">
+              <div class="flex align-center gap-2 mb-3">
+                <span class="text-lg">🗺️</span>
+                <div>
+                  <h5 class="text-sm font-bold text-white mb-0">Peta Topologi Jaringan</h5>
+                  <span class="text-xs text-muted">Lokasi ODP dan distribusi jaringan</span>
+                </div>
+              </div>
+
+              <div v-if="correlationData?.topology_node" class="text-xs">
+                <div class="flex-between py-1">
+                  <span class="text-muted">Node / Titik Distribusi:</span>
+                  <strong class="text-white">{{ correlationData.topology_node.name }} ({{ correlationData.topology_node.type }})</strong>
+                </div>
+                <div class="flex-between py-1">
+                  <span class="text-muted">Koordinat GPS:</span>
+                  <span class="font-mono text-cyan">{{ correlationData.topology_node.lat }}, {{ correlationData.topology_node.lng }}</span>
+                </div>
+              </div>
+              <div v-else class="empty-glass-state text-xs py-3">
+                Node topologi untuk wilayah <strong>{{ device?.area_tag || 'ini' }}</strong> belum ditentukan pada peta jaringan.
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- TAB 5: TASKS (AUDIT TRAIL) -->
         <div v-if="activeTab === 'tasks'" class="tab-pane fade-in">
           <div class="flex-between align-center mb-4">
@@ -797,6 +925,21 @@ const loadMetrics = async () => {
     console.error('Failed to load metrics', err)
   } finally {
     isLoadingMetrics.value = false
+  }
+}
+
+const correlationData = ref<any>(null)
+const isLoadingCorrelation = ref(false)
+
+const loadCorrelation = async () => {
+  if (!props.device) return
+  isLoadingCorrelation.value = true
+  try {
+    correlationData.value = await store.fetchDeviceCorrelation(props.device.id)
+  } catch (err: any) {
+    console.error('Failed to load device correlation', err)
+  } finally {
+    isLoadingCorrelation.value = false
   }
 }
 

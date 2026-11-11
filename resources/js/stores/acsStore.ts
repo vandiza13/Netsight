@@ -346,6 +346,132 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
+  // ============================================================
+  // FASE 4: ALERTS, NOTIFICATIONS & CORRELATION
+  // ============================================================
+  const alerts = ref<any[]>([])
+  const alertRules = ref<any[]>([])
+  const notificationConfig = ref<any>(null)
+  const healthAnalytics = ref<any>(null)
+
+  const fetchAlerts = async (page = 1, filters: { resolved?: boolean; severity?: string; search?: string } = {}) => {
+    try {
+      const params: any = { page }
+      if (filters.resolved !== undefined) params.resolved = filters.resolved
+      if (filters.severity && filters.severity !== 'all') params.severity = filters.severity
+      if (filters.search) params.search = filters.search
+
+      const response = await api.get('/acs/alerts', { params })
+      alerts.value = response.data.data.data || []
+      return response.data.data
+    } catch (err: any) {
+      console.error('Failed to fetch ACS alerts', err)
+      return { data: [], current_page: 1, last_page: 1, total: 0 }
+    }
+  }
+
+  const resolveAlert = async (alertId: number) => {
+    try {
+      const response = await api.post(`/acs/alerts/${alertId}/resolve`)
+      await fetchStats()
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal menandai alert selesai.' }
+    }
+  }
+
+  const resolveAllAlerts = async () => {
+    try {
+      const response = await api.post('/acs/alerts/resolve-all')
+      await fetchStats()
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal menandai semua alert selesai.' }
+    }
+  }
+
+  const fetchAlertRules = async () => {
+    try {
+      const response = await api.get('/acs/alert-rules')
+      alertRules.value = response.data.data || []
+      return alertRules.value
+    } catch (err: any) {
+      console.error('Failed to fetch alert rules', err)
+      return []
+    }
+  }
+
+  const saveAlertRule = async (data: any) => {
+    try {
+      const response = await api.post('/acs/alert-rules', data)
+      await fetchAlertRules()
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal menyimpan aturan alert.' }
+    }
+  }
+
+  const deleteAlertRule = async (id: number) => {
+    try {
+      const response = await api.delete(`/acs/alert-rules/${id}`)
+      await fetchAlertRules()
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal menghapus aturan alert.' }
+    }
+  }
+
+  const fetchNotificationConfig = async () => {
+    try {
+      const response = await api.get('/acs/notification-config')
+      notificationConfig.value = response.data.data
+      return notificationConfig.value
+    } catch (err: any) {
+      console.error('Failed to fetch notification config', err)
+      return null
+    }
+  }
+
+  const saveNotificationConfig = async (data: any) => {
+    try {
+      const response = await api.post('/acs/notification-config', data)
+      notificationConfig.value = response.data.data
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal menyimpan pengaturan notifikasi.' }
+    }
+  }
+
+  const testNotification = async (payload: { channel: string; [key: string]: any }) => {
+    try {
+      const response = await api.post('/acs/notifications/test', payload)
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Uji coba pengiriman notifikasi gagal.' }
+    }
+  }
+
+  const fetchHealthAnalytics = async () => {
+    try {
+      const response = await api.get('/acs/analytics/health')
+      healthAnalytics.value = response.data.data
+      return healthAnalytics.value
+    } catch (err: any) {
+      console.error('Failed to fetch health analytics', err)
+      return null
+    }
+  }
+
+  const fetchDeviceCorrelation = async (deviceId: number) => {
+    try {
+      const response = await api.get(`/acs/devices/${deviceId}/correlation`)
+      return response.data.data
+    } catch (err: any) {
+      console.error('Failed to fetch device correlation', err)
+      return null
+    }
+  }
+
   return {
     devices,
     stats,
@@ -383,6 +509,21 @@ export const useAcsStore = defineStore('acs', () => {
     deleteProfile,
     fetchBatchStatus,
     provisionDevice,
-    updateDeviceTag
+    updateDeviceTag,
+    alerts,
+    alertRules,
+    notificationConfig,
+    healthAnalytics,
+    fetchAlerts,
+    resolveAlert,
+    resolveAllAlerts,
+    fetchAlertRules,
+    saveAlertRule,
+    deleteAlertRule,
+    fetchNotificationConfig,
+    saveNotificationConfig,
+    testNotification,
+    fetchHealthAnalytics,
+    fetchDeviceCorrelation
   }
 })
