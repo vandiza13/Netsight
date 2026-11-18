@@ -17,8 +17,15 @@
               <h3 class="panel-title">Activity Trail</h3>
               
               <div class="filter-controls">
+                <select v-model="filters.module" class="form-input" @change="fetchLogs(1)">
+                  <option value="">Semua Modul</option>
+                  <option value="ACS">TR-069 ACS</option>
+                  <option value="TORCH">Torch Inspector</option>
+                  <option value="AUTH">Autentikasi</option>
+                  <option value="RBAC_DENIED">Akses Ditolak (403)</option>
+                </select>
                 <input type="text" v-model="filters.action" placeholder="Filter by action..." class="form-input" @keyup.enter="fetchLogs(1)" />
-                <input type="text" v-model="filters.target" placeholder="Filter by target..." class="form-input" @keyup.enter="fetchLogs(1)" />
+                <input type="text" v-model="filters.target" placeholder="Filter by target / SN..." class="form-input" @keyup.enter="fetchLogs(1)" />
                 <button class="btn btn-secondary" @click="fetchLogs(1)" :disabled="loading">Search</button>
               </div>
             </div>
@@ -34,6 +41,7 @@
                     <th>Action</th>
                     <th>Staff / Actor</th>
                     <th>Router / Target</th>
+                    <th>Outcome &amp; Detail</th>
                     <th>IP Address</th>
                   </tr>
                 </thead>
@@ -41,12 +49,15 @@
                   <tr v-for="log in logs" :key="log.id">
                     <td class="cell-time">{{ formatDate(log.created_at) }}</td>
                     <td>
-                      <span class="badge badge-action">{{ log.action }}</span>
+                      <span class="badge" :class="getActionBadgeClass(log.action)">{{ log.action }}</span>
                     </td>
                     <td>
                       <div class="staff-info">
                         <strong>{{ log.staff?.name || 'SYSTEM' }}</strong>
-                        <span class="text-xs text-muted block">{{ log.staff?.email }}</span>
+                        <span class="text-xs text-muted block">
+                          {{ log.staff?.email }}
+                          <span v-if="log.staff?.role" class="badge-role-mini">{{ log.staff.role }}</span>
+                        </span>
                       </div>
                     </td>
                     <td>
@@ -56,10 +67,27 @@
                       </div>
                       <span v-else class="text-muted">-</span>
                     </td>
-                    <td class="cell-mono">{{ log.ip_address || '-' }}</td>
+                    <td>
+                      <div class="detail-meta-cell">
+                        <span
+                          v-if="log.metadata?.outcome"
+                          class="badge mr-1"
+                          :class="getOutcomeBadgeClass(log.metadata.outcome)"
+                        >
+                          {{ log.metadata.outcome }}
+                        </span>
+                        <span v-if="log.metadata?.execution_type" class="meta-pill">{{ log.metadata.execution_type }}</span>
+                        <span v-if="log.metadata?.batch_id" class="meta-pill">{{ log.metadata.batch_id }}</span>
+                        <div v-if="log.metadata?.error" class="text-xs text-danger-meta mt-1">{{ log.metadata.error }}</div>
+                        <div v-else-if="formatMetadataSummary(log.metadata)" class="text-xs text-muted mt-1 font-mono">
+                          {{ formatMetadataSummary(log.metadata) }}
+                        </div>
+                      </div>
+                    </td>
+                    <td class="cell-mono">{{ log.metadata?.ip_address || log.ip_address || '-' }}</td>
                   </tr>
                   <tr v-if="logs.length === 0">
-                    <td colspan="5" class="text-center">No audit logs found.</td>
+                    <td colspan="6" class="text-center">No audit logs found.</td>
                   </tr>
                 </tbody>
               </table>
@@ -95,6 +123,7 @@ const pagination = ref({
 })
 
 const filters = reactive({
+  module: '',
   action: '',
   target: ''
 })
@@ -108,6 +137,7 @@ async function fetchLogs(page: number) {
   error.value = ''
   try {
     const params: any = { page }
+    if (filters.module) params.module = filters.module
     if (filters.action) params.action = filters.action
     if (filters.target) params.target = filters.target
     
@@ -123,6 +153,35 @@ async function fetchLogs(page: number) {
   } finally {
     loading.value = false
   }
+}
+
+function getActionBadgeClass(action: string) {
+  if (!action) return 'badge-action'
+  if (action.includes('RBAC_DENIED') || action.includes('REJECTED') || action.includes('FACTORY_RESET') || action.includes('DELETE')) {
+    return 'badge-danger-action'
+  }
+  if (action.startsWith('ACS_')) return 'badge-acs'
+  if (action.includes('TORCH')) return 'badge-torch'
+  return 'badge-action'
+}
+
+function getOutcomeBadgeClass(outcome: string) {
+  if (outcome === 'success' || outcome === 'completed') return 'badge-router'
+  if (outcome === 'failed' || outcome === 'rejected' || outcome === 'aborted') return 'badge-danger-action'
+  return 'badge-action'
+}
+
+function formatMetadataSummary(meta: any): string {
+  if (!meta) return ''
+  const parts: string[] = []
+  if (meta.params && typeof meta.params === 'object') {
+    const clean = Object.entries(meta.params)
+      .filter(([, v]) => v !== null && v !== '')
+      .map(([k, v]) => `${k}=${typeof v === 'object' ? JSON.stringify(v) : v}`)
+    if (clean.length > 0) parts.push(clean.join(', '))
+  }
+  if (meta.abort_reason) parts.push(meta.abort_reason)
+  return parts.join(' | ').slice(0, 120)
 }
 
 function formatDate(dateString: string) {
@@ -244,6 +303,40 @@ function formatDate(dateString: string) {
   color: #3b82f6;
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
+.badge-acs {
+  background: rgba(168, 85, 247, 0.2);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+}
+.badge-torch {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+.badge-danger-action {
+  background: rgba(244, 63, 94, 0.2);
+  color: #fb7185;
+  border: 1px solid rgba(244, 63, 94, 0.35);
+}
+.badge-role-mini {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-left: 4px;
+  font-size: 0.65rem;
+}
+.meta-pill {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-right: 4px;
+}
+.text-danger-meta { color: #fb7185; }
+.font-mono { font-family: var(--font-mono); }
+.mr-1 { margin-right: 4px; }
+.mt-1 { margin-top: 4px; }
 .badge-router {
   background: rgba(16, 185, 129, 0.2);
   color: #10b981;

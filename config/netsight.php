@@ -128,6 +128,38 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | TR-069 ACS Security, Rate Limiting & Queue Guardrails
+    |--------------------------------------------------------------------------
+    | Pembatasan laju eksekusi perintah GenieACS agar CPE, NBI, dan antrean
+    | worker tetap aman pada skala besar (Fase 5).
+    */
+    'acs' => [
+        // Cooldown per perangkat per tipe aksi (detik)
+        'device_cooldowns' => [
+            'refresh' => (int) env('NETSIGHT_ACS_CD_REFRESH', 10),
+            'refresh_hosts' => (int) env('NETSIGHT_ACS_CD_REFRESH_HOSTS', 10),
+            'update_wifi' => (int) env('NETSIGHT_ACS_CD_WIFI', 10),
+            'update_radio' => (int) env('NETSIGHT_ACS_CD_RADIO', 10),
+            'update_pppoe' => (int) env('NETSIGHT_ACS_CD_PPPOE', 15),
+            'reboot' => (int) env('NETSIGHT_ACS_CD_REBOOT', 30),
+            'factory_reset' => (int) env('NETSIGHT_ACS_CD_FACTORY_RESET', 60),
+            'provision' => (int) env('NETSIGHT_ACS_CD_PROVISION', 15),
+            'diagnostics' => (int) env('NETSIGHT_ACS_CD_DIAGNOSTICS', 15),
+        ],
+
+        // Cooldown sinkronisasi penuh manual (detik)
+        'sync_cooldown_seconds' => (int) env('NETSIGHT_ACS_SYNC_COOLDOWN', 30),
+
+        // Batas maksimal perangkat per operasi massal & proteksi antrean
+        'bulk_max_devices' => (int) env('NETSIGHT_ACS_BULK_MAX_DEVICES', 500),
+        'bulk_cooldown_seconds' => (int) env('NETSIGHT_ACS_BULK_COOLDOWN', 30),
+        'bulk_chunk_size' => (int) env('NETSIGHT_ACS_BULK_CHUNK_SIZE', 25),
+        'bulk_delay_ms' => (int) env('NETSIGHT_ACS_BULK_DELAY_MS', 100),
+        'bulk_consecutive_failure_limit' => (int) env('NETSIGHT_ACS_BULK_CB_LIMIT', 5),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | License Configuration
     |--------------------------------------------------------------------------
     | Pengaturan untuk validasi lisensi ke server sentral.

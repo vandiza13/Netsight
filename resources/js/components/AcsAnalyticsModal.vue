@@ -51,7 +51,7 @@
               Menampilkan peringatan telemetri aktif yang belum ditandai selesai.
             </span>
             <button
-              v-if="alerts.length > 0"
+              v-if="auth.isTier2 && alerts.length > 0"
               class="btn btn-secondary btn-xs"
               @click="handleResolveAll"
               title="Tandai semua alert sebagai terselesaikan"
@@ -247,6 +247,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useAcsStore } from '../stores/acsStore'
+import { useAuthStore } from '../stores/authStore'
 
 const props = defineProps({
   show: {
@@ -257,6 +258,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'updated'])
 const store = useAcsStore()
+const auth = useAuthStore()
 
 const activeTab = ref<'alerts' | 'spectrum' | 'areas'>('alerts')
 const isLoadingAlerts = ref(false)

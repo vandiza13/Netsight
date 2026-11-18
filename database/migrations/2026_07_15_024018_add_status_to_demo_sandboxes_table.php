@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,8 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasColumn('public.demo_sandboxes', 'status')) {
-            Schema::table('public.demo_sandboxes', function (Blueprint $table) {
+        $tableName = DB::getDriverName() === 'pgsql' ? 'public.demo_sandboxes' : 'demo_sandboxes';
+
+        if (!Schema::hasColumn($tableName, 'status')) {
+            Schema::table($tableName, function (Blueprint $table) {
                 $table->string('status')->default('idle')->after('schema_name');
                 $table->index('status');
             });
@@ -24,7 +27,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('public.demo_sandboxes', function (Blueprint $table) {
+        $tableName = DB::getDriverName() === 'pgsql' ? 'public.demo_sandboxes' : 'demo_sandboxes';
+
+        Schema::table($tableName, function (Blueprint $table) {
             $table->dropIndex(['status']);
             $table->dropColumn('status');
         });

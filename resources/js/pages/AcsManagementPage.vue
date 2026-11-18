@@ -29,11 +29,11 @@
                 {{ store.stats?.unresolved_alerts }}
               </span>
             </button>
-            <button class="btn btn-outline" @click="isAlertSettingsModalOpen = true" title="Konfigurasi Notifikasi Bot Telegram & WhatsApp Gateway">
+            <button v-if="auth.isAdmin" class="btn btn-outline" @click="isAlertSettingsModalOpen = true" title="Konfigurasi Notifikasi Bot Telegram & WhatsApp Gateway (Admin)">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
               <span>Notifikasi</span>
             </button>
-            <button class="btn btn-secondary" @click="isProfilesModalOpen = true" title="Kelola Profil Provisioning TR-069 & Zero-Touch">
+            <button v-if="auth.isTier2" class="btn btn-secondary" @click="isProfilesModalOpen = true" title="Lihat/Kelola Profil Provisioning TR-069">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               Profil ACS
             </button>
@@ -41,7 +41,7 @@
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Ekspor CSV
             </button>
-            <button class="btn btn-primary" @click="handleManualSync" :disabled="store.syncing || store.loading" :title="store.syncing ? 'Menyinkronkan data dari GenieACS NBI...' : 'Tarik data terbaru dari GenieACS NBI'">
+            <button v-if="auth.isTier2" class="btn btn-primary" @click="handleManualSync" :disabled="store.syncing || store.loading" :title="store.syncing ? 'Menyinkronkan data dari GenieACS NBI...' : 'Tarik data terbaru dari GenieACS NBI'">
               <svg :class="{ spinning: store.syncing || store.loading }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
               <span>{{ store.syncing ? 'Menyinkronkan...' : 'Sinkronkan' }}</span>
             </button>
@@ -265,7 +265,7 @@
               <table class="premium-table">
                 <thead>
                   <tr>
-                    <th class="th-checkbox">
+                    <th v-if="auth.isAdmin" class="th-checkbox">
                       <input type="checkbox" @change="toggleAll" :checked="isAllSelected" class="checkbox-glass" title="Pilih Semua di Halaman Ini">
                     </th>
                     <th class="th-status">STATUS</th>
@@ -280,7 +280,7 @@
                 <tbody>
                   <!-- Loading State -->
                   <tr v-if="store.loading && store.devices.length === 0">
-                    <td colspan="8" class="loading-state">
+                    <td :colspan="auth.isAdmin ? 8 : 7" class="loading-state">
                       <div class="loading-state-content">
                         <span class="spinning">🔄</span>
                         <p>Memuat data perangkat TR-069...</p>
@@ -290,14 +290,14 @@
 
                   <!-- Empty State -->
                   <tr v-else-if="store.devices.length === 0">
-                    <td colspan="8" class="empty-state">
+                    <td :colspan="auth.isAdmin ? 8 : 7" class="empty-state">
                       <div class="empty-state-content">
                         <div class="empty-state-icon">📡</div>
                         <h4>Tidak Ada Perangkat yang Cocok</h4>
                         <p v-if="isFiltered">Coba sesuaikan filter pencarian atau klik Reset Filter.</p>
                         <p v-else>Belum ada perangkat ACS yang terhubung atau tersinkronkan dari GenieACS.</p>
                         <button v-if="isFiltered" class="btn btn-secondary btn-sm mt-3" @click="resetAllFilters">Reset Filter</button>
-                        <button v-else class="btn btn-primary btn-sm mt-3" @click="handleManualSync">Sinkronkan dari GenieACS</button>
+                        <button v-else-if="auth.isTier2" class="btn btn-primary btn-sm mt-3" @click="handleManualSync">Sinkronkan dari GenieACS</button>
                       </div>
                     </td>
                   </tr>
@@ -309,8 +309,8 @@
                     class="table-row-hover"
                     :class="{ 'row-selected': selectedDevices.includes(device.id) }"
                   >
-                    <!-- Checkbox -->
-                    <td class="td-checkbox">
+                    <!-- Checkbox (Admin Only for Bulk Actions) -->
+                    <td v-if="auth.isAdmin" class="td-checkbox">
                       <input type="checkbox" :value="device.id" v-model="selectedDevices" class="checkbox-glass">
                     </td>
 
@@ -453,7 +453,7 @@
                     <td class="td-actions text-right">
                       <div class="action-buttons-row">
                         <button
-                          v-if="!device.provisioned_at"
+                          v-if="auth.isTier2 && !device.provisioned_at"
                           class="btn-action-icon btn-action-icon--amber"
                           @click="openQuickProvision(device)"
                           title="Terapkan Profil Provisioning Cepat"
@@ -475,9 +475,10 @@
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
                         </button>
                         <button
+                          v-if="auth.isAdmin"
                           class="btn-action-icon btn-action-icon--danger"
-                          @click="deleteDeviceConfirm(device.id, device.serial_number)"
-                          title="Hapus Modem dari ACS dan Database"
+                          @click="deleteDeviceConfirm(device)"
+                          title="Hapus Modem dari ACS dan Database (Admin)"
                         >
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                         </button>
@@ -539,8 +540,8 @@
           @updated="onDeviceUpdated"
         />
 
-        <!-- Bulk Action Floating Bar -->
-        <div v-if="selectedDevices.length > 0" class="bulk-action-bar fade-in-up">
+        <!-- Bulk Action Floating Bar (Admin Only) -->
+        <div v-if="auth.isAdmin && selectedDevices.length > 0" class="bulk-action-bar fade-in-up">
           <div class="bulk-info">
             <span class="bulk-count">{{ selectAllMatching ? store.pagination.total : selectedDevices.length }}</span> modem terpilih
             <span v-if="selectAllMatching" class="badge-all-matching">(Semua yang cocok filter)</span>
@@ -683,14 +684,30 @@
             </div>
           </div>
         </div>
+
+        <!-- Destructive Action Confirmation Modal (Delete Device / Bulk Factory Reset) -->
+        <AcsConfirmDangerModal
+          :show="dangerModal.open"
+          :title="dangerModal.title"
+          :warning-text="dangerModal.warningText"
+          :expected-input="dangerModal.expectedInput"
+          :input-label="dangerModal.inputLabel"
+          :confirm-button-text="dangerModal.confirmButtonText"
+          :target-summary="dangerModal.targetSummary"
+          :loading="dangerModal.loading"
+          :error="dangerModal.error"
+          @close="dangerModal.open = false"
+          @confirm="executeDangerModal"
+        />
       </main>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import { useAcsStore } from '../stores/acsStore'
+import { useAuthStore } from '../stores/authStore'
 import SidebarNav from '../components/SidebarNav.vue'
 import TopBar from '../components/TopBar.vue'
 import AcsDeviceModal from '../components/AcsDeviceModal.vue'
@@ -698,9 +715,10 @@ import AcsProfilesModal from '../components/AcsProfilesModal.vue'
 import AcsBatchModal from '../components/AcsBatchModal.vue'
 import AcsAlertSettingsModal from '../components/AcsAlertSettingsModal.vue'
 import AcsAnalyticsModal from '../components/AcsAnalyticsModal.vue'
-import { reactive } from 'vue'
+import AcsConfirmDangerModal from '../components/AcsConfirmDangerModal.vue'
 
 const store = useAcsStore()
+const auth = useAuthStore()
 const sidebarOpen = ref(false)
 const searchQuery = ref('')
 const activeStatusFilter = ref('all')
@@ -842,16 +860,73 @@ const refreshParams = async (deviceId: number) => {
   }
 }
 
-const deleteDeviceConfirm = async (deviceId: number, serialNumber: string) => {
-  if (confirm(`Hapus perangkat ${serialNumber}? Data akan dihapus dari ACS dan database lokal.`)) {
-    try {
-      await store.deleteDevice(deviceId)
+const dangerModal = reactive({
+  open: false,
+  mode: '' as 'delete_device' | 'bulk_factory_reset' | '',
+  device: null as any,
+  targetCount: 0,
+  title: '',
+  warningText: '',
+  expectedInput: '',
+  inputLabel: '',
+  confirmButtonText: '',
+  targetSummary: null as Record<string, any> | null,
+  loading: false,
+  error: ''
+})
+
+const deleteDeviceConfirm = (device: any) => {
+  const sn = device.serial_number || device.genieacs_id || ''
+  dangerModal.mode = 'delete_device'
+  dangerModal.device = device
+  dangerModal.title = 'Hapus Modem dari ACS & Database'
+  dangerModal.warningText = 'Perangkat akan dihapus permanen dari database Netsight dan antrean GenieACS. Modem tetap bisa melapor kembali jika masih mengarah ke CWMP URL ini.'
+  dangerModal.expectedInput = sn
+  dangerModal.inputLabel = 'Ketik ulang Serial Number modem di bawah untuk mengonfirmasi:'
+  dangerModal.confirmButtonText = 'Hapus Permanen'
+  dangerModal.targetSummary = {
+    'Serial Number': sn,
+    'Model': `${device.vendor || ''} ${device.model || ''}`.trim(),
+    'PPPoE': device.pppoe_username || 'Belum tertaut'
+  }
+  dangerModal.error = ''
+  dangerModal.loading = false
+  dangerModal.open = true
+}
+
+const executeDangerModal = async (confirmationText: string) => {
+  dangerModal.loading = true
+  dangerModal.error = ''
+  try {
+    if (dangerModal.mode === 'delete_device' && dangerModal.device) {
+      await store.deleteDevice(dangerModal.device.id, confirmationText)
+      dangerModal.open = false
       showNotification('Perangkat berhasil dihapus dari ACS dan database.')
       fetchData(1)
       store.fetchStats()
-    } catch (err: any) {
-      showNotification(err?.message || 'Gagal menghapus perangkat.', 'error')
+    } else if (dangerModal.mode === 'bulk_factory_reset') {
+      const res = await store.bulkAction({
+        deviceIds: selectAllMatching.value ? [] : selectedDevices.value,
+        action: 'factory_reset',
+        params: { confirmation_phrase: confirmationText },
+        selectAllMatching: selectAllMatching.value,
+        filterSearch: searchQuery.value,
+        filterVendor: activeVendorFilter.value,
+        filterStatus: activeStatusFilter.value
+      })
+      dangerModal.open = false
+      if (res.batch_id) {
+        activeBatchId.value = res.batch_id
+        activeBatchAction.value = 'factory_reset'
+        isBatchModalOpen.value = true
+      }
+      showNotification(res.message || 'Factory Reset massal dimasukkan ke antrean.')
+      cancelBulkSelection()
     }
+  } catch (err: any) {
+    dangerModal.error = err?.message || 'Operasi gagal dijalankan.'
+  } finally {
+    dangerModal.loading = false
   }
 }
 
@@ -933,12 +1008,30 @@ const executeBulkPrompt = async () => {
 
 // Direct bulk actions (reboot, refresh, factory_reset)
 const handleBulkAction = async (action: string) => {
+  const targetCount = selectAllMatching.value ? store.pagination.total : selectedDevices.value.length
+
+  if (action === 'factory_reset') {
+    dangerModal.mode = 'bulk_factory_reset'
+    dangerModal.device = null
+    dangerModal.targetCount = targetCount
+    dangerModal.title = `Factory Reset Massal (${targetCount} ONT)`
+    dangerModal.warningText = `BAHAYA EKSTREM: Seluruh konfigurasi PPPoE, Wi-Fi, dan port forwarding pada ${targetCount} perangkat terpilih akan di-reset ke setelan pabrik!`
+    dangerModal.expectedInput = `FACTORY-RESET-${targetCount}`
+    dangerModal.inputLabel = 'Ketik frasa konfirmasi di bawah ini untuk melanjutkan eksekusi massal:'
+    dangerModal.confirmButtonText = `Eksekusi Reset ${targetCount} ONT`
+    dangerModal.targetSummary = {
+      'Jumlah Target': `${targetCount} perangkat`,
+      'Filter Aktif': isFiltered.value ? `${activeStatusFilter.value} / ${activeVendorFilter.value}` : 'Pilihan manual'
+    }
+    dangerModal.error = ''
+    dangerModal.loading = false
+    dangerModal.open = true
+    return
+  }
+
   let actionName = ''
   if (action === 'reboot') actionName = 'Reboot'
   if (action === 'refresh') actionName = 'Tarik Parameter (Sync)'
-  if (action === 'factory_reset') actionName = 'Factory Reset'
-
-  const targetCount = selectAllMatching.value ? store.pagination.total : selectedDevices.value.length
 
   if (confirm(`Apakah Anda yakin ingin melakukan ${actionName} pada ${targetCount} perangkat?`)) {
     try {
@@ -1107,8 +1200,12 @@ const getInformClass = (dateStr: string | null) => {
 onMounted(() => {
   store.fetchStats()
   fetchData(1)
-  store.fetchProfiles()
-  store.fetchAlertRules()
+  if (auth.isTier2) {
+    store.fetchProfiles()
+  }
+  if (auth.isAdmin) {
+    store.fetchAlertRules()
+  }
 })
 </script>
 

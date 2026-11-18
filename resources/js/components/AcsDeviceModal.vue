@@ -163,23 +163,26 @@
 
           <!-- PPPoE Form -->
           <div class="glass-card mb-4">
-            <h4 class="card-title">Konfigurasi Akun PPPoE Pelanggan</h4>
+            <div class="flex-between align-center">
+              <h4 class="card-title mb-0">Konfigurasi Akun PPPoE Pelanggan</h4>
+              <span v-if="!auth.isTier2" class="rbac-lock-note">🔒 Khusus NOC Tier 2+</span>
+            </div>
             <form @submit.prevent="savePppoe" class="form-stack mt-3">
               <div class="form-group">
                 <label class="form-label">Username PPPoE</label>
-                <input v-model="pppoeForm.username" type="text" class="input-glass" placeholder="Username dari ISP / Mikrotik">
+                <input v-model="pppoeForm.username" type="text" class="input-glass" :disabled="!auth.isTier2" placeholder="Username dari ISP / Mikrotik">
               </div>
               <div class="form-group">
                 <label class="form-label">Password PPPoE</label>
                 <div class="input-action-wrap">
-                  <input v-model="pppoeForm.password" :type="showPppoePassword ? 'text' : 'password'" class="input-glass" placeholder="Biarkan kosong jika tidak ingin mengubah password">
+                  <input v-model="pppoeForm.password" :type="showPppoePassword ? 'text' : 'password'" class="input-glass" :disabled="!auth.isTier2" placeholder="Biarkan kosong jika tidak ingin mengubah password">
                   <button type="button" @click="showPppoePassword = !showPppoePassword" class="input-action-btn" :title="showPppoePassword ? 'Sembunyikan password' : 'Lihat password'">
                     <svg v-if="!showPppoePassword" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
                     <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
                   </button>
                 </div>
               </div>
-              <div class="flex-end mt-2">
+              <div class="flex-end mt-2" v-if="auth.isTier2">
                 <button type="submit" :disabled="isSavingPppoe" class="btn btn-primary btn-glass">
                   <span v-if="isSavingPppoe" class="spinning mr-2">⟳</span>
                   {{ isSavingPppoe ? 'Menerapkan...' : 'Simpan Konfigurasi PPPoE' }}
@@ -191,13 +194,36 @@
 
           <!-- Actions Card -->
           <div class="glass-card action-card">
-            <h4 class="card-title">Aksi Remote Perangkat</h4>
+            <div class="flex-between align-center">
+              <h4 class="card-title mb-0">Aksi Remote Perangkat</h4>
+              <span v-if="!auth.isTier2" class="rbac-lock-note">🔒 Aksi Memutus Layanan Terkunci</span>
+            </div>
             <div class="flex gap-2 mt-3">
-              <button @click="reboot" :disabled="isRebooting || isResetting" class="btn btn-danger-outline flex-1">
-                <span v-if="isRebooting" class="spinning mr-2">⟳</span> Reboot Modem
+              <button
+                @click="reboot"
+                :disabled="!auth.isTier2 || isRebooting || isResetting"
+                class="btn btn-danger-outline flex-1"
+                :title="auth.isTier2 ? 'Kirim perintah reboot TR-069' : 'Hanya NOC Tier 2 atau Admin yang dapat melakukan reboot'"
+              >
+                <span v-if="isRebooting" class="spinning mr-2">⟳</span>
+                Reboot Modem <small v-if="!auth.isTier2">(T2+)</small>
               </button>
-              <button @click="factoryReset" :disabled="isRebooting || isResetting" class="btn btn-danger flex-1">
+              <button
+                v-if="auth.isAdmin"
+                @click="openFactoryResetConfirm"
+                :disabled="isRebooting || isResetting"
+                class="btn btn-danger flex-1"
+                title="Reset setelan pabrik (memerlukan konfirmasi ketik SN)"
+              >
                 <span v-if="isResetting" class="spinning mr-2">⟳</span> Factory Reset
+              </button>
+              <button
+                v-else
+                disabled
+                class="btn btn-danger flex-1 opacity-50"
+                title="Hanya Administrator yang berhak melakukan Factory Reset"
+              >
+                🔒 Factory Reset (ADMIN)
               </button>
             </div>
           </div>
@@ -718,7 +744,10 @@
                 </div>
               </div>
               <div class="text-right">
-                <div class="text-xs text-muted">oleh {{ task.creator?.name || 'Sistem' }}</div>
+                <div class="text-xs text-muted">
+                  oleh {{ task.creator?.name || 'Sistem' }}
+                  <span v-if="task.creator?.role" class="role-mini-badge">{{ task.creator.role }}</span>
+                </div>
                 <div class="text-xs text-muted mt-1 uppercase">{{ task.execution_type }}</div>
               </div>
             </div>
@@ -752,6 +781,25 @@
         </div>
       </div>
     </div>
+
+    <!-- Destructive Action Confirmation Modal (SN Verification) -->
+    <AcsConfirmDangerModal
+      :show="confirmResetModal.open"
+      title="Factory Reset ONT Pelanggan"
+      warning-text="PERINGATAN KERAS: Modem akan dihapus seluruh konfigurasinya (PPPoE, WiFi, TR-069 lokal) ke setelan pabrik. Layanan pelanggan akan langsung terputus!"
+      :expected-input="device?.serial_number || device?.genieacs_id || ''"
+      input-label="Ketik ulang Serial Number modem di bawah untuk mengonfirmasi:"
+      confirm-button-text="Eksekusi Factory Reset"
+      :target-summary="{
+        'Serial Number': device?.serial_number || '-',
+        'Model': (device?.vendor || '') + ' ' + (device?.model || ''),
+        'Akun PPPoE': device?.pppoe_username || 'Belum tertaut'
+      }"
+      :loading="isResetting"
+      :error="confirmResetModal.error"
+      @close="confirmResetModal.open = false"
+      @confirm="executeFactoryReset"
+    />
   </div>
 </template>
 
@@ -760,9 +808,12 @@ import { ref, watch, reactive, computed } from 'vue'
 import QRCode from 'qrcode'
 import { useAcsStore } from '../stores/acsStore'
 import { useToastStore } from '../stores/toastStore'
+import { useAuthStore } from '../stores/authStore'
+import AcsConfirmDangerModal from './AcsConfirmDangerModal.vue'
 
 const toastStore = useToastStore()
 const store = useAcsStore()
+const auth = useAuthStore()
 
 const props = defineProps({
   show: {
@@ -1278,16 +1329,28 @@ const reboot = async () => {
   }
 }
 
-const factoryReset = async () => {
-  const confirmText = prompt('PERINGATAN: Modem akan di-reset total ke setelan pabrik. Ketik "RESET" untuk konfirmasi:')
-  if (confirmText !== 'RESET') return
+const confirmResetModal = reactive({
+  open: false,
+  error: ''
+})
+
+const openFactoryResetConfirm = () => {
+  confirmResetModal.error = ''
+  confirmResetModal.open = true
+}
+
+const executeFactoryReset = async (confirmationSn: string) => {
+  if (!props.device) return
   isResetting.value = true
+  confirmResetModal.error = ''
   try {
-    await store.factoryResetDevice(props.device.id)
-    toastStore.success('Perintah factory reset dikirim.')
+    await store.factoryResetDevice(props.device.id, confirmationSn)
+    toastStore.success('Perintah factory reset dikirim ke modem.')
+    confirmResetModal.open = false
+    emit('updated', 'Perintah factory reset telah dicatat & dikirim.')
     close()
   } catch (err: any) {
-    toastStore.error(err.message || 'Gagal mengirim perintah reset.')
+    confirmResetModal.error = err.message || 'Gagal mengirim perintah factory reset.'
   } finally {
     isResetting.value = false
   }
@@ -1566,6 +1629,25 @@ const close = () => {
 .mb-4 { margin-bottom: 16px; }
 .grid-2-col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 .grid-3-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+.rbac-lock-note {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.role-mini-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-left: 4px;
+}
 
 .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }

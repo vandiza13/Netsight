@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,8 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        $tableName = DB::getDriverName() === 'pgsql' ? 'public.demo_sandboxes' : 'demo_sandboxes';
+
         try {
-            Schema::create('public.demo_sandboxes', function (Blueprint $table) {
+            Schema::create($tableName, function (Blueprint $table) {
                 $table->id();
                 $table->string('schema_name', 50)->unique();
                 $table->timestamp('expires_at');
@@ -31,6 +34,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('public.demo_sandboxes');
+        $tableName = DB::getDriverName() === 'pgsql' ? 'public.demo_sandboxes' : 'demo_sandboxes';
+        Schema::dropIfExists($tableName);
     }
 };

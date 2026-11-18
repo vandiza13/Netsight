@@ -110,9 +110,11 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
-  const factoryResetDevice = async (deviceId: number) => {
+  const factoryResetDevice = async (deviceId: number, confirmationSn: string) => {
     try {
-      const response = await api.post(`/acs/devices/${deviceId}/factory-reset`)
+      const response = await api.post(`/acs/devices/${deviceId}/factory-reset`, {
+        confirmation_sn: confirmationSn
+      })
       return response.data
     } catch (err: any) {
       throw err.response?.data || { message: 'Gagal melakukan factory reset modem.' }
@@ -227,9 +229,11 @@ export const useAcsStore = defineStore('acs', () => {
     }
   }
 
-  const deleteDevice = async (deviceId: number) => {
+  const deleteDevice = async (deviceId: number, confirmationSn: string) => {
     try {
-      const response = await api.delete(`/acs/devices/${deviceId}`)
+      const response = await api.delete(`/acs/devices/${deviceId}`, {
+        data: { confirmation_sn: confirmationSn }
+      })
       return response.data
     } catch (err: any) {
       throw err.response?.data || { message: 'Gagal menghapus perangkat.' }
@@ -279,6 +283,7 @@ export const useAcsStore = defineStore('acs', () => {
     action: string
     params?: any
     selectAllMatching?: boolean
+    filterArea?: string
     filterSearch?: string
     filterVendor?: string
     filterStatus?: string
@@ -289,6 +294,7 @@ export const useAcsStore = defineStore('acs', () => {
         action: payload.action,
         params: payload.params || {},
         select_all_matching: payload.selectAllMatching || false,
+        filter_area: payload.filterArea || '',
         filter_search: payload.filterSearch || '',
         filter_vendor: payload.filterVendor || '',
         filter_status: payload.filterStatus || ''
@@ -306,6 +312,15 @@ export const useAcsStore = defineStore('acs', () => {
     } catch (err: any) {
       console.error('Failed to fetch batch status', err)
       return null
+    }
+  }
+
+  const cancelBatch = async (batchId: string) => {
+    try {
+      const response = await api.post(`/acs/batches/${batchId}/cancel`)
+      return response.data
+    } catch (err: any) {
+      throw err.response?.data || { message: 'Gagal menghentikan batch operasi.' }
     }
   }
 
@@ -508,6 +523,7 @@ export const useAcsStore = defineStore('acs', () => {
     saveProfile,
     deleteProfile,
     fetchBatchStatus,
+    cancelBatch,
     provisionDevice,
     updateDeviceTag,
     alerts,

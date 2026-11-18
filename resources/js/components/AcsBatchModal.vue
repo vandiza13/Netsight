@@ -118,18 +118,32 @@
       <!-- Footer -->
       <div class="batch-footer">
         <span class="footer-note" v-if="batchData?.status === 'running'">
-          ⚠️ Harap tunggu, operasi sedang diproses bertahap agar tidak membebani server ACS.
+          ⚠️ Operasi diproses bertahap dengan Circuit Breaker &amp; Rate Limiting untuk melindungi server GenieACS.
+        </span>
+        <span class="footer-note text-rose" v-else-if="batchData?.status === 'aborted' || batchData?.status === 'cancelled'">
+          🛑 {{ batchData?.abort_reason || 'Batch dihentikan sebelum seluruh target selesai.' }}
         </span>
         <span class="footer-note text-emerald" v-else>
           ✅ Seluruh perintah massal telah selesai dieksekusi.
         </span>
-        <button
-          class="btn btn-primary btn-sm"
-          @click="close"
-          :disabled="batchData?.status === 'running'"
-        >
-          {{ batchData?.status === 'running' ? 'Memproses...' : 'Tutup' }}
-        </button>
+        <div class="flex gap-2">
+          <button
+            v-if="auth.isAdmin && batchData?.status === 'running'"
+            class="btn btn-danger btn-sm"
+            :disabled="isCancelling"
+            @click="handleCancelBatch"
+            title="Hentikan antrean eksekusi sisa perangkat"
+          >
+            {{ isCancelling ? 'Menghentikan...' : '🛑 Hentikan Batch' }}
+          </button>
+          <button
+            class="btn btn-primary btn-sm"
+            @click="close"
+            :disabled="batchData?.status === 'running'"
+          >
+            {{ batchData?.status === 'running' ? 'Memproses...' : 'Tutup' }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -138,6 +152,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onUnmounted } from 'vue'
 import { useAcsStore } from '../stores/acsStore'
+import { useAuthStore } from '../stores/authStore'
 
 const props = defineProps({
   show: {
@@ -156,8 +171,10 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'finished'])
 const store = useAcsStore()
+const auth = useAuthStore()
 
 const batchData = ref<any>(null)
+const isCancelling = ref(false)
 let pollInterval: any = null
 
 const actionLabel = computed(() => {
@@ -187,15 +204,28 @@ const pendingCount = computed(() => {
 const statusText = computed(() => {
   if (!batchData.value) return 'Memulai antrean...'
   if (batchData.value.status === 'completed') return 'Selesai'
+  if (batchData.value.status === 'cancelled') return 'Dihentikan oleh Admin'
+  if (batchData.value.status === 'aborted') return 'Dihentikan Circuit Breaker'
   return `Memproses (${batchData.value.processed || 0} dari ${batchData.value.total})`
 })
+
+const handleCancelBatch = async () => {
+  if (!props.batchId) return
+  if (!confirm('Hentikan sisa antrean operasi massal ini? Perangkat yang sudah dieksekusi tetap berjalan.')) return
+  isCancelling.value = true
+  try {
+    await store.cancelBatch(props.batchId)
+  } finally {
+    isCancelling.value = false
+  }
+}
 
 const fetchStatus = async () => {
   if (!props.batchId) return
   const data = await store.fetchBatchStatus(props.batchId)
   if (data) {
     batchData.value = data
-    if (data.status === 'completed') {
+    if (['completed', 'cancelled', 'aborted'].includes(data.status)) {
       stopPolling()
       emit('finished')
     }

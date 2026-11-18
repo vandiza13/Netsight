@@ -25,9 +25,10 @@
             <p class="section-desc">
               Profil provisioning menentukan parameter standar (interval inform, kata sandi web admin, template SSID) yang dapat dipush massal atau dipasang otomatis (Zero-Touch) saat modem baru terdeteksi.
             </p>
-            <button class="btn btn-primary btn-sm" @click="openCreateForm">
+            <button v-if="auth.isAdmin" class="btn btn-primary btn-sm" @click="openCreateForm">
               + Buat Profil Baru
             </button>
+            <span v-else class="text-xs text-amber">🔒 Mode Baca (Kelola profil khusus Admin)</span>
           </div>
 
           <!-- Loading & Empty States -->
@@ -61,7 +62,7 @@
                   </div>
                   <p class="card-desc">{{ prof.description || 'Tidak ada deskripsi.' }}</p>
                 </div>
-                <div class="card-actions">
+                <div class="card-actions" v-if="auth.isAdmin">
                   <button class="icon-btn" @click="openEditForm(prof)" title="Edit Profil">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
                   </button>
@@ -86,7 +87,7 @@
                 </div>
                 <div class="spec-item">
                   <span class="spec-label">Admin Web Pass:</span>
-                  <span class="spec-val">{{ prof.admin_password ? '••••••••' : '(Tidak diubah)' }}</span>
+                  <span class="spec-val">{{ prof.has_admin_password ? '•••••••• (🔐)' : '(Tidak diubah)' }}</span>
                 </div>
                 <div class="spec-item" v-if="prof.wifi_ssid_template">
                   <span class="spec-label">Template SSID:</span>
@@ -176,11 +177,11 @@
                 <label>Kata Sandi Web Admin ONT</label>
                 <input
                   v-model="form.admin_password"
-                  type="text"
+                  type="password"
                   class="form-control font-mono"
-                  placeholder="Kosongkan jika tidak ingin mengubah password bawaan"
+                  :placeholder="form.has_admin_password ? 'Terenkripsi (kosongkan untuk pertahankan)' : 'Kosongkan jika tidak ingin mengubah password bawaan'"
                 />
-                <small class="help-text">Mengubah password web login modem untuk keamanan.</small>
+                <small class="help-text">Mengubah password web login modem untuk keamanan (disimpan terenkripsi).</small>
               </div>
 
               <!-- WiFi SSID Template -->
@@ -244,6 +245,7 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue'
 import { useAcsStore } from '../stores/acsStore'
+import { useAuthStore } from '../stores/authStore'
 
 const props = defineProps({
   show: {
@@ -254,6 +256,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'updated'])
 const store = useAcsStore()
+const auth = useAuthStore()
 
 const mode = ref<'list' | 'form'>('list')
 const isLoading = ref(false)
@@ -269,6 +272,7 @@ const form = reactive({
   periodic_inform_interval: 300,
   admin_username: 'admin',
   admin_password: '',
+  has_admin_password: false,
   wifi_ssid_template: '',
   wifi_password_template: '',
   is_auto_apply: false,
@@ -294,6 +298,7 @@ const openCreateForm = () => {
     periodic_inform_interval: 300,
     admin_username: 'admin',
     admin_password: '',
+    has_admin_password: false,
     wifi_ssid_template: '',
     wifi_password_template: '',
     is_auto_apply: false,
@@ -311,7 +316,8 @@ const openEditForm = (prof: any) => {
     model: prof.model || '',
     periodic_inform_interval: prof.periodic_inform_interval || 300,
     admin_username: prof.admin_username || 'admin',
-    admin_password: prof.admin_password || '',
+    admin_password: '',
+    has_admin_password: Boolean(prof.has_admin_password),
     wifi_ssid_template: prof.wifi_ssid_template || '',
     wifi_password_template: prof.wifi_password_template || '',
     is_auto_apply: Boolean(prof.is_auto_apply),

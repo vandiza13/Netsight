@@ -70,14 +70,19 @@
             </div>
 
             <div class="form-group col-span-2">
-              <label>Telegram Bot Token <span class="text-rose">*</span></label>
+              <div class="flex-between align-center mb-1">
+                <label class="mb-0">Telegram Bot Token <span v-if="!tokenState.hasTelegramToken" class="text-rose">*</span></label>
+                <span v-if="tokenState.hasTelegramToken" class="text-xs text-emerald">
+                  🔐 Terenkripsi ({{ tokenState.telegramTokenMasked }})
+                </span>
+              </div>
               <input
                 v-model="configForm.telegram_bot_token"
-                type="text"
+                type="password"
                 class="form-control font-mono"
-                placeholder="Contoh: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
+                :placeholder="tokenState.hasTelegramToken ? 'Biarkan kosong untuk mempertahankan token tersimpan, atau isi token baru...' : 'Contoh: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ'"
               />
-              <small class="help-text">Dapatkan dari @BotFather di Telegram.</small>
+              <small class="help-text">Dapatkan dari @BotFather di Telegram. Token dienkripsi AES-256 di server.</small>
             </div>
 
             <div class="form-group col-span-2">
@@ -96,7 +101,7 @@
             <button
               type="button"
               class="btn btn-secondary btn-sm"
-              :disabled="isTesting || !configForm.telegram_bot_token || !configForm.telegram_chat_id"
+              :disabled="isTesting || (!configForm.telegram_bot_token && !tokenState.hasTelegramToken) || !configForm.telegram_chat_id"
               @click="handleTestNotification('telegram')"
             >
               {{ isTesting ? 'Mengirim Uji Coba...' : '🚀 Test Kirim Pesan Telegram' }}
@@ -135,12 +140,17 @@
             </div>
 
             <div class="form-group">
-              <label>API Key / Token (Opsional)</label>
+              <div class="flex-between align-center mb-1">
+                <label class="mb-0">API Key / Token (Opsional)</label>
+                <span v-if="tokenState.hasWhatsappKey" class="text-xs text-emerald">
+                  🔐 {{ tokenState.whatsappKeyMasked }}
+                </span>
+              </div>
               <input
                 v-model="configForm.whatsapp_api_key"
                 type="password"
                 class="form-control font-mono"
-                placeholder="••••••••••••••••"
+                :placeholder="tokenState.hasWhatsappKey ? 'Kosongkan untuk pertahankan key' : '••••••••••••••••'"
               />
             </div>
 
@@ -277,21 +287,35 @@ const configForm = reactive({
   whatsapp_enabled: false
 })
 
+const tokenState = reactive({
+  hasTelegramToken: false,
+  telegramTokenMasked: '',
+  hasWhatsappKey: false,
+  whatsappKeyMasked: ''
+})
+
 const rules = ref<any[]>([])
+
+const applyLoadedConfig = (conf: any) => {
+  if (!conf) return
+  Object.assign(configForm, {
+    telegram_bot_token: '',
+    telegram_chat_id: conf.telegram_chat_id || '',
+    telegram_enabled: Boolean(conf.telegram_enabled),
+    whatsapp_endpoint: conf.whatsapp_endpoint || '',
+    whatsapp_api_key: '',
+    whatsapp_target_number: conf.whatsapp_target_number || '',
+    whatsapp_enabled: Boolean(conf.whatsapp_enabled)
+  })
+  tokenState.hasTelegramToken = Boolean(conf.has_telegram_bot_token)
+  tokenState.telegramTokenMasked = conf.telegram_bot_token_masked || ''
+  tokenState.hasWhatsappKey = Boolean(conf.has_whatsapp_api_key)
+  tokenState.whatsappKeyMasked = conf.whatsapp_api_key_masked || ''
+}
 
 const loadData = async () => {
   const conf = await store.fetchNotificationConfig()
-  if (conf) {
-    Object.assign(configForm, {
-      telegram_bot_token: conf.telegram_bot_token || '',
-      telegram_chat_id: conf.telegram_chat_id || '',
-      telegram_enabled: Boolean(conf.telegram_enabled),
-      whatsapp_endpoint: conf.whatsapp_endpoint || '',
-      whatsapp_api_key: conf.whatsapp_api_key || '',
-      whatsapp_target_number: conf.whatsapp_target_number || '',
-      whatsapp_enabled: Boolean(conf.whatsapp_enabled)
-    })
-  }
+  applyLoadedConfig(conf)
 
   rules.value = await store.fetchAlertRules()
 }
@@ -308,6 +332,9 @@ const handleSaveConfig = async () => {
   isSaving.value = true
   try {
     const res = await store.saveNotificationConfig(configForm)
+    if (res?.data) {
+      applyLoadedConfig(res.data)
+    }
     showFeedback(res.message || 'Pengaturan notifikasi berhasil disimpan.')
     emit('updated')
   } catch (err: any) {

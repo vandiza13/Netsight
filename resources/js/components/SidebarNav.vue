@@ -125,7 +125,7 @@ const navItems: NavItem[] = [
   { key: 'mapping', label: 'Network Topology', svgIcon: icons.mapping },
   { key: 'routers', label: 'Edge Routers', svgIcon: icons.routers },
   { key: 'olts', label: 'OLT Infrastructure', svgIcon: icons.olts, requiresTier2: true, badge: 'T2+', badgeClass: 'sidebar__link-badge--warning' },
-  { key: 'acs', label: 'ACS Devices', svgIcon: icons.acs, requiresTier2: true, badge: 'T2+', badgeClass: 'sidebar__link-badge--warning' },
+  { key: 'acs', label: 'ACS Devices', svgIcon: icons.acs, badge: 'T1+', badgeClass: 'sidebar__link-badge--info' },
   { key: 'inspect', label: 'Traffic Inspector', svgIcon: icons.inspect, requiresTier2: true, badge: 'T2+', badgeClass: 'sidebar__link-badge--warning' },
   { key: 'staff', label: 'Staff & Roles', svgIcon: icons.staff, requiresAdmin: true, badge: 'ADM', badgeClass: 'sidebar__link-badge--danger' },
   { key: 'audit', label: 'Audit & Security', svgIcon: icons.audit, requiresAdmin: true, badge: 'ADM', badgeClass: 'sidebar__link-badge--danger' },
@@ -293,6 +293,11 @@ function handleNav(key: string) {
   letter-spacing: 0.04em;
   padding: 1px 6px;
   border-radius: var(--radius-full);
+}
+
+.sidebar__link-badge--info {
+  background: rgba(6, 182, 212, 0.14);
+  color: #06b6d4;
 }
 
 .sidebar__link-badge--warning {
